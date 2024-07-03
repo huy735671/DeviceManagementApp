@@ -16,7 +16,7 @@ const SplashScreen = ({ navigation }) => {
   }, []);
 
   const handleContinue = () => {
-    navigation.replace('SignIn'); // Thay 'Home' bằng tên màn hình chính của bạn
+    navigation.replace('SignIn'); 
   };
 
   return (
@@ -24,12 +24,13 @@ const SplashScreen = ({ navigation }) => {
       <Animatable.Image
         animation="bounceIn"
         duration={1500}
-        source={require('../assets/logo.png')} // Thay bằng đường dẫn đến ảnh logo của bạn
+        source={require('../assets/logo.png')}
         style={styles.logo}
       />
       <Animatable.Text animation="fadeIn" duration={2000} style={styles.text}>
         Device Management
       </Animatable.Text>
+      
       {isReady && (
         <Animatable.View animation="pulse" easing="ease-out" iterationCount="infinite">
           <TouchableOpacity style={styles.button} onPress={handleContinue}>

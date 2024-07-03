@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import users from './../data/userData';
 import Icons from 'react-native-vector-icons/Ionicons';
+import * as Animatable from 'react-native-animatable';
 
 
 const SignInScreen = ({ navigation }) => {
@@ -9,6 +10,7 @@ const SignInScreen = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
   const handleSignIn = () => {
     // Login conditions user or admin
@@ -35,23 +37,26 @@ const SignInScreen = ({ navigation }) => {
   return (
 
     <View style={styles.headerContainer}>
-      <View style={styles.TopImageContainer}>
-        <Image source={require('./../assets/logo.png')} style={styles.TopImage} />
-      </View>
+      <Animatable.Image
+        animation="bounceIn"
+        duration={1500}
+        source={require('../assets/logo.png')}
+        style={styles.TopImage}
+      />
       <View style={styles.bodyContainer}>
         <Text style={styles.bodyText}>Welcome to my app</Text>
       </View>
 
-      <View style={styles.inputContainer}>
+      <Animatable.View animation="fadeIn"  duration={1500} style={styles.inputContainer}>
         <Icons name="mail-outline" size={24} color="gray" style={styles.InputIcon} />
         <TextInput
           style={styles.textInput}
           placeholder='Nhập email của bạn'
           value={email}
           onChangeText={setEmail} />
-      </View>
+      </Animatable.View>
 
-      <View style={styles.inputContainer}>
+      <Animatable.View animation="fadeIn"  duration={1500} style={styles.inputContainer}>
         <Icons name="lock-closed-outline" size={24} color="gray" style={styles.inputIcon} />
         <TextInput
           style={styles.textInput}
@@ -63,28 +68,26 @@ const SignInScreen = ({ navigation }) => {
         <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
           <Icons name={showPassword ? "eye-outline" : "eye-off-outline"} size={24} color="gray" />
         </TouchableOpacity>
-      </View>
+      </Animatable.View>
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
-      <View style={{ marginTop: 100 }} />
-
-      <TouchableOpacity onPress={handleSignIn}>
-        <View style={styles.signinButtonContainer}>
+      <Animatable.View animation="pulse"  duration={1500} style={{ top: '5%' }}>
+        <TouchableOpacity onPress={handleSignIn} style={styles.signinButtonContainer}>
           <Text style={styles.signinText}>Đăng nhập</Text>
-        </View>
-      </TouchableOpacity>
+        </TouchableOpacity>
+      </Animatable.View>
 
-      <TouchableOpacity onPress={handlerSignUp}>
-        <View style={styles.signupContainer}>
+      <Animatable.View animation="zoomIn"  duration={1500} style={{ top: '5%' }}>
+        <TouchableOpacity onPress={handlerSignUp}>
           <Text style={styles.signupText}> Bạn chưa có tài khoản?<Text style={{ color: 'blue' }}>Đăng ký</Text> </Text>
-        </View>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={handlerForgotPassword}>
-        <View style={styles.forgotPassword}>
+        </TouchableOpacity>
+      </Animatable.View>
+      
+      <Animatable.View animation="zoomIn"  duration={1500} style={{ top: '5%' }}>
+        <TouchableOpacity onPress={handlerForgotPassword} style={styles.forgotPassword}>
           <Text style={{ color: 'blue', textAlign: 'center', fontSize: 16 }}>Quên mật khẩu</Text>
-        </View>
-      </TouchableOpacity>
-
+        </TouchableOpacity>
+      </Animatable.View>
     </View>
 
   );
@@ -135,7 +138,7 @@ const styles = StyleSheet.create({
   textInput: {
     flex: 1,
     paddingVertical: 10,
-    marginHorizontal:15,
+    marginHorizontal: 15,
     color: 'black',
   },
   signinButtonContainer: {
