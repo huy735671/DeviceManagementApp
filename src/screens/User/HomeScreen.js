@@ -5,6 +5,7 @@ import Devices from '../../components/Devices'
 import RoomList from '../../components/RoomList'
 
 const HomeScreen = ({ navigation }) => {
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF' }}>
       <View style={{ justifyContent: 'center', alignItems: 'center' }}>

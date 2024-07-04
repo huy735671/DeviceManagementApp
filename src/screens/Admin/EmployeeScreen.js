@@ -3,9 +3,9 @@ import React from 'react'
 
 const EmployeeScreen = () => {
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor:'#FFF' }}>
-    <Text>Employee admin!</Text>
-  </View>
+    <View>
+      <Text>EmployeeScreen</Text>
+    </View>
   )
 }
 

@@ -6,11 +6,15 @@ import DashboardScreen from '../screens/Admin/DashboardScreen';
 import EmployeeScreen from '../screens/Admin/EmployeeScreen';
 import HomeScreen from '../screens/User/HomeScreen';
 import AccountScreen from '../screens/User/AccountScreen';
-
+import { TouchableOpacity, View } from 'react-native';
+import Icon from "react-native-vector-icons/MaterialIcons";
 const Tab = createBottomTabNavigator();
 
 const BottomNavigation = ({ route }) => {
     const { isAdmin } = route.params;
+    const AddDeviceHandler = () => {
+        navigation.navigate('AddDevice');
+    }
 
     return (
         <Tab.Navigator>
@@ -19,20 +23,73 @@ const BottomNavigation = ({ route }) => {
                     <Tab.Screen
                         name="Dashboard"
                         component={DashboardScreen}
-                        options={{
+                        options={({ navigation }) => ({
+                            headerStyle: {
+                                backgroundColor: "#1CD2BD",
+                            },
                             tabBarIcon: ({ color, size }) => (
-                                <MaterialIcons name="home" color={color} size={size} />
+                                <Ionicons name="grid-outline" color={color} size={size} />
                             ),
-                        }}
+                            headerTitle: "Device Management",
+                            headerRight: () => (
+                                <View style={{ flexDirection: "row" }}>
+                                    <TouchableOpacity onPress={() => alert("Search icon pressed")}>
+                                        <Icon
+                                            name="search"
+                                            size={25}
+                                            color="white"
+                                            style={{ marginRight: 15 }}
+                                        />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        onPress={() => navigation.navigate("AddScreen")}
+                                    >
+                                        <Icon
+                                            name="add-circle"
+                                            size={25}
+                                            color="white"
+                                            style={{ marginRight: 15 }}
+                                        />
+                                    </TouchableOpacity>
+                                </View>
+                            ),
+                        })}
                     />
                     <Tab.Screen
-                        name="Employee"
-                        component={EmployeeScreen}
-                        options={{
+                        name="Account"
+                        component={AccountScreen}
+
+                        options={({ navigation }) => ({
+                            headerStyle: {
+                                backgroundColor: "#1CD2BD",
+                            },
                             tabBarIcon: ({ color, size }) => (
-                                <MaterialIcons name="account-circle" color={color} size={size} />
+                                <Ionicons name="person-circle-outline" color={color} size={size} />
                             ),
-                        }}
+                            headerTitle: "Device Management",
+                            headerRight: () => (
+                                <View style={{ flexDirection: "row" }}>
+                                    <TouchableOpacity onPress={() => alert("Search icon pressed")}>
+                                        <Icon
+                                            name="search"
+                                            size={25}
+                                            color="white"
+                                            style={{ marginRight: 15 }}
+                                        />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        onPress={() => navigation.navigate("AddScreen")}
+                                    >
+                                        <Icon
+                                            name="add-circle"
+                                            size={25}
+                                            color="white"
+                                            style={{ marginRight: 15 }}
+                                        />
+                                    </TouchableOpacity>
+                                </View>
+                            ),
+                        })}
                     />
                 </>
             ) : (
@@ -42,8 +99,12 @@ const BottomNavigation = ({ route }) => {
                         component={HomeScreen}
                         options={{
                             tabBarIcon: ({ color, size }) => (
-                                <Ionicons name="home-outline" color={color} size={size} />
+                                <MaterialIcons name="home" color={color} size={size} />
                             ),
+                            headerStyle: {
+                                backgroundColor: "#1CD2BD",
+                            },
+                            headerTitle: "Device Management",
                         }}
                     />
                     <Tab.Screen
@@ -51,8 +112,12 @@ const BottomNavigation = ({ route }) => {
                         component={AccountScreen}
                         options={{
                             tabBarIcon: ({ color, size }) => (
-                                <Ionicons name="person-circle-outline" color={color} size={size} />
+                                <MaterialIcons name="account-circle" color={color} size={size} />
                             ),
+                            headerStyle: {
+                                backgroundColor: "#1CD2BD",
+                            },
+                            headerTitle: "Device Management",
                         }}
                     />
                 </>

@@ -7,21 +7,105 @@ import SignUpScreen from '../screens/SignUpScreen';
 import ForgotPassword from '../screens/ForgotPassword';
 import Room from '../screens/User/Room';
 import RoomList from '../components/RoomList';
+import AddDeviceScreen from '../screens/Admin/AddDeviceScreen';
+import AddEmployeeScreen from '../screens/Admin/AddEmployeeScreen';
+import AddScreen from '../screens/Admin/AddScreen';
+import RoomScreen from '../screens/Admin/RoomScreen';
+import DevicesDetail from '../screens/Admin/DevicesDetail';
+import EmployeeDetail from '../screens/Admin/EmployeeDetail';
+import MaintenanceDetail from '../screens/Admin/MaintenanceDetail';
 
 const Stack = createNativeStackNavigator();
 
 const StackNavigation = () => {
   return (
-    <Stack.Navigator initialRouteName='Splash' screenOptions={{ 
-      headerShown:false,   
+    <Stack.Navigator initialRouteName='Splash' screenOptions={{
+      headerShown: false,
     }}>
       <Stack.Screen name='Splash' component={SplashScreen} options={{ headerShown: false }} />
       <Stack.Screen name='SignIn' component={SignInScreen} />
       <Stack.Screen name='SignUp' component={SignUpScreen} />
-      <Stack.Screen name='Tabs' component={BottomNavigation}  />
-      <Stack.Screen name='ForgotPassword' component={ForgotPassword}/>
-      <Stack.Screen name='Room' component={Room}  options={{ headerShown: false }} />
-      <Stack.Screen name='RoomList' component={RoomList}  options={{ headerShown: false }} />
+      <Stack.Screen name='Tabs' component={BottomNavigation} />
+      <Stack.Screen name='ForgotPassword' component={ForgotPassword} />
+      <Stack.Screen name='Room' component={Room} options={{ headerShown: false }} />
+      <Stack.Screen name='RoomList' component={RoomList} options={{ headerShown: false }} />
+      <Stack.Screen
+        name="AddDevice"
+        component={AddDeviceScreen}
+        options={{
+          title: "Thêm nhân viên",
+          headerShown: true,
+          headerStyle: {
+            backgroundColor: "#1FD2BD",
+          },
+        }}
+      />
+      <Stack.Screen
+        name="AddEmployee"
+        component={AddEmployeeScreen}
+        options={{
+          title: "Thêm nhân viên",
+          headerShown: true,
+          headerStyle: {
+            backgroundColor: "#1FD2BD",
+          },
+        }}
+      />
+        <Stack.Screen
+        name="AddScreen"
+        component={AddScreen}
+        options={{
+          title: "Thêm thiết bị/ Nhân viên",
+          headerShown: true,
+          headerStyle: {
+            backgroundColor: "#1FD2BD",
+          },
+        }}
+      />
+       <Stack.Screen
+        name="DevicesDetail"
+        component={DevicesDetail}
+        options={{
+          title: "Thông tin thiết bị",
+          headerShown: true,
+          headerStyle: {
+            backgroundColor: "#1FD2BD",
+          },
+        }}
+      />
+      <Stack.Screen
+        name="EmployeeDetail"
+        component={EmployeeDetail}
+        options={{
+          title: "Thông tin nhân viên",
+          headerShown: true,
+          headerStyle: {
+            backgroundColor: "#1FD2BD",
+          },
+        }}
+      />
+      <Stack.Screen
+        name="RoomScreen"
+        component={RoomScreen}
+        options={{
+          title: "Thông tin phòng ban",
+          headerShown: true,
+          headerStyle: {
+            backgroundColor: "#1FD2BD",
+          },
+        }}
+      />
+      <Stack.Screen
+        name="MaintenanceDetail"
+        component={MaintenanceDetail}
+        options={{
+          title: "Thông tin bảo trì",
+          headerShown: true,
+          headerStyle: {
+            backgroundColor: "#1FD2BD",
+          },
+        }}
+      />
     </Stack.Navigator>
   )
 }
