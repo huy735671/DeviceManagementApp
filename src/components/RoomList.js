@@ -5,9 +5,11 @@ import {
   StyleSheet,
   Dimensions,
   TouchableOpacity,
+  ScrollView,
 } from "react-native";
 import Icons from "react-native-vector-icons/MaterialIcons";
 import { useNavigation } from "@react-navigation/native";
+import * as Animatable from 'react-native-animatable';
 
 const RoomList = () => {
   const navigation = useNavigation();
@@ -52,7 +54,12 @@ const RoomList = () => {
         { devices: "laptop", status: "Normal" },
       ]
     },
-  
+    {
+      room: "Room 6", list: [
+        { devices: "tablet", status: "Normal" },
+        { devices: "laptop", status: "Normal" },
+      ]
+    },
   ];
 
   const getStatusColor = (status) => {
@@ -75,21 +82,25 @@ const RoomList = () => {
 
   return (
     <View>
-      <Text style={{ fontWeight: "bold", fontSize: 20 }}>Room List</Text>
+      <Text style={{ fontWeight: "bold", fontSize: 25, margin: 10 }}>Room List</Text>
       <View style={style.container}>
         {data.map((item, index) => (
-          <View key={index} style={style.items}>
+          <Animatable.View
+            key={index}
+            animation="bounceIn">
             <TouchableOpacity
+
+              style={style.items}
               onPress={() => handlerRoom(item)}
-              style={{ alignItems: "center", justifyContent: "center" }}
+
             >
-              <Icons name="computer" size={30} color="black" />
+              <Icons name="computer" size={50} color="black" />
               <Text>{item.name}</Text>
               <Text style={{ color: getStatusColor(item.status) }}>
                 {item.status}
               </Text>
             </TouchableOpacity>
-          </View>
+          </Animatable.View>
         ))}
       </View>
     </View>

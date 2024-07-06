@@ -1,40 +1,60 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { Header } from "react-native-elements";
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from "react-native";
+import Icons from "react-native-vector-icons/MaterialIcons";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import { Header } from "react-native-elements";
 
 const Room = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { room, roomData } = route.params;
+  const { roomData } = route.params;
+
+  const handleDevicePress = (device) => {
+    navigation.navigate("InfoDevices", { device });
+  };
 
   return (
     <View style={styles.container}>
-      <Header
+       <Header
         leftComponent={{
           icon: "arrow-back",
           color: "#fff",
           onPress: () => navigation.goBack(),
         }}
-        centerComponent={   <Text style={styles.title}>{room.name}</Text>}
+        centerComponent={   <Text style={styles.title}>Devices in {roomData.room}</Text>}
       />
-      <View style={styles.content}>
-     
-        {/* <Text>Status: {room.status}</Text>
-        <Text>Devices:</Text> */}
+
+      <View style={styles.container}>
         {roomData.list.map((device, index) => (
-          <View key={index}  style={styles.items}>
-            <Text style={{fontSize:16,fontWeight:'bold'}}>Device: {device.devices}</Text>
-            <Text style={{fontSize:16,fontWeight:'bold'}}>Status: {device.status}</Text>
-          </View>
+          <TouchableOpacity
+            key={index}
+            onPress={() => handleDevicePress(device)}
+            style={{ alignItems: "center", justifyContent: "center" }}
+          >
+            <View style={styles.items}>
+              <View style={{paddingRight:20}}>
+              <Icons name="devices" size={50} color="black"/>
+              </View>
+            <View>
+            <Text style={{ fontWeight:'bold'}}>Device: {device.devices}</Text>
+            <Text style={{ color: device.color, fontWeight:'bold' }}>Status: {device.status}</Text>
+            </View>
+             
+            </View>
+          </TouchableOpacity>
         ))}
+        
       </View>
+      
     </View>
   );
 };
 
+export default Room;
+
+const { width } = Dimensions.get("window");
 const styles = StyleSheet.create({
-  container: {
+   container: {
     flex: 1,
   },
   content: {
@@ -48,6 +68,8 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   items:{
+    flexDirection: "row",
+    width:400,
     height:100,
     borderWidth:1,
     marginVertical:10,
@@ -56,8 +78,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderRadius:10,
+    
   },
 });
-
-
-export default Room;

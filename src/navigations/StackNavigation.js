@@ -1,6 +1,6 @@
 import React from 'react'
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import SplashScreen from '../screens/SplashScreen';
+
 import SignInScreen from '../screens/SignInScreen';
 import BottomNavigation from './BottomNavigation';
 import SignUpScreen from '../screens/SignUpScreen';
@@ -14,6 +14,10 @@ import RoomScreen from '../screens/Admin/RoomScreen';
 import DevicesDetail from '../screens/Admin/DevicesDetail';
 import EmployeeDetail from '../screens/Admin/EmployeeDetail';
 import MaintenanceDetail from '../screens/Admin/MaintenanceDetail';
+import EditProfileScreen from '../screens/User/EditProfileScreen';
+import InfoDevices from '../screens/User/InfoDevices';
+import ReportScreen from '../screens/User/ReportScreen';
+import SearchBar from '../components/SearchBar';
 
 const Stack = createNativeStackNavigator();
 
@@ -22,7 +26,7 @@ const StackNavigation = () => {
     <Stack.Navigator initialRouteName='Splash' screenOptions={{
       headerShown: false,
     }}>
-      <Stack.Screen name='Splash' component={SplashScreen} options={{ headerShown: false }} />
+
       <Stack.Screen name='SignIn' component={SignInScreen} />
       <Stack.Screen name='SignUp' component={SignUpScreen} />
       <Stack.Screen name='Tabs' component={BottomNavigation} />
@@ -51,7 +55,7 @@ const StackNavigation = () => {
           },
         }}
       />
-        <Stack.Screen
+      <Stack.Screen
         name="AddScreen"
         component={AddScreen}
         options={{
@@ -62,7 +66,7 @@ const StackNavigation = () => {
           },
         }}
       />
-       <Stack.Screen
+      <Stack.Screen
         name="DevicesDetail"
         component={DevicesDetail}
         options={{
@@ -104,6 +108,44 @@ const StackNavigation = () => {
           headerStyle: {
             backgroundColor: "#1FD2BD",
           },
+        }}
+      />
+      <Stack.Screen name='EditProfile'
+        component={EditProfileScreen}
+        options={{
+          title: "Thông tin người dùng",
+          headerShown: true,
+          headerStyle: {
+            backgroundColor: "#1FD2BD",
+          },
+        }}
+      />
+      <Stack.Screen name='InfoDevices'
+        component={InfoDevices}
+        options={{
+
+          headerShown: false,
+          headerStyle: {
+            backgroundColor: "#1FD2BD",
+          },
+        }}
+      />
+      <Stack.Screen name='Report'
+        component={ReportScreen}
+        options={{
+
+          headerShown: false,
+          headerStyle: {
+            backgroundColor: "#1FD2BD",
+          },
+        }}
+      />
+
+      <Stack.Screen
+        name="SearchBar"
+        component={SearchBar}
+        options={{
+          headerShown: false,
         }}
       />
     </Stack.Navigator>

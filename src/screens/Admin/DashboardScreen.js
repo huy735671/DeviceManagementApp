@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import * as Animatable from 'react-native-animatable';
+
 
 const DashboardScreen = ({ navigation }) => {
   const [numColumns, setNumColumns] = useState(3);
@@ -70,7 +72,7 @@ const DashboardScreen = ({ navigation }) => {
 
   const renderItem = ({ item }) => {
     return (
-      <View style={styles.itemContainer}>
+      <Animatable.View animation='zoomIn' style={styles.itemContainer}>
         <TouchableOpacity
           style={styles.btnFearture}
           onPress={() => handleFeaturePress(item.id)}
@@ -78,7 +80,7 @@ const DashboardScreen = ({ navigation }) => {
           <Icon name={item.icon} size={40} color={"#000"} />
         </TouchableOpacity>
         <Text style={styles.txtFearture}>{item.title}</Text>
-      </View>
+      </Animatable.View>
     );
   };
 
@@ -108,7 +110,7 @@ const DashboardScreen = ({ navigation }) => {
 
   const renderDetailItem = ({ item }) => {
     return (
-      <View style={{ ...styles.itemContainer, marginLeft: 25 }}>
+      <Animatable.View animation='zoomIn' style={{ ...styles.itemContainer, marginLeft: 25 }}>
         <TouchableOpacity
           style={styles.btn4FlstUnder}
           onPress={() => handleDetailPress(item)}
@@ -131,7 +133,7 @@ const DashboardScreen = ({ navigation }) => {
           )}
         </TouchableOpacity>
         <Text style={styles.txtFearture}>{item.name}</Text>
-      </View>
+      </Animatable.View>
     );
   };
 

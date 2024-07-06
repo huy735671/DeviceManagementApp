@@ -3,17 +3,19 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import DashboardScreen from '../screens/Admin/DashboardScreen';
-import EmployeeScreen from '../screens/Admin/EmployeeScreen';
 import HomeScreen from '../screens/User/HomeScreen';
 import AccountScreen from '../screens/User/AccountScreen';
 import { TouchableOpacity, View } from 'react-native';
 import Icon from "react-native-vector-icons/MaterialIcons";
 const Tab = createBottomTabNavigator();
 
-const BottomNavigation = ({ route }) => {
+const BottomNavigation = ({ route, navigation }) => {
     const { isAdmin } = route.params;
     const AddDeviceHandler = () => {
         navigation.navigate('AddDevice');
+    }
+    const SearchHandler = () => {
+        navigation.navigate('SearchBar');
     }
 
     return (
@@ -39,6 +41,7 @@ const BottomNavigation = ({ route }) => {
                                             size={25}
                                             color="white"
                                             style={{ marginRight: 15 }}
+                                            onPress={SearchHandler}
                                         />
                                     </TouchableOpacity>
                                     <TouchableOpacity
@@ -75,6 +78,7 @@ const BottomNavigation = ({ route }) => {
                                             size={25}
                                             color="white"
                                             style={{ marginRight: 15 }}
+                                            onPress={SearchHandler}
                                         />
                                     </TouchableOpacity>
                                     <TouchableOpacity
@@ -105,6 +109,20 @@ const BottomNavigation = ({ route }) => {
                                 backgroundColor: "#1CD2BD",
                             },
                             headerTitle: "Device Management",
+                            headerRight: () => (
+                                <View style={{ flexDirection: "row" }}>
+                                    <TouchableOpacity onPress={() => alert("Search icon pressed")}>
+                                        <Icon
+                                            name="search"
+                                            size={25}
+                                            color="white"
+                                            style={{ marginRight: 15 }}
+                                            onPress={SearchHandler}
+                                        />
+                                    </TouchableOpacity>
+
+                                </View>
+                            ),
                         }}
                     />
                     <Tab.Screen
@@ -118,6 +136,20 @@ const BottomNavigation = ({ route }) => {
                                 backgroundColor: "#1CD2BD",
                             },
                             headerTitle: "Device Management",
+                            headerRight: () => (
+                                <View style={{ flexDirection: "row" }}>
+                                    <TouchableOpacity onPress={() => alert("Search icon pressed")}>
+                                        <Icon
+                                            name="search"
+                                            size={25}
+                                            color="white"
+                                            style={{ marginRight: 15 }}
+                                            onPress={SearchHandler}
+                                        />
+                                    </TouchableOpacity>
+
+                                </View>
+                            ),
                         }}
                     />
                 </>

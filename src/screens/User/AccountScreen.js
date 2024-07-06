@@ -1,7 +1,10 @@
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
 import React, { useState } from "react";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { Button, TextInput } from "react-native-paper";
+import * as Animatable from 'react-native-animatable';
+
+
 
 const AccountScreen = () => {
   const [name, setName] = useState("");
@@ -19,15 +22,14 @@ const AccountScreen = () => {
       <View style={{ flexDirection: "row" }}>
         <Icon name={"account-circle"} size={150} color={"#000"} />
         <View style={{ alignItems: "center", padding: 30 }}>
+
           <Button style={{ backgroundColor: "#1FD2BD", ...styles.btn }}>
             <Text style={styles.txt}>Lưu thông tin</Text>
           </Button>
-          <Button style={{ backgroundColor: "red", ...styles.btn }}>
-            <Text style={styles.txt}>Đăng xuất</Text>
-          </Button>
+
         </View>
       </View>
-      <View style={{ ...styles.boder4Info, padding: 15 }}>
+      <Animatable.View animation='bounceIn' style={{ ...styles.boder4Info, padding: 15 }}>
         <Text
           style={{
             ...styles.txt,
@@ -76,8 +78,8 @@ const AccountScreen = () => {
             placeholderTextColor={"#000"}
           />
         </View>
-      </View>
-      <View style={{ ...styles.boder4Info, padding: 15 }}>
+      </Animatable.View>
+      <Animatable.View animation='bounceIn' style={{ ...styles.boder4Info, padding: 15 }}>
         <Text
           style={{
             ...styles.txt,
@@ -158,7 +160,7 @@ const AccountScreen = () => {
             />
           </TouchableOpacity>
         </View>
-      </View>
+      </Animatable.View>
     </View>
   );
 };
@@ -203,7 +205,7 @@ const styles = StyleSheet.create({
 
   iconStyle: {
     position: "absolute",
-    right: 15,
-    top: 12, 
+    right: 10,
+    top: 12,
   },
 });

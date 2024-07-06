@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet } from 'react-native'
+import { View, Text, StyleSheet, ScrollView } from 'react-native'
 import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Devices from '../../components/Devices'
@@ -8,10 +8,11 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF' }}>
-      <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-      </View>
-      <Devices style={style.Devices} />
-      <RoomList />
+     
+      <ScrollView>
+        <Devices style={style.Devices} />
+        <RoomList />
+      </ScrollView>
     </SafeAreaView>
   )
 }
