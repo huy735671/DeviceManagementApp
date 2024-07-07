@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, TextInput, TouchableOpacity, StyleSheet, FlatList, Text } from 'react-native';
 import Icons from 'react-native-vector-icons/Ionicons';
 import * as Animatable from 'react-native-animatable';
+import { useNavigation } from '@react-navigation/native';
+import { Header } from 'react-native-elements';
 
 const devices = [
   { id: 1, name: 'Laptop', status: 'available', icon: 'laptop-outline' },
@@ -32,23 +34,27 @@ const getStatusColor = (status) => {
   }
 };
 
-const SearchBar = ({ userRole, navigation }) => {
+const SearchBar = ({ userRole }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
-
+  const navigation = useNavigation();
   useEffect(() => {
     setSearchResults([]);
     setSearchQuery('');
   }, [userRole]);
 
   const handleSearch = () => {
-    const data = userRole === 'admin' ? devices : rooms;
-    const results = data.filter(item =>
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.status.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    setSearchResults(results);
-  };
+   const searchRoom =  rooms.filter(item =>
+    item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.status.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+   const searchDevices = devices.filter(item =>
+    item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.status.toLowerCase().includes(searchQuery.toLowerCase())
+   );
+   
+    setSearchResults([...searchRoom, ...searchDevices]);
+  }
 
   const clearSearch = () => {
     setSearchQuery('');
@@ -69,7 +75,16 @@ const SearchBar = ({ userRole, navigation }) => {
 
   return (
     <View style={styles.container}>
+        <Header
+        leftComponent={{
+          icon: "arrow-back",
+          color: "#fff",
+          onPress: () => navigation.goBack(),
+        }}
+        
+      />
       <View style={styles.searchContainer}>
+        
         <TouchableOpacity style={styles.searchIconContainer} onPress={handleSearch}>
           <Icons name="search-outline" size={24} color="#666" />
         </TouchableOpacity>

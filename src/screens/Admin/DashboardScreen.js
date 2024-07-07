@@ -5,13 +5,13 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
+  Dimensions,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import * as Animatable from 'react-native-animatable';
 
-
 const DashboardScreen = ({ navigation }) => {
-  const [numColumns, setNumColumns] = useState(3);
+  const [numColumns, setNumColumns] = useState(2);
   const featuresData = [
     { id: "1", title: "Tất cả", icon: "menu" },
     { id: "2", title: "Nhân viên", icon: "group" },
@@ -110,7 +110,7 @@ const DashboardScreen = ({ navigation }) => {
 
   const renderDetailItem = ({ item }) => {
     return (
-      <Animatable.View animation='zoomIn' style={{ ...styles.itemContainer, marginLeft: 25 }}>
+      <Animatable.View animation='zoomIn' style={styles.items}>
         <TouchableOpacity
           style={styles.btn4FlstUnder}
           onPress={() => handleDetailPress(item)}
@@ -189,11 +189,12 @@ const DashboardScreen = ({ navigation }) => {
           showsHorizontalScrollIndicator={false}
         />
       </View>
-      <View>
+      
         <Text style={styles.txt}>Chi tiết</Text>
         {selectedFeatureId === "5" ? (
           renderStatistics()
         ) : (
+          <View style={styles.secondContainer}>
           <FlatList
             numColumns={numColumns}
             data={filteredData}
@@ -202,18 +203,22 @@ const DashboardScreen = ({ navigation }) => {
             contentContainerStyle={styles.listContainer}
             showsHorizontalScrollIndicator={false}
           />
+          </View>
         )}
-      </View>
+     
     </View>
   );
 };
 
 export default DashboardScreen;
 
+const { width } = Dimensions.get("window");
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFF",
+    flexDirection: "row",
+    flexWrap: "wrap",
   },
   txt: {
     fontSize: 20,
@@ -222,7 +227,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   listContainer: {
-    paddingHorizontal: 10,
+    // paddingHorizontal: 10,
   },
   itemContainer: {
     alignItems: "center",
@@ -236,23 +241,28 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   btn4FlstUnder: {
-    borderRadius: 10,
-    borderWidth: 2,
-    padding: 10,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 10,
   },
   txtFearture: {
     fontSize: 18,
     color: "#000",
     fontWeight: "bold",
-    marginTop: 5,
+    // marginTop: 5,
     textAlign: "center",
   },
-  txtDetail: {
-    fontSize: 16,
-    color: "#000",
-    padding: 10,
+  secondContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+  },
+  items: {
+    width: width / 2 - 20,
+    height: 100,
+    margin: 10,
+    borderColor: "black",
+    borderWidth: 2,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 10,
   },
 });

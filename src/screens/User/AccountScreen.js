@@ -68,7 +68,7 @@ const AccountScreen = () => {
               </Button>
             </TouchableOpacity>
 
-            <Button style={{ backgroundColor: "red", ...styles.btn }}>
+            <Button style={{ backgroundColor: "red", ...styles.btn }} onPress={() =>navigation.navigate("SignIn")}>
               <Text style={styles.txt}>Đăng xuất</Text>
             </Button>
 
