@@ -7,6 +7,7 @@ import HomeScreen from '../screens/User/HomeScreen';
 import AccountScreen from '../screens/User/AccountScreen';
 import { TouchableOpacity, View } from 'react-native';
 import Icon from "react-native-vector-icons/MaterialIcons";
+import EditProfileScreen from '../screens/User/EditProfileScreen';
 const Tab = createBottomTabNavigator();
 
 const BottomNavigation = ({ route, navigation }) => {

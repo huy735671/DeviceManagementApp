@@ -123,7 +123,6 @@ const StackNavigation = () => {
       <Stack.Screen name='InfoDevices'
         component={InfoDevices}
         options={{
-
           headerShown: false,
           headerStyle: {
             backgroundColor: "#1FD2BD",
@@ -140,7 +139,7 @@ const StackNavigation = () => {
           },
         }}
       />
-
+      
       <Stack.Screen
         name="SearchBar"
         component={SearchBar}

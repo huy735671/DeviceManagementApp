@@ -12,13 +12,11 @@ const Devices = () => {
           <View style={style.icon}>
             <Icons name="computer" size={25} color="black" />
           </View>
-
           <Text > Computer</Text>
         </View>
 
         <View style={style.devices}>
           <View style={style.icon}><Icons name="phone" size={25} color="black" /></View>
-
           <Text > Phone</Text>
         </View>
         <View style={style.devices}>

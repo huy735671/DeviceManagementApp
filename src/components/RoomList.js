@@ -89,10 +89,8 @@ const RoomList = () => {
             key={index}
             animation="bounceIn">
             <TouchableOpacity
-
               style={style.items}
               onPress={() => handlerRoom(item)}
-
             >
               <Icons name="computer" size={50} color="black" />
               <Text>{item.name}</Text>

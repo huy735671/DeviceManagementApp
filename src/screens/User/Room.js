@@ -15,13 +15,13 @@ const Room = () => {
 
   return (
     <View style={styles.container}>
-       <Header
+      <Header
         leftComponent={{
           icon: "arrow-back",
           color: "#fff",
           onPress: () => navigation.goBack(),
         }}
-        centerComponent={   <Text style={styles.title}>Devices in {roomData.room}</Text>}
+        centerComponent={<Text style={styles.title}>Devices in {roomData.room}</Text>}
       />
 
       <View style={styles.container}>
@@ -32,20 +32,20 @@ const Room = () => {
             style={{ alignItems: "center", justifyContent: "center" }}
           >
             <View style={styles.items}>
-              <View style={{paddingRight:20}}>
-              <Icons name="devices" size={50} color="black"/>
+              <View style={{ paddingRight: 20 }}>
+                <Icons name="devices" size={50} color="black" />
               </View>
-            <View>
-            <Text style={{ fontWeight:'bold'}}>Device: {device.devices}</Text>
-            <Text style={{ color: device.color, fontWeight:'bold' }}>Status: {device.status}</Text>
-            </View>
-             
+              <View>
+                <Text style={{ fontWeight: 'bold' }}>Device: {device.devices}</Text>
+                <Text style={{ color: device.color, fontWeight: 'bold' }}>Status: {device.status}</Text>
+              </View>
+
             </View>
           </TouchableOpacity>
         ))}
-        
+
       </View>
-      
+
     </View>
   );
 };
@@ -54,30 +54,30 @@ export default Room;
 
 const { width } = Dimensions.get("window");
 const styles = StyleSheet.create({
-   container: {
+  container: {
     flex: 1,
   },
   content: {
     flex: 1,
     // justifyContent: "center",
     // alignItems: "center",
-    
+
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
   },
-  items:{
+  items: {
     flexDirection: "row",
-    width:400,
-    height:100,
-    borderWidth:1,
-    marginVertical:10,
-    marginLeft:10,
-    marginRight:10,
+    width: 400,
+    height: 100,
+    borderWidth: 1,
+    marginVertical: 10,
+    marginLeft: 10,
+    marginRight: 10,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius:10,
-    
+    borderRadius: 10,
+
   },
 });
