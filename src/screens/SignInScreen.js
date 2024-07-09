@@ -6,6 +6,9 @@ import * as Animatable from 'react-native-animatable';
 import firestore from "@react-native-firebase/firestore";
 import {Auth} from "@react-native-firebase/auth";
 import { useMyContextController, login } from "../context";
+
+
+
 const SignInScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -23,9 +26,9 @@ const SignInScreen = ({ navigation }) => {
       console.log("User role:", userLogin.role);
 
       if (userLogin.role === "admin") {
-        navigation.navigate('Dashboard');
-      } else {
-        navigation.navigate('Home');
+        navigation.navigate('AdminTab');
+      } else if (userLogin.role === "user"){
+        navigation.navigate('UserTab');
       }
     } 
   }, [userLogin, error]);
