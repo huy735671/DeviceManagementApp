@@ -19,6 +19,7 @@ import InfoDevices from '../screens/User/InfoDevices';
 import ReportScreen from '../screens/User/ReportScreen';
 import SearchBar from '../components/SearchBar';
 import DashboardScreen from '../screens/Admin/DashboardScreen';
+import HomeScreen from '../screens/User/HomeScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -35,6 +36,7 @@ const StackNavigation = () => {
       <Stack.Screen name='Room' component={Room} options={{ headerShown: false }} />
       <Stack.Screen name='Dashboard' component={DashboardScreen} options={{ headerShown: false }} />
       <Stack.Screen name='RoomList' component={RoomList} options={{ headerShown: false }} />
+      <Stack.Screen name='Home' component={HomeScreen} options={{ headerShown: false }}/>
       <Stack.Screen
         name="AddDevice"
         component={AddDeviceScreen}

@@ -7,8 +7,8 @@ import firestore from "@react-native-firebase/firestore";
 import {Auth} from "@react-native-firebase/auth";
 import { useMyContextController, login } from "../context";
 const SignInScreen = ({ navigation }) => {
-  const [email, setEmail] = useState('hiep1234@gmail.com');
-  const [password, setPassword] = useState('123456');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isReady, setIsReady] = useState(false);
@@ -23,7 +23,7 @@ const SignInScreen = ({ navigation }) => {
       console.log("User role:", userLogin.role);
 
       if (userLogin.role === "admin") {
-        navigation.navigate("Dashboard");
+        navigation.navigate('Dashboard');
       } else {
         navigation.navigate('Home');
       }
