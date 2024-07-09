@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Icons from 'react-native-vector-icons/Ionicons';
 import * as Animatable from 'react-native-animatable';
-
-
+import firestore from '@react-native-firebase/firestore';
+import {Auth}   from '../services';
 const SignUpScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
@@ -15,18 +15,34 @@ const SignUpScreen = ({ navigation }) => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSignUp = () => {
-    // Kiểm tra các điều kiện đăng ký
-    if (!email || !username || !phone || !password || !confirmPassword) {
-      setError('Please fill all fields');
-    } else if (password !== confirmPassword) {
-      setError('Passwords do not match');
-    } else {
-      // Xử lý đăng ký thành công
-      // Ví dụ: Gửi dữ liệu đến máy chủ hoặc lưu trữ dữ liệu
-      setError('');
-      console.log('User signed up:', { email, username, phone, password });
-      navigation.navigate('SignIn');
+  // const handleSignUp = () => {
+  //   // Kiểm tra các điều kiện đăng ký
+  //   if (!email || !username || !phone || !password || !confirmPassword) {
+  //     setError('Please fill all fields');
+  //   } else if (password !== confirmPassword) {
+  //     setError('Passwords do not match');
+  //   } else {
+  //     // Xử lý đăng ký thành công
+  //     // Ví dụ: Gửi dữ liệu đến máy chủ hoặc lưu trữ dữ liệu
+  //     setError('');
+  //     console.log('User signed up:', { email, username, phone, password });
+  //     navigation.navigate('SignIn');
+  //   }
+  // };
+  const handleSignUp = async () => {
+    try {
+      await Auth.signUp(username, phone, email, password, 'User');
+      console.log('User signed up successfully!');
+      
+      // Display success message
+      alert('Đăng ký thành công!');
+  
+      // Navigate back to the login screen
+      navigation.goBack();
+    } catch (error) {
+      console.error('Error signing up:', error.message);
+      // Handle the error, e.g., show an error message to the user.
+      alert('Đăng ký thất bại: ' + error.message);
     }
   };
   const handlerSignIn = () => {
@@ -80,7 +96,7 @@ const SignUpScreen = ({ navigation }) => {
         </TouchableOpacity>
       </Animatable.View>
 
-      <Animatable.View animation="fadeIn"  duration={1500} style={styles.inputContainer}>
+      {/* <Animatable.View animation="fadeIn"  duration={1500} style={styles.inputContainer}>
         <Icons name="lock-closed-outline" size={24} color="gray" style={styles.inputIcon} />
         <TextInput
           style={styles.textInput}
@@ -92,7 +108,7 @@ const SignUpScreen = ({ navigation }) => {
         <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
           <Icons name={showConfirmPassword ? "eye-outline" : "eye-off-outline"} size={24} color="gray" />
         </TouchableOpacity>
-      </Animatable.View>
+      </Animatable.View> */}
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
       <Animatable.View animation="fadeIn"   duration={1500} style={styles.inputContainer}>

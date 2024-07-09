@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "977346175114",
+    "firebase_url": "https://devices-3e9ad-default-rtdb.firebaseio.com",
+    "project_id": "devices-3e9ad",
+    "storage_bucket": "devices-3e9ad.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:977346175114:android:8f553e08aebfe78d7dcd73",
+        "android_client_info": {
+          "package_name": "com.devicemanagementapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAYEjGfBqVqqWprQFgqCUEDq3uggVLZuwU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

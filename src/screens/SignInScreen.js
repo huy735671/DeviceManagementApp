@@ -1,28 +1,37 @@
 import React, { useEffect, useState } from 'react';
 import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import users from './../data/userData';
+// import users from './../data/userData';
 import Icons from 'react-native-vector-icons/Ionicons';
 import * as Animatable from 'react-native-animatable';
-
-
+import firestore from "@react-native-firebase/firestore";
+import {Auth} from "@react-native-firebase/auth";
+import { useMyContextController, login } from "../context";
 const SignInScreen = ({ navigation }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('hiep1234@gmail.com');
+  const [password, setPassword] = useState('123456');
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const [controller, dispatch] = useMyContextController();
+  const { userLogin } = controller;
+ 
+  useEffect(() => {
+    console.log("userLogin:", userLogin);
+    console.log("error:", error);
+
+    if (userLogin != null) {
+      console.log("User role:", userLogin.role);
+
+      if (userLogin.role === "admin") {
+        navigation.navigate("Dashboard");
+      } else {
+        navigation.navigate('Home');
+      }
+    } 
+  }, [userLogin, error]);
 
   const handleSignIn = () => {
-    // Login conditions user or admin
-    const user = users.find(user => user.email === email && user.password === password && user.role === 'user');
-    const admin = users.find(user => user.email === email && user.password === password && user.role === 'admin');
-
-    if ((user && user.password === password) || (admin && admin.password === password)) {
-      // Successful login processing
-      navigation.navigate('Tabs', { isAdmin: admin !== undefined });
-    } else {
-      setError('Invalid email or password');
-    }
+    login(dispatch, email, password);
   };
   const handlerForgotPassword = () => {
     navigation.navigate('ForgotPassword')
@@ -32,6 +41,7 @@ const SignInScreen = ({ navigation }) => {
     navigation.navigate('SignUp')
   }
 
+
   useEffect(() => {
     //Simulate the wait time, then navigate to the main screen
     const timer = setTimeout(() => {
@@ -40,6 +50,7 @@ const SignInScreen = ({ navigation }) => {
 
     return () => clearTimeout(timer);
   }, []);
+
 
 
   return (
