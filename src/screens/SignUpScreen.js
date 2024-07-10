@@ -31,7 +31,7 @@ const SignUpScreen = ({ navigation }) => {
   // };
   const handleSignUp = async () => {
     try {
-      await Auth.signUp(username, phone, email, password, 'User');
+      await Auth.signUp(username, phone, email, password, 'user');
       console.log('User signed up successfully!');
       
       // Display success message
