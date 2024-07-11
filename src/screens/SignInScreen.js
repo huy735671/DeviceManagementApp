@@ -7,8 +7,8 @@ import firestore from "@react-native-firebase/firestore";
 import {Auth} from "@react-native-firebase/auth";
 import { useMyContextController, login } from "../context";
 const SignInScreen = ({ navigation }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('huy735671@gmail.com');
+  const [password, setPassword] = useState('123456');
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isReady, setIsReady] = useState(false);

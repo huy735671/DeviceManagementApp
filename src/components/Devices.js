@@ -6,28 +6,28 @@ import * as Animatable from 'react-native-animatable';
 const Devices = () => {
   return (
     <View>
-      <Text style={{ fontWeight: 'bold', fontSize: 25, margin: 10, }}>Devices List</Text>
+      <Text style={{ fontWeight: 'bold', fontSize: 25, margin: 10, color:'black' }}>Devices List</Text>
       <Animatable.View animation='lightSpeedIn' style={style.container}>
         <View style={style.devices}>
           <View style={style.icon}>
             <Icons name="computer" size={25} color="black" />
           </View>
-          <Text > Computer</Text>
+          <Text style={{color:'black',fontSize:16,fontWeight:'bold'}} > Computer</Text>
         </View>
 
         <View style={style.devices}>
           <View style={style.icon}><Icons name="phone" size={25} color="black" /></View>
-          <Text > Phone</Text>
+          <Text style={{color:'black',fontSize:16,fontWeight:'bold'}}> Phone</Text>
         </View>
         <View style={style.devices}>
           <View style={style.icon}><Icons name="tv" size={25} color="black" /></View>
 
-          <Text> Screen</Text>
+          <Text style={{color:'black',fontSize:16,fontWeight:'bold'}}> Screen</Text>
         </View>
         <View style={style.devices}>
           <View style={style.icon}><Icons name="camera" size={25} color="black" /></View>
 
-          <Text > Camera</Text>
+          <Text style={{color:'black',fontSize:16,fontWeight:'bold'}} > Camera</Text>
         </View>
 
       </Animatable.View>
@@ -39,16 +39,17 @@ export default Devices;
 
 const style = StyleSheet.create({
   container: {
-
     display: "flex",
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
+    color:'black',
   },
   devices: {
     margin: 10,
     alignItems: "center",
     marginHorizontal: 5,
+    
 
   },
   icon: {
@@ -56,7 +57,7 @@ const style = StyleSheet.create({
     height: 70,
     alignItems: "center",
     marginHorizontal: 5,
-    borderWidth: 1,
+    borderWidth: 2,
     borderBlockColor: "black",
     borderRadius: 50,
     justifyContent: "center",

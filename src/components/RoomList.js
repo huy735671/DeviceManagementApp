@@ -82,7 +82,7 @@ const RoomList = () => {
 
   return (
     <View>
-      <Text style={{ fontWeight: "bold", fontSize: 25, margin: 10 }}>Room List</Text>
+      <Text style={{ fontWeight: "bold", fontSize: 25, margin: 10,color:'black' }}>Room List</Text>
       <View style={style.container}>
         {data.map((item, index) => (
           <Animatable.View
@@ -93,8 +93,8 @@ const RoomList = () => {
               onPress={() => handlerRoom(item)}
             >
               <Icons name="computer" size={50} color="black" />
-              <Text>{item.name}</Text>
-              <Text style={{ color: getStatusColor(item.status) }}>
+              <Text style={{color:'black',fontWeight: 'bold'}}>{item.name}</Text>
+              <Text style={{ color: getStatusColor(item.status),fontWeight:'bold' }}>
                 {item.status}
               </Text>
             </TouchableOpacity>
@@ -118,9 +118,11 @@ const style = StyleSheet.create({
     height: 100,
     margin: 10,
     borderColor: "black",
-    borderWidth: 1,
+    borderWidth: 2,
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 10,
+    
   },
+  
 });

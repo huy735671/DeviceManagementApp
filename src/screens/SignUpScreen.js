@@ -15,20 +15,6 @@ const SignUpScreen = ({ navigation }) => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
 
-  // const handleSignUp = () => {
-  //   // Kiểm tra các điều kiện đăng ký
-  //   if (!email || !username || !phone || !password || !confirmPassword) {
-  //     setError('Please fill all fields');
-  //   } else if (password !== confirmPassword) {
-  //     setError('Passwords do not match');
-  //   } else {
-  //     // Xử lý đăng ký thành công
-  //     // Ví dụ: Gửi dữ liệu đến máy chủ hoặc lưu trữ dữ liệu
-  //     setError('');
-  //     console.log('User signed up:', { email, username, phone, password });
-  //     navigation.navigate('SignIn');
-  //   }
-  // };
   const handleSignUp = async () => {
     try {
       await Auth.signUp(username, phone, email, password, 'User');

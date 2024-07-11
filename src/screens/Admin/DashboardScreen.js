@@ -6,12 +6,16 @@ import {
   FlatList,
   TouchableOpacity,
   Dimensions,
+  ScrollView,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import * as Animatable from 'react-native-animatable';
-
+import { Header } from "react-native-elements";
+import { useMyContextController } from "../../context";
 const DashboardScreen = ({ navigation }) => {
   const [numColumns, setNumColumns] = useState(2);
+  const [controller, dispatch] = useMyContextController();
+  const { userLogin } = controller;
   const featuresData = [
     { id: "1", title: "Tất cả", icon: "menu" },
     { id: "2", title: "Nhân viên", icon: "group" },
@@ -178,8 +182,17 @@ const DashboardScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+        <Header leftComponent={  <Text style={{fontSize:30,fontWeight:'bold',color:'white'}}>
+          Welcome Home, {userLogin.name}
+        </Text>} containerStyle ={styles.header}/>
+     
       <View>
+      
+      
+        
+      
         <Text style={styles.txt}>Các chức năng quản lí</Text>
+      
         <FlatList
           horizontal
           data={featuresData}
@@ -188,9 +201,12 @@ const DashboardScreen = ({ navigation }) => {
           contentContainerStyle={styles.listContainer}
           showsHorizontalScrollIndicator={false}
         />
+       
       </View>
-      
-        <Text style={styles.txt}>Chi tiết</Text>
+     
+      <Text style={styles.txt}>Chi tiết</Text>
+     
+       
         {selectedFeatureId === "5" ? (
           renderStatistics()
         ) : (
@@ -228,6 +244,7 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     // paddingHorizontal: 10,
+    
   },
   itemContainer: {
     alignItems: "center",
@@ -263,6 +280,12 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 10,
+    borderRadius: 20,
+  },
+  header:{
+    width:'200%',
+    // backgroundColor: 'transparent', 
+    borderBottomWidth: 0, 
+    
   },
 });

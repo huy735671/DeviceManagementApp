@@ -23,7 +23,6 @@ const signUp = async (username, phone, email, password, role) => {
       phone,
       email,
       password, 
-     
       role,
     });
 

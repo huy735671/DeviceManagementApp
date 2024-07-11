@@ -3,23 +3,34 @@ import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Devices from '../../components/Devices'
 import RoomList from '../../components/RoomList'
-
+import { Header } from 'react-native-elements'
+import { useMyContextController } from '../../context';
+import BottomNavigation from '../../navigations/BottomNavigation'
 const HomeScreen = ({ navigation }) => {
+  const [controller, dispatch] = useMyContextController();
+  const { userLogin } = controller;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF' }}>
-     
+     <Header leftComponent={  <Text style={{fontSize:25,fontWeight:'bold',color:'white'}}>
+          Welcome Home, {userLogin.username}
+        </Text>} containerStyle ={style.header}/>
       <ScrollView>
         <Devices style={style.Devices} />
         <RoomList />
       </ScrollView>
+      {/* <BottomNavigation/> */}
     </SafeAreaView>
   )
 }
 
 export default HomeScreen;
 const style = StyleSheet.create({
-  Devices: {
 
-  }
+  header:{
+    width:'200%',
+    // backgroundColor: 'transparent', 
+    borderBottomWidth: 0, 
+    
+  },
 });

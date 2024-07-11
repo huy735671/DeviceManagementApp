@@ -40,6 +40,7 @@ const App = () => {
     <PaperProvider>
       <NavigationContainer>
         <StackNavigation />
+        
       </NavigationContainer>
     </PaperProvider>
     </MyContextControllerProvider>
