@@ -1,12 +1,14 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
-import React, { useState } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Image, ScrollView } from "react-native";
+import React, { useEffect, useState } from "react";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { Button, TextInput } from "react-native-paper";
-import * as Animatable from 'react-native-animatable';
+import * as Animatable from "react-native-animatable";
+import auth from "@react-native-firebase/auth";
+import storage from "@react-native-firebase/storage";
+import firestore from "@react-native-firebase/firestore";
+import { launchImageLibrary } from "react-native-image-picker";
 
-
-
-const EditProfileScreen = () => {
+const EditProfileScreen = ({ navigation }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [numPhone, setNumPhone] = useState("");
@@ -16,35 +18,147 @@ const EditProfileScreen = () => {
   const [showPassCurrent, setShowPassCurrent] = useState(false);
   const [showPassNew, setShowPassNew] = useState(false);
   const [showPassConfirm, setShowPassConfirm] = useState(false);
+  const [user, setUser] = useState(null);
+  const [imageUri, setImageUri] = useState(null);
+  const [imageName, setImageName] = useState('');
+  const [imageSource, setImageSource] = useState(null);
+  const [isEdited, setIsEdited] = useState(false);
 
+  useEffect(() => {
+    const unsubscribe = auth().onAuthStateChanged(async (user) => {
+      if (user) {
+        setUser(user);
+        setEmail(user.email);
+        setName(user.displayName);
+        try {
+          const userDoc = await firestore()
+            .collection("USERS")
+            .doc(user.email)
+            .get();
+          if (userDoc.exists) {
+            const userData = userDoc.data();
+            setNumPhone(userData.phone || "");
+            // setAvatar(userData.avatarUrl);
+          }
+        } catch (error) {
+          console.error("Error fetching user data: ", error);
+        }
+      } else {
+        setUser(null);
+      }
+    });
+
+    return unsubscribe;
+  }, []);
+
+  const handleSave = async () => {
+    try {
+      const currentUser = auth().currentUser;
+      if (!currentUser) {
+        Alert.alert("Lỗi", "Không thể xác thực người dùng.");
+        return;
+      }
+  
+      // Chuẩn bị đối tượng cập nhật thông tin người dùng
+      const userDataUpdate = {};
+  
+      // Nếu người dùng đã chọn ảnh mới, tải ảnh lên Firebase Storage và lưu URL
+      if (imageSource) {
+        const downloadURL = await uploadImageToFirebase(imageSource.uri, imageName);
+        userDataUpdate.avatarUrl = downloadURL;
+      }
+  
+      // Chỉ cập nhật tên và số điện thoại nếu chúng đã được thay đổi
+      if (name) {
+        userDataUpdate.username = name;
+      }
+      if (numPhone) {
+        userDataUpdate.phone = numPhone;
+      }
+  
+      await firestore().collection("USERS").doc(currentUser.email).update(userDataUpdate);
+  
+      Alert.alert(
+        "Thành công",
+        "Thông tin người dùng đã được cập nhật thành công.",
+        [
+          { text: "OK", onPress: () => navigation.goBack() }, // Quay lại trang trước đó sau khi nhấn OK
+        ]
+      );
+    } catch (error) {
+      Alert.alert("Lỗi", error.message);
+    }
+  };
+  
+  const handleInputChange = (setter) => (value) => {
+    setter(value);
+    setIsEdited(true);
+  };
+
+  const uploadImageToFirebase = async (localImagePath, imageName) => {
+    try {
+      const reference = storage().ref(`imagesUser/${imageName}`);
+      await reference.putFile(localImagePath);
+      const downloadURL = await reference.getDownloadURL();
+      return downloadURL;
+    } catch (error) {
+      console.error('Error uploading image: ', error);
+      throw error;
+    }
+  };
+
+  const selectedImage = () => {
+    launchImageLibrary({ mediaType: 'photo' }, (response) => {
+      if (!response.didCancel && !response.error && response.assets.length > 0) {
+        const filePath = response.assets[0].uri;
+        const parts = filePath.split('/');
+        const imageName = parts[parts.length - 1];
+  
+        console.log('Image Info:', response.assets[0]);
+        setImageSource({ uri: filePath });
+        setImageName(imageName);
+        setIsEdited(true); // Đánh dấu rằng đã chỉnh sửa để enable nút Lưu
+      } else if (response.error) {
+        console.log('ImagePicker Error: ', response.error);
+        Alert.alert('Lỗi', 'Đã xảy ra lỗi khi chọn ảnh từ thư viện.');
+      } else {
+        console.log('User cancelled image picker');
+      }
+    });
+  };
+  
   return (
-    <View style={{ flex: 1, backgroundColor: "#FFF" }}>
-      <View style={{ flexDirection: "row" }}>
-        <Icon name={"account-circle"} size={150} color={"#000"} />
-        <View style={{ alignItems: "center", padding: 30 }}>
-
-          <Button style={{ backgroundColor: "#1FD2BD", ...styles.btn }}>
-            <Text style={styles.txt}>Lưu thông tin</Text>
-          </Button>
-
-        </View>
+    <ScrollView style={{ flex: 1, backgroundColor: "#FFF" }}>
+      <Button
+        style={{ backgroundColor: isEdited ? "#1FD2BD" : "#CCC", ...styles.btn }}
+        onPress={handleSave}
+        disabled={!isEdited}
+      >
+        <Text style={styles.txt}>Lưu thông tin</Text>
+      </Button>
+      <View style={{ alignItems: "center", padding: 30 }}>
+        {imageSource ? (
+          <Image
+            source={imageSource}
+            style={{ width: 150, height: 150, borderRadius: 75, marginBottom: 10 }}
+          />
+        ) : (
+          <Icon name={"account-circle"} size={150} color={"#000"} />
+        )}
+        <TouchableOpacity onPress={selectedImage} style={styles.editAvatar}>
+          <Text style={styles.editAvatarText}>Chỉnh sửa ảnh đại diện</Text>
+        </TouchableOpacity>
       </View>
-      <Animatable.View animation='bounceIn' style={{ ...styles.boder4Info, padding: 15 }}>
-        <Text
-          style={{
-            ...styles.txt,
-            textDecorationLine: "underline",
-            fontWeight: "bold",
-          }}
-        >
+      <Animatable.View animation="bounceIn" style={{ ...styles.boder4Info, padding: 15 }}>
+        <Text style={{ ...styles.txt, textDecorationLine: "underline", fontWeight: "bold" }}>
           Thông tin người dùng:
         </Text>
         <View style={styles.txtAndInput}>
-          <Text style={{ ...styles.txt, padding: 10 }}>Họ và tên: </Text>
+          <Text style={{ ...styles.txt, padding: 10 }}>Họ và tên:</Text>
           <TextInput
-            placeholder={"Tên người dùng"}
+            placeholder={user ? user.displayName : "Không có tên"}
             value={name}
-            onChangeText={setName}
+            onChangeText={handleInputChange(setName)}
             style={styles.txtInput}
             underlineColor="white"
             textColor="#000"
@@ -56,9 +170,9 @@ const EditProfileScreen = () => {
           <Text style={{ ...styles.txt, padding: 10 }}>Email: </Text>
           <TextInput
             disabled
-            placeholder={"Email"}
+            placeholder={user ? user.email : "Không có email"}
             value={email}
-            onChangeText={setEmail}
+            onChangeText={handleInputChange(setEmail)}
             style={{ ...styles.txtInput, width: "76%" }}
             underlineColor="white"
             textColor="#000"
@@ -69,9 +183,9 @@ const EditProfileScreen = () => {
         <View style={styles.txtAndInput}>
           <Text style={{ ...styles.txt, padding: 10 }}>Số điện thoại: </Text>
           <TextInput
-            placeholder={"Số điện thoại"}
+            placeholder={numPhone}
             value={numPhone}
-            onChangeText={setNumPhone}
+            onChangeText={handleInputChange(setNumPhone)}
             style={{ ...styles.txtInput, width: "56%" }}
             underlineColor="white"
             textColor="#000"
@@ -79,14 +193,8 @@ const EditProfileScreen = () => {
           />
         </View>
       </Animatable.View>
-      <Animatable.View animation='bounceIn' style={{ ...styles.boder4Info, padding: 15 }}>
-        <Text
-          style={{
-            ...styles.txt,
-            textDecorationLine: "underline",
-            fontWeight: "bold",
-          }}
-        >
+      <Animatable.View animation="bounceIn" style={{ ...styles.boder4Info, padding: 15 }}>
+        <Text style={{ ...styles.txt, textDecorationLine: "underline", fontWeight: "bold" }}>
           Đổi mật khẩu:
         </Text>
         <View style={styles.txtAndInput}>
@@ -95,7 +203,7 @@ const EditProfileScreen = () => {
             secureTextEntry={!showPassCurrent}
             placeholder={"Mật khẩu cũ"}
             value={passCurrent}
-            onChangeText={setPassCurrent}
+            onChangeText={handleInputChange(setPassCurrent)}
             style={{ ...styles.txtInput, width: "60%" }}
             underlineColor="white"
             textColor="#000"
@@ -119,8 +227,8 @@ const EditProfileScreen = () => {
             secureTextEntry={!showPassNew}
             placeholder={"Mật khẩu mới"}
             value={passNew}
-            onChangeText={setPassNew}
-            style={{ ...styles.txtInput, width: "56%" }}
+            onChangeText={handleInputChange(setPassNew)}
+            style={{ ...styles.txtInput, width: "60%" }}
             underlineColor="white"
             textColor="#000"
             placeholderTextColor={"#000"}
@@ -138,12 +246,12 @@ const EditProfileScreen = () => {
         </View>
 
         <View style={styles.txtAndInput}>
-          <Text style={{ ...styles.txt, padding: 10 }}>Nhập lại pass: </Text>
+          <Text style={{ ...styles.txt, padding: 10 }}>Nhập lại mật khẩu: </Text>
           <TextInput
             secureTextEntry={!showPassConfirm}
             placeholder={"Nhập lại mật khẩu"}
             value={confirmPass}
-            onChangeText={setConfirmPass}
+            onChangeText={handleInputChange(setConfirmPass)}
             style={{ ...styles.txtInput, width: "56%" }}
             underlineColor="white"
             textColor="#000"
@@ -161,51 +269,62 @@ const EditProfileScreen = () => {
           </TouchableOpacity>
         </View>
       </Animatable.View>
-    </View>
+    </ScrollView>
   );
 };
 
-export default EditProfileScreen;
-
 const styles = StyleSheet.create({
-  boder4Info: {
-    borderRadius: 30,
-    borderWidth: 1,
-    marginHorizontal: 10,
-    marginVertical: 10,
+  btn: {
+    margin: 10,
+    // marginTop: 50,
+    width: 160,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 20,
   },
   txt: {
-    color: "#000",
-    fontSize: 18,
+    color: "black",
   },
-  btn: {
+  editAvatar: {
+    backgroundColor: "#1FD2BD",
+    padding: 10,
     borderRadius: 5,
-    width: 200,
-    marginBottom: 10,
   },
-  txtInput: {
-    backgroundColor: null,
-    borderRadius: 10,
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
-    height: 40,
-    flex: 1,
-    width: "65%",
-    borderWidth: 1,
-    marginBottom: 5,
-    paddingLeft: 10,
-    paddingRight: 10,
+  editAvatarText: {
+    color: "#FFF",
+    fontWeight: "bold",
   },
-
+  boder4Info: {
+    margin: 10,
+    borderWidth: 2,
+    borderRadius: 4,
+    borderColor: "#1FD2BD",
+  },
   txtAndInput: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 5,
+    justifyContent: "space-between",
+    margin: 5,
   },
-
+  txtInput: {
+    backgroundColor: "#FFF",
+    width: "75%",
+    height: 40,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: "#CCC",
+    padding: 5,
+    margin: 5,
+    fontSize: 15,
+  },
   iconStyle: {
-    position: "absolute",
-    right: 10,
-    top: 12,
+    width: 30,
+    height: 30,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
+
+export default EditProfileScreen;
+

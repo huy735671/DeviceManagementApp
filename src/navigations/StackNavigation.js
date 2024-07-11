@@ -2,7 +2,6 @@ import React from 'react'
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import SignInScreen from '../screens/SignInScreen';
-import BottomNavigation from './BottomNavigation';
 import SignUpScreen from '../screens/SignUpScreen';
 import ForgotPassword from '../screens/ForgotPassword';
 import Room from '../screens/User/Room';
@@ -20,6 +19,8 @@ import ReportScreen from '../screens/User/ReportScreen';
 import SearchBar from '../components/SearchBar';
 import DashboardScreen from '../screens/Admin/DashboardScreen';
 import HomeScreen from '../screens/User/HomeScreen';
+import AdminTab from './AdminTab';
+import UserTab from './UserTab';
 
 const Stack = createNativeStackNavigator();
 
@@ -31,12 +32,13 @@ const StackNavigation = () => {
 
       <Stack.Screen name='SignIn' component={SignInScreen} />
       <Stack.Screen name='SignUp' component={SignUpScreen} />
-      <Stack.Screen name='Tabs' component={BottomNavigation} />
+      <Stack.Screen name='AdminTab' component={AdminTab} />
+      <Stack.Screen name='UserTab' component={UserTab} />
       <Stack.Screen name='ForgotPassword' component={ForgotPassword} />
       <Stack.Screen name='Room' component={Room} options={{ headerShown: false }} />
       <Stack.Screen name='Dashboard' component={DashboardScreen} options={{ headerShown: false }} />
       <Stack.Screen name='RoomList' component={RoomList} options={{ headerShown: false }} />
-      <Stack.Screen name='Home' component={HomeScreen} options={{ headerShown: false }}/>
+      <Stack.Screen name='Home' component={HomeScreen} options={{ headerShown: false }} />
       <Stack.Screen
         name="AddDevice"
         component={AddDeviceScreen}
@@ -143,7 +145,7 @@ const StackNavigation = () => {
           },
         }}
       />
-      
+
       <Stack.Screen
         name="SearchBar"
         component={SearchBar}

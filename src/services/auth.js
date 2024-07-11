@@ -1,6 +1,8 @@
 import auth from "@react-native-firebase/auth";
 import firestore from "@react-native-firebase/firestore";
 
+
+
 const signUp = async (username, phone, email, password, role) => {
   try {
     if (!username || !phone || !email || !password  || !role) {
@@ -67,6 +69,7 @@ const Auth = {
   signUp,
   signIn,
   signOut,
+  
 };
 
 export default Auth;

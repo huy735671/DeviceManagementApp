@@ -182,9 +182,9 @@ const DashboardScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-        <Header leftComponent={  <Text style={{fontSize:30,fontWeight:'bold',color:'white'}}>
+        {/* <Header leftComponent={  <Text style={{fontSize:30,fontWeight:'bold',color:'white'}}>
           Welcome Home, {userLogin.name}
-        </Text>} containerStyle ={styles.header}/>
+        </Text>} containerStyle ={styles.header}/> */}
      
       <View>
       
