@@ -54,11 +54,9 @@ const AccountScreen = () => {
               <Text style={styles.txt}>{user ? user.phone : 'NaN'}      </Text>
             </View>
 
-            <TouchableOpacity onPress={handlerAccount} style={{ alignItems: "center" }}>
               <Button style={{ backgroundColor: "#1FD2BD", ...styles.btn }} onPress={() => navigation.navigate('EditProfile')}>
                 <Text style={styles.txt}>Chỉnh sửa</Text>
               </Button>
-            </TouchableOpacity>
 
             <Button style={{ backgroundColor: "red", ...styles.btn }} onPress={handleSignOut}>
               <Text style={styles.txt}>Đăng xuất</Text>
