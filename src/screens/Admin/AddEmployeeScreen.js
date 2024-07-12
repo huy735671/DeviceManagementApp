@@ -1,20 +1,81 @@
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import React, { useState } from "react";
-import Icon from "react-native-vector-icons/MaterialIcons";
-import { Button, TextInput } from "react-native-paper";
-import DatePicker from "react-native-date-picker";
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Modal, FlatList } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { Button, TextInput } from 'react-native-paper';
+import DatePicker from 'react-native-date-picker';
+import firestore from '@react-native-firebase/firestore';
 
-const AddEmployeeScreen = () => {
-  const [name, setName] = useState("");
-  const [id, setId] = useState("");
-  const [room, setRoom] = useState("");
-  const [email, setEmail] = useState("");
-  const [numPhone, setNumPhone] = useState("");
-  const [role, setRole] = useState("Staff");
-  const [password, setPassword] = useState("");
+const AddEmployeeScreen = ({ navigation }) => {
+  const [name, setName] = useState('');
+  const [id, setId] = useState('');
+  const [selectedRoom, setSelectedRoom] = useState(null);
+  const [email, setEmail] = useState('');
+  const [numPhone, setNumPhone] = useState('');
+  const [role, setRole] = useState('User'); // Mặc định là User
+  const [password, setPassword] = useState('');
   const [datetime, setDatetime] = useState(new Date());
   const [open, setOpen] = useState(false);
   const [showPass, setShowPass] = useState(false);
+  const [rooms, setRooms] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  useEffect(() => {
+    // Lấy danh sách các phòng ban từ Firestore
+    const fetchRooms = async () => {
+      try {
+        const roomsCollection = await firestore().collection('ROOMS').get();
+        const roomsData = roomsCollection.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setRooms(roomsData);
+      } catch (error) {
+        console.error('Error fetching rooms:', error);
+      }
+    };
+
+    fetchRooms();
+  }, []);
+
+  const handleSaveEmployee = async () => {
+    if (selectedRoom) {
+      try {
+        // Lưu nhân viên vào bộ sưu tập 'EMPLOYEES' của phòng ban được chọn
+        await firestore()
+          .collection('EMPLOYEES')
+          .add({
+            name,
+            id,
+            email,
+            numPhone,
+            role,
+            datetime,
+            password,
+            roomId: selectedRoom.id,
+          });
+
+        // Hiển thị thông báo lưu thành công và quay lại màn hình trước đó
+        Alert.alert('Thành công', 'Nhân viên đã được lưu thành công!', [
+          { text: 'OK', onPress: () => navigation.goBack() }
+        ]);
+
+      } catch (error) {
+        console.error('Lỗi khi lưu nhân viên:', error);
+        Alert.alert('Lỗi', 'Đã xảy ra lỗi khi lưu nhân viên. Vui lòng thử lại sau.');
+      }
+    } else {
+      Alert.alert('Lỗi', 'Vui lòng chọn phòng ban trước khi lưu.');
+    }
+  };
+
+  const renderRoomItem = ({ item }) => (
+    <TouchableOpacity
+      style={styles.roomItem}
+      onPress={() => {
+        setSelectedRoom(item);
+        setModalVisible(false); // Đóng modal sau khi chọn phòng ban
+      }}
+    >
+      <Text style={styles.roomItemText}>{item.name}</Text>
+    </TouchableOpacity>
+  );
 
   return (
     <View style={{ flex: 1, backgroundColor: "#FFF" }}>
@@ -29,9 +90,6 @@ const AddEmployeeScreen = () => {
             value={name}
             onChangeText={setName}
             style={styles.txtInput}
-            underlineColor="white"
-            textColor="#000"
-            placeholderTextColor={"#000"}
           />
         </View>
         <View style={styles.txtAndInput}>
@@ -41,22 +99,18 @@ const AddEmployeeScreen = () => {
             value={id}
             onChangeText={setId}
             style={styles.txtInput}
-            underlineColor="white"
-            textColor="#000"
-            placeholderTextColor={"#000"}
           />
         </View>
         <View style={styles.txtAndInput}>
           <Text style={styles.txt}>Phòng ban: </Text>
-          <TextInput
-            placeholder={"Phòng ban"}
-            value={room}
-            onChangeText={setRoom}
+          <TouchableOpacity
             style={styles.txtInput}
-            underlineColor="white"
-            textColor="#000"
-            placeholderTextColor={"#000"}
-          />
+            onPress={() => setModalVisible(true)}
+          >
+            <Text style={styles.roomText}>
+              {selectedRoom ? selectedRoom.name : 'Chọn phòng ban'}
+            </Text>
+          </TouchableOpacity>
         </View>
         <View style={styles.txtAndInput}>
           <Text style={styles.txt}>Email: </Text>
@@ -65,9 +119,6 @@ const AddEmployeeScreen = () => {
             value={email}
             onChangeText={setEmail}
             style={styles.txtInput}
-            underlineColor="white"
-            textColor="#000"
-            placeholderTextColor={"#000"}
           />
         </View>
         <View style={styles.txtAndInput}>
@@ -78,9 +129,6 @@ const AddEmployeeScreen = () => {
             onChangeText={setNumPhone}
             keyboardType="numeric"
             style={styles.txtInput}
-            underlineColor="white"
-            textColor="#000"
-            placeholderTextColor={"#000"}
           />
         </View>
         <View style={styles.txtAndInput}>
@@ -109,15 +157,12 @@ const AddEmployeeScreen = () => {
         </View>
         <View style={styles.txtAndInput}>
           <Text style={styles.txt}>Vai trò: </Text>
-          <TextInput
-            placeholder={"Vai trò"}
-            value={role}
-            onChangeText={setRole}
-            style={styles.txtInput}
-            underlineColor="white"
-            textColor="#000"
-            placeholderTextColor={"#000"}
-          />
+          <TouchableOpacity
+            style={styles.roleButton}
+            onPress={() => setRole(role === 'User' ? 'Admin' : 'User')}
+          >
+            <Text style={styles.roleText}>{role}</Text>
+          </TouchableOpacity>
         </View>
         <View style={styles.txtAndInput}>
           <Text style={styles.txt}>Mật khẩu: </Text>
@@ -127,9 +172,6 @@ const AddEmployeeScreen = () => {
             value={password}
             onChangeText={setPassword}
             style={styles.txtInput}
-            underlineColor="white"
-            textColor="#000"
-            placeholderTextColor={"#000"}
           />
           <TouchableOpacity
             onPress={() => setShowPass(!showPass)}
@@ -146,16 +188,39 @@ const AddEmployeeScreen = () => {
       <View style={{ alignItems: "center" }}>
         <Button
           style={{ backgroundColor: "#1FD2BD", ...styles.btn }}
-          onPress={() => console.log("Touched Button")}
+          onPress={handleSaveEmployee}
         >
           <Text style={styles.txt}>Lưu thông tin</Text>
         </Button>
       </View>
+
+      {/* Modal chọn phòng ban */}
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        transparent
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalHeader}>Chọn phòng ban</Text>
+            <FlatList
+              data={rooms}
+              renderItem={renderRoomItem}
+              keyExtractor={(item) => item.id}
+              style={{ marginTop: 20 }}
+            />
+            <TouchableOpacity
+              onPress={() => setModalVisible(false)}
+              style={styles.modalCloseButton}
+            >
+              <Text style={styles.modalCloseButtonText}>Đóng</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
-
-export default AddEmployeeScreen;
 
 const styles = StyleSheet.create({
   txt: {
@@ -176,6 +241,7 @@ const styles = StyleSheet.create({
     flex: 1,
     borderWidth: 1,
     marginBottom: 10,
+    paddingLeft: 10,
   },
   txtAndInput: {
     flexDirection: "row",
@@ -191,4 +257,50 @@ const styles = StyleSheet.create({
     right: 15,
     top: 12,
   },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    backgroundColor: "#FFF",
+    borderRadius: 10,
+    padding: 20,
+    width: "80%",
+    maxHeight: "80%",
+  },
+  modalHeader: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  roomItem: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#DDD",
+  },
+  roomItemText: {
+    fontSize: 16,
+    color: "#000",
+  },
+  modalCloseButton: {
+    marginTop: 20,
+    alignSelf: "center",
+  },
+  modalCloseButtonText: {
+    fontSize: 16,
+    color: "#1FD2BD",
+  },
+  roleItem: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#DDD",
+  },
+  roleItemText: {
+    fontSize: 16,
+    color: "#000",
+  },
 });
+
+export default AddEmployeeScreen;

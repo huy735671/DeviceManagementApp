@@ -22,7 +22,6 @@ const DashboardScreen = ({ navigation }) => {
     { id: "3", title: "Phòng ban", icon: "groups" },
     { id: "4", title: "Bảo trì", icon: "settings" },
     { id: "5", title: "Thống kê", icon: "insert-chart-outlined" },
-    // Add more items as needed
   ];
 
   const allData = [

@@ -43,7 +43,7 @@ const StackNavigation = () => {
         name="AddDevice"
         component={AddDeviceScreen}
         options={{
-          title: "Thêm nhân viên",
+          title: "Thêm thiết bị",
           headerShown: true,
           headerStyle: {
             backgroundColor: "#1FD2BD",
