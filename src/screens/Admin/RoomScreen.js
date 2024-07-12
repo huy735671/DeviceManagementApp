@@ -1,128 +1,82 @@
-import {
-  View,
-  Text,
-  Touchable,
-  FlatList,
-  StyleSheet,
-  TouchableOpacity,
-} from "react-native";
-import React from "react";
-import Icon from "react-native-vector-icons/MaterialIcons";
+import React, { useState, useEffect } from 'react';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import firestore from '@react-native-firebase/firestore';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
-const RoomScreen = ({ navigation }) => {
-  const allData = [
-    {
-      id: "1",
-      featureId: "1",
-      name: "Máy tính",
-      status: "Bảo trì",
-      icon: "computer",
-    },
-    {
-      id: "2",
-      featureId: "1",
-      name: "Máy tính",
-      status: "Hư hỏng",
-      icon: "computer",
-    },
-    {
-      id: "3",
-      featureId: "1",
-      name: "Máy lạnh",
-      status: "Hoạt động",
-      icon: "air",
-    },
-    {
-      id: "4",
-      featureId: "1",
-      name: "Camera",
-      status: "Bảo trì",
-      icon: "camera",
-    },
-  ];
+const RoomScreen = ({ navigation, route }) => {
+  const { roomId, roomName } = route.params;
+  const [devices, setDevices] = useState([]);
+
+  useEffect(() => {
+    const unsubscribe = firestore()
+      .collection('DEVICES')
+      .where('roomId', '==', roomId) // Filter devices by roomId
+      .onSnapshot(querySnapshot => {
+        const devicesData = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setDevices(devicesData);
+      });
+
+    return () => unsubscribe();
+  }, [roomId]);
 
   const handleDetailPress = (item) => {
-    navigation.navigate("DevicesDetail", {
+    navigation.navigate('DevicesDetail', {
       icon: item.icon,
       name: item.name,
       status: item.status,
     });
   };
 
-  const renderItem = ({ item }) => {
-    return (
-      <View style={{ ...styles.itemContainer }}>
-        <TouchableOpacity
-          style={styles.btn4FlstUnder}
-          onPress={() => handleDetailPress(item)}
-        >
-          <Icon name={item.icon} size={60} color={"#000"} />
-          <View style={{ flexDirection: "column", marginLeft: 20 }}>
-            <View style={{ flexDirection: "row" }}>
-              <Text style={styles.txtFearture}>Tên thiết bị: </Text>
-              <Text style={{ ...styles.txtFearture, fontWeight: "0" }}>
-                {item.name}
-              </Text>
-            </View>
-
-            <View style={{ flexDirection: "row" }}>
-              <Text style={styles.txtFearture}>Trạng thái: </Text>
-              {item.status == "Bảo trì" && (
-                <Text style={{ ...styles.txtFearture, color: "orange" }}>
-                  {item.status}
-                </Text>
-              )}
-              {item.status == "Hư hỏng" && (
-                <Text style={{ ...styles.txtFearture, color: "red" }}>
-                  {item.status}
-                </Text>
-              )}
-              {item.status == "Hoạt động" && (
-                <Text style={{ ...styles.txtFearture, color: "blue" }}>
-                  {item.status}
-                </Text>
-              )}
-            </View>
-          </View>
-        </TouchableOpacity>
+  const renderItem = ({ item }) => (
+    <TouchableOpacity style={styles.itemContainer} onPress={() => handleDetailPress(item)}>
+      <Icon name={item.icon} size={60} color="#000" />
+      <View style={{ marginLeft: 20 }}>
+        <Text style={styles.txtFeature}>Tên thiết bị: {item.name}</Text>
+        <Text style={styles.txtFeature}>Trạng thái: {item.status}</Text>
       </View>
-    );
-  };
+    </TouchableOpacity>
+  );
 
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: "#FFF",
-      }}
-    >
+    <View style={styles.container}>
+      <Text style={styles.title}>Danh sách thiết bị trong phòng {roomName}</Text>
       <FlatList
-        data={allData}
-        showsHorizontalScrollIndicator={false}
-        keyExtractor={(item) => item.id}
+        data={devices}
         renderItem={renderItem}
+        keyExtractor={(item) => item.id}
+        showsVerticalScrollIndicator={false}
       />
     </View>
   );
 };
 
-export default RoomScreen;
-
 const styles = StyleSheet.create({
-  txtFearture: {
-    fontSize: 18,
-    color: "#000",
-    fontWeight: "bold",
-    marginTop: 5,
-  },
-  btn4FlstUnder: {
-    borderRadius: 10,
-    borderWidth: 2,
+  container: {
+    flex: 1,
+    backgroundColor: '#FFF',
     padding: 10,
-    marginTop: 10,
-    flexDirection: "row",
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
   },
   itemContainer: {
-    marginHorizontal: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f1f1f1',
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  txtFeature: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: 5,
   },
 });
+
+export default RoomScreen;

@@ -1,66 +1,26 @@
-import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Dimensions,
-  TouchableOpacity,
-  ScrollView,
-} from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from "react-native";
 import Icons from "react-native-vector-icons/MaterialIcons";
 import { useNavigation } from "@react-navigation/native";
-import * as Animatable from 'react-native-animatable';
+import firestore from "@react-native-firebase/firestore";
 
 const RoomList = () => {
   const navigation = useNavigation();
+  const [rooms, setRooms] = useState([]);
 
-  const data = [
-    { id: 1, name: "Room 1", status: "Normal" },
-    { id: 2, name: "Room 2", status: "Broken" },
-    { id: 3, name: "Room 3", status: "Normal" },
-    { id: 4, name: "Room 4", status: "Maintenance" },
-    { id: 5, name: "Room 5", status: "Normal" },
-    { id: 6, name: "Room 6", status: "Normal" },
-  ];
+  useEffect(() => {
+    const unsubscribe = firestore()
+      .collection("ROOMS")
+      .onSnapshot((snapshot) => {
+        const roomsData = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setRooms(roomsData);
+      });
 
-  const dataRoomList = [
-    {
-      room: "Room 1", list: [
-        { devices: "phone", status: "Normal" },
-        { devices: "laptop", status: "Normal" },
-      ]
-    },
-    {
-      room: "Room 2", list: [
-        { devices: "tablet", status: "Normal" },
-        { devices: "laptop", status: "Normal" },
-      ]
-    },
-    {
-      room: "Room 3", list: [
-        { devices: "phone", status: "Normal" },
-        { devices: "tablet", status: "Normal" },
-      ]
-    },
-    {
-      room: "Room 4", list: [
-        { devices: "phone", status: "Normal" },
-        { devices: "laptop", status: "Normal" },
-      ]
-    },
-    {
-      room: "Room 5", list: [
-        { devices: "tablet", status: "Normal" },
-        { devices: "laptop", status: "Normal" },
-      ]
-    },
-    {
-      room: "Room 6", list: [
-        { devices: "tablet", status: "Normal" },
-        { devices: "laptop", status: "Normal" },
-      ]
-    },
-  ];
+    return () => unsubscribe();
+  }, []);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -75,30 +35,26 @@ const RoomList = () => {
     }
   };
 
-  const handlerRoom = (room) => {
-    const roomData = dataRoomList.find((item) => item.room === room.name);
-    navigation.navigate("Room", { room, roomData });
+  const handleRoomPress = (room) => {
+    navigation.navigate("Room", { room });
   };
 
   return (
     <View>
-      <Text style={{ fontWeight: "bold", fontSize: 25, margin: 10,color:'black' }}>Room List</Text>
-      <View style={style.container}>
-        {data.map((item, index) => (
-          <Animatable.View
-            key={index}
-            animation="bounceIn">
-            <TouchableOpacity
-              style={style.items}
-              onPress={() => handlerRoom(item)}
-            >
-              <Icons name="computer" size={50} color="black" />
-              <Text style={{color:'black',fontWeight: 'bold'}}>{item.name}</Text>
-              <Text style={{ color: getStatusColor(item.status),fontWeight:'bold' }}>
-                {item.status}
-              </Text>
-            </TouchableOpacity>
-          </Animatable.View>
+      <Text style={{ fontWeight: "bold", fontSize: 25, margin: 10 }}>
+        Room List
+      </Text>
+      <View style={styles.container}>
+        {rooms.map((room) => (
+          <TouchableOpacity
+            key={room.id}
+            style={styles.item}
+            onPress={() => handleRoomPress(room)}
+          >
+            <Icons name="computer" size={50} color="black" />
+            <Text style={{ fontWeight: "bold" }}>{room.name}</Text>
+            <Text style={{ color: getStatusColor(room.status), fontWeight: 'bold' }}>{room.status}</Text>
+          </TouchableOpacity>
         ))}
       </View>
     </View>
@@ -108,12 +64,12 @@ const RoomList = () => {
 export default RoomList;
 
 const { width } = Dimensions.get("window");
-const style = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     flexWrap: "wrap",
   },
-  items: {
+  item: {
     width: width / 2 - 20,
     height: 100,
     margin: 10,
@@ -122,7 +78,5 @@ const style = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 10,
-    
   },
-  
 });
