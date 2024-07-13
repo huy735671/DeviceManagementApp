@@ -1,153 +1,131 @@
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import React from "react";
-import Icon from "react-native-vector-icons/MaterialIcons";
+import { View, Text, StyleSheet, Alert } from "react-native";
 import { Button } from "react-native-paper";
+import Icon from "react-native-vector-icons/MaterialIcons";
+import firestore from "@react-native-firebase/firestore";
 
-const DevicesDetail = ({ route, navigation }) => {
-  const { icon, name, status } = route.params;
+const DeviceDetail = ({ route, navigation }) => {
+  const {
+    id, icon, name, status, type, assetType, brand, model,
+    supplier, price, purchaseDate, warrantyPeriod, operationalStatus,
+    deploymentDate
+  } = route.params;
+
+  const handleDeleteDevice = async () => {
+    try {
+      // Xóa thiết bị khỏi Firestore
+      await firestore().collection('DEVICES').doc(id).delete();
+      console.log('Thiết bị đã được xóa khỏi Firestore');
+
+      // Cập nhật lại giao diện sau khi xóa
+      navigation.navigate('AdminTab'); // Điều hướng về màn hình Dashboard
+
+      // Thông báo xóa thành công (tùy chọn)
+      Alert.alert('Xóa thành công', 'Thiết bị đã được xóa khỏi hệ thống.');
+    } catch (error) {
+      console.error('Lỗi khi xóa thiết bị:', error);
+      // Thông báo lỗi (tùy chọn)
+      Alert.alert('Lỗi', 'Đã xảy ra lỗi khi xóa thiết bị.');
+    }
+  };
+
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: "#FFF",
-      }}
-    >
-      <View style={{ margin: 30, borderRadius: 10, borderWidth: 1 }}>
-        <View
-          style={{
-            padding: 10,
-            flexDirection: "row",
-            justifyContent: "center",
-          }}
-        >
-          <Icon name={icon} size={100} color={"#000"} />
-          <View
-            style={{
-              flexDirection: "column",
-              justifyContent: "center",
-              marginLeft: 10,
-            }}
-          >
-            <View style={{ flexDirection: "row" }}>
-              <Text style={{ ...styles.txt, fontWeight: "bold" }}>
-                Tên thiết bị:{" "}
-              </Text>
-              <Text style={styles.txt}>{name}</Text>
-            </View>
-            <View style={{ flexDirection: "row" }}>
-              <Text style={{ ...styles.txt, fontWeight: "bold" }}>
-                Tên thiết bị:{" "}
-              </Text>
-              <Text style={styles.txt}>NaN</Text>
-            </View>
-            <View style={{ flexDirection: "row" }}>
-              <Text style={{ ...styles.txt, fontWeight: "bold" }}>
-                Phòng ban:{" "}
-              </Text>
-              <Text style={styles.txt}>NaN</Text>
-            </View>
+    <View style={styles.container}>
+      <View style={styles.card}>
+        <View style={styles.header}>
+          <Icon name={icon} size={100} color="#000" />
+          <View style={styles.headerText}>
+            <Text style={styles.title}>Tên thiết bị:</Text>
+            <Text style={styles.text}>{name}</Text>
+            <Text style={styles.title}>Trạng thái:</Text>
+            <Text style={styles.text}>{status}</Text>
           </View>
         </View>
-        <View
-          style={{
-            flexDirection: "column",
-            padding: 10,
-          }}
-        >
-          <View style={{ flexDirection: "row" }}>
-            <Text style={{ ...styles.txt, fontWeight: "bold" }}>
-              Kiểu thiết bị:{" "}
-            </Text>
-            <Text style={styles.txt}>NaN</Text>
-          </View>
-
-          <View style={{ flexDirection: "row" }}>
-            <Text style={{ ...styles.txt, fontWeight: "bold" }}>
-              Loại tài sản:{" "}
-            </Text>
-            <Text style={styles.txt}>NaN</Text>
-          </View>
-
-          <View style={{ flexDirection: "row" }}>
-            <Text style={{ ...styles.txt, fontWeight: "bold" }}>
-              Thương hiệu:{" "}
-            </Text>
-
-            <Text style={styles.txt}>NaN</Text>
-          </View>
-
-          <View style={{ flexDirection: "row" }}>
-            <Text style={{ ...styles.txt, fontWeight: "bold" }}>Mẫu: </Text>
-            <Text style={styles.txt}>NaN</Text>
-          </View>
-
-          <View style={{ flexDirection: "row" }}>
-            <Text style={{ ...styles.txt, fontWeight: "bold" }}>
-              Nhà cung cấp:{" "}
-            </Text>
-            <Text style={styles.txt}>NaN</Text>
-          </View>
-
-          <View style={{ flexDirection: "row" }}>
-            <Text style={{ ...styles.txt, fontWeight: "bold" }}>Giá: </Text>
-            <Text style={styles.txt}>NaN</Text>
-          </View>
-
-          <View style={{ flexDirection: "row" }}>
-            <Text style={{ ...styles.txt, fontWeight: "bold" }}>
-              Ngày mua:{" "}
-            </Text>
-            <Text style={styles.txt}>NaN</Text>
-          </View>
-
-          <View style={{ flexDirection: "row" }}>
-            <Text style={{ ...styles.txt, fontWeight: "bold" }}>
-              Thời hạn bảo hành:{" "}
-            </Text>
-            <Text style={styles.txt}>NaN</Text>
-          </View>
-
-          <View style={{ flexDirection: "row" }}>
-            <Text style={{ ...styles.txt, fontWeight: "bold" }}>
-              Trạng thái hoạt động:{" "}
-            </Text>
-            <Text style={styles.txt}>{status}</Text>
-          </View>
-
-          <View style={{ flexDirection: "row" }}>
-            <Text style={{ ...styles.txt, fontWeight: "bold" }}>
-              Ngày đưa vào sử dụng:{" "}
-            </Text>
-            <Text style={styles.txt}>NaN</Text>
-          </View>
+        <View style={styles.details}>
+          <Text style={styles.detailText}>Kiểu thiết bị: {type}</Text>
+          <Text style={styles.detailText}>Loại tài sản: {assetType}</Text>
+          <Text style={styles.detailText}>Thương hiệu: {brand}</Text>
+          <Text style={styles.detailText}>Mẫu: {model}</Text>
+          <Text style={styles.detailText}>Nhà cung cấp: {supplier}</Text>
+          <Text style={styles.detailText}>Giá: {price}</Text>
+          <Text style={styles.detailText}>Ngày mua: {purchaseDate}</Text>
+          <Text style={styles.detailText}>Thời hạn bảo hành: {warrantyPeriod}</Text>
+          <Text style={styles.detailText}>Trạng thái hoạt động: {operationalStatus}</Text>
+          <Text style={styles.detailText}>Ngày đưa vào sử dụng: {deploymentDate}</Text>
         </View>
       </View>
-      <View style={{ alignItems: "center" }}>
-        <Button style={{ backgroundColor: "orange", ...styles.btn }}>
-          <Text style={styles.txt}>Báo cáo</Text>
+      <View style={styles.buttonContainer}>
+        <Button
+          mode="contained"
+          style={[styles.button, { backgroundColor: "orange" }]}
+          onPress={() => navigation.navigate('ReportDevice', { id })}
+        >
+          Báo cáo
         </Button>
-        <Button style={{ backgroundColor: "#1FD2BD", ...styles.btn }}>
-          <Text style={styles.txt}>Chỉnh sửa</Text>
+        <Button
+          mode="contained"
+          style={[styles.button, { backgroundColor: "#1FD2BD" }]}
+          onPress={() => navigation.navigate('EditDevice', { id })}
+        >
+          Chỉnh sửa
         </Button>
-        <Button style={{ backgroundColor: "red", ...styles.btn }}>
-          <Text style={styles.txt}>Xóa</Text>
+        <Button
+          mode="contained"
+          style={[styles.button, { backgroundColor: "red" }]}
+          onPress={handleDeleteDevice}
+        >
+          Xóa
         </Button>
       </View>
     </View>
   );
 };
 
-export default DevicesDetail;
-
 const styles = StyleSheet.create({
-  txt: {
-    color: "#000",
-    fontSize: 17,
+  container: {
+    flex: 1,
+    backgroundColor: "#FFF",
+    padding: 20,
   },
-
-  btn: {
+  card: {
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#000",
+    marginBottom: 20,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+  },
+  headerText: {
+    marginLeft: 10,
+  },
+  title: {
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  text: {
+    fontSize: 16,
+    marginBottom: 5,
+  },
+  details: {
+    padding: 10,
+  },
+  detailText: {
+    fontSize: 16,
+    marginBottom: 5,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginTop: 20,
+  },
+  button: {
     borderRadius: 5,
-    width: 200,
+    width: 120,
     marginBottom: 10,
   },
 });
+
+export default DeviceDetail;

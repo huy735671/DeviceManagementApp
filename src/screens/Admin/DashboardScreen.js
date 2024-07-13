@@ -5,12 +5,10 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  Dimensions,
   FlatList,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import * as Animatable from 'react-native-animatable';
-import { useMyContextController } from "../../context";
 import firestore from '@react-native-firebase/firestore';
 
 const DashboardScreen = ({ navigation }) => {
@@ -20,8 +18,6 @@ const DashboardScreen = ({ navigation }) => {
   const [employees, setEmployees] = useState([]);
   const [rooms, setRooms] = useState([]);
   const [maintenance, setMaintenance] = useState([]);
-  const [controller, dispatch] = useMyContextController();
-  const { userLogin } = controller;
 
   useEffect(() => {
     const unsubscribeDevices = firestore()
@@ -83,20 +79,6 @@ const DashboardScreen = ({ navigation }) => {
     setSelectedFeatureId(featureId);
   };
 
-  const renderItem = ({ item }) => {
-    return (
-      <Animatable.View animation='zoomIn' style={styles.itemContainer}>
-        <TouchableOpacity
-          style={styles.btnFearture}
-          onPress={() => handleFeaturePress(item.id)}
-        >
-          <Icon name={item.icon} size={40} color={"#000"} />
-        </TouchableOpacity>
-        <Text style={styles.txtFearture}>{item.title}</Text>
-      </Animatable.View>  
-    );
-  };
-
   const handleDetailPress = (item) => {
     if (item.featureId === "1") {
       navigation.navigate("DevicesDetail", {
@@ -129,23 +111,14 @@ const DashboardScreen = ({ navigation }) => {
           onPress={() => handleDetailPress(item)}
         >
           <Icon name={item.icon} size={40} color={"#000"} />
-          {/* Handle status display based on your item properties */}
           <Text style={styles.txtFearture}>{item.name}</Text>
         </TouchableOpacity>
       </Animatable.View>
     );
   };
 
-  const renderStatistics = () => {
-    // Implement your statistics display logic here
-    return (
-      <View>
-        {/* Example statistics display */}
-        <Text>Total employees: {employees.length}</Text>
-        <Text>Total devices: {devices.length}</Text>
-        <Text>Total rooms: {rooms.length}</Text>
-      </View>
-    );
+  const deleteDeviceFromState = (deviceId) => {
+    setDevices(prevDevices => prevDevices.filter(device => device.id !== deviceId));
   };
 
   const filteredData = [
@@ -157,8 +130,7 @@ const DashboardScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      {/* Add your header if needed */}
-      <Text style={styles.txt}>Các chức năng quản lí</Text>
+      <Text style={styles.txt}>Các chức năng quản lý</Text>
       <ScrollView
         horizontal
         contentContainerStyle={styles.scrollViewContent}
@@ -187,15 +159,13 @@ const DashboardScreen = ({ navigation }) => {
         keyExtractor={(item) => item.id}
         numColumns={numColumns}
       />
-
-      {selectedFeatureId === "5" && renderStatistics()}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex:1,
+    flex: 1,
     backgroundColor: "#FFF",
     paddingHorizontal: 10,
   },
@@ -207,7 +177,6 @@ const styles = StyleSheet.create({
   },
   scrollViewContent: {
     flexDirection: "row",
-   // alignItems: "center",
     paddingVertical: 10,
   },
   itemContainer: {
@@ -226,7 +195,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   items: {
-   flex: 1,
+    flex: 1,
     margin: 10,
     padding: 10,
     backgroundColor: "#f9f9f9",
