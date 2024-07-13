@@ -93,7 +93,7 @@ const DashboardScreen = ({ navigation }) => {
           <Icon name={item.icon} size={40} color={"#000"} />
         </TouchableOpacity>
         <Text style={styles.txtFearture}>{item.title}</Text>
-      </Animatable.View>
+      </Animatable.View>  
     );
   };
 
@@ -195,7 +195,7 @@ const DashboardScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
-    
+    flex:1,
     backgroundColor: "#FFF",
     paddingHorizontal: 10,
   },
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
   },
   scrollViewContent: {
     flexDirection: "row",
-    alignItems: "center",
+   // alignItems: "center",
     paddingVertical: 10,
   },
   itemContainer: {
@@ -226,14 +226,17 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   items: {
-    flexDirection: "row",
-    marginTop: 20,
+   flex: 1,
+    margin: 10,
+    padding: 10,
+    backgroundColor: "#f9f9f9",
+    borderRadius: 10,
+    alignItems: "center",
+    elevation: 3,
   },
   btn4FlstUnder: {
     borderRadius: 10,
-    borderWidth: 2,
     padding: 10,
-    marginTop: 10,
     flexDirection: "row",
     alignItems: "center",
   },

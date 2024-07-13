@@ -4,25 +4,28 @@ import { Button } from "react-native-paper";
 
 const AddScreen = ({ navigation }) => {
   return (
-    <View
-      style={{
-        flex: 1,
-
-        backgroundColor: "#FFF",
-      }}
-    >
-      <View style={{ alignItems: "center", padding: 30 }}>
-        <Button
-          style={{ backgroundColor: "#1FD2BD", ...styles.btn }}
-          onPress={() => navigation.navigate("AddEmployee")}
+    <View style={styles.container}>
+      <View style={styles.buttonContainer}>
+      <Button
+          mode="contained"
+          style={styles.btn}
+          onPress={() => navigation.navigate("AddRoom")}
         >
-          <Text style={styles.txt}>Thêm nhân viên</Text>
+          <Text style={styles.btnText}>Thêm phòng ban</Text>
         </Button>
         <Button
-          style={{ backgroundColor: "#1FD2BD", ...styles.btn }}
+          mode="contained"
+          style={styles.btn}
+          onPress={() => navigation.navigate("AddEmployee")}
+        >
+          <Text style={styles.btnText}>Thêm nhân viên</Text>
+        </Button>
+        <Button
+          mode="contained"
+          style={styles.btn}
           onPress={() => navigation.navigate("AddDevice")}
         >
-          <Text style={styles.txt}>Thêm thiết bị</Text>
+          <Text style={styles.btnText}>Thêm thiết bị</Text>
         </Button>
       </View>
     </View>
@@ -32,32 +35,32 @@ const AddScreen = ({ navigation }) => {
 export default AddScreen;
 
 const styles = StyleSheet.create({
-  boder4Info: {
-    borderRadius: 30,
-    borderWidth: 1,
-    marginHorizontal: 10,
-    margin: 10,
+  container: {
+    flex: 1,
+    backgroundColor: "#FFF",
+    justifyContent: "center",
+    alignItems: "center",
   },
-
-  txt: {
-    color: "#000",
-    fontSize: 18,
+  buttonContainer: {
+    alignItems: "center",
+    padding: 30,
   },
-
   btn: {
-    borderRadius: 5,
+    backgroundColor: "#1FD2BD",
+    borderRadius: 25,
     width: 200,
-    marginBottom: 10,
+    marginBottom: 20,
+    elevation: 3, // Adds shadow on Android
+    shadowColor: "#000", // Adds shadow on iOS
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
-
-  txtInput: {
-    marginBottom: 15,
-    backgroundColor: null,
-    borderRadius: 10,
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
-    height: 40,
-    width: "65%",
-    borderWidth: 1,
+  btnText: {
+    color: "#FFF",
+    fontSize: 18,
   },
 });

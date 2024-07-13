@@ -21,6 +21,7 @@ import DashboardScreen from '../screens/Admin/DashboardScreen';
 import HomeScreen from '../screens/User/HomeScreen';
 import AdminTab from './AdminTab';
 import UserTab from './UserTab';
+import AddRoom from '../screens/Admin/AddRoom';
 
 const Stack = createNativeStackNavigator();
 
@@ -39,6 +40,7 @@ const StackNavigation = () => {
       <Stack.Screen name='Dashboard' component={DashboardScreen} options={{ headerShown: false }} />
       <Stack.Screen name='RoomList' component={RoomList} options={{ headerShown: false }} />
       <Stack.Screen name='Home' component={HomeScreen} options={{ headerShown: false }} />
+      <Stack.Screen name='AddRoom' component={AddRoom} options={{ headerShown: false }} />
       <Stack.Screen
         name="AddDevice"
         component={AddDeviceScreen}
