@@ -66,14 +66,29 @@ const AddDeviceScreen = ({ navigation }) => {
   }, [warrantyPeriod, datetime]);
 
   const handleSaveDevice = async () => {
-    if (selectedRoom && name && id && deviceType && price && warrantyPeriod && operationalStatus) {
+    if (
+      selectedRoom &&
+      name &&
+      id &&
+      deviceType &&
+      price &&
+      warrantyPeriod &&
+      operationalStatus &&
+      selectedIcon
+    ) {
       const warrantyEndDate = new Date(datetime);
       warrantyEndDate.setMonth(warrantyEndDate.getMonth() + parseInt(warrantyPeriod, 10));
 
       try {
+        // Fetch the count of existing documents to determine the new ID
+        const devicesRef = await firestore().collection('DEVICES').get();
+        const newId = devicesRef.size + 1; // Calculate the new ID
+
+        // Add the device with the custom ID
         const deviceRef = await firestore()
           .collection('DEVICES')
-          .add({
+          .doc(newId.toString()) // Convert the ID to string before setting as document ID
+          .set({
             name,
             id,
             deviceType,
@@ -84,12 +99,12 @@ const AddDeviceScreen = ({ navigation }) => {
             supplier,
             brand,
             operationalStatus,
-            deploymentDate,
+            deploymentDate: deploymentDate.toISOString(), // Save deploymentDate as ISO string
             icon: selectedIcon,
           });
 
         const newDevice = {
-          id: deviceRef.id,
+          id: newId.toString(), // Convert ID back to string for consistency
           name,
           icon: selectedIcon,
           status: operationalStatus,
@@ -250,86 +265,105 @@ const AddDeviceScreen = ({ navigation }) => {
         </View>
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Trạng thái hoạt động:</Text>
-          <View style={styles.dropdownContainer}>
-            {statusOptions.map((option) => (
+          <Text style={styles.label}>Tình trạng hoạt động:</Text>
+          <FlatList
+            data={statusOptions}
+            renderItem={({ item }) => (
               <TouchableOpacity
-                key={option.value}
                 style={[
                   styles.statusOption,
-                  operationalStatus === option.value && styles.selectedStatusOption,
+                  operationalStatus === item.value && styles.selectedStatus,
                 ]}
-                onPress={() => setOperationalStatus(option.value)}
+                onPress={() => setOperationalStatus(item.value)}
               >
-                <Text style={styles.statusOptionLabel}>{option.label}</Text>
+                <Text style={styles.statusOptionText}>{item.label}</Text>
               </TouchableOpacity>
-            ))}
-          </View>
+            )}
+            keyExtractor={(item) => item.value}
+            horizontal={true}
+            showsHorizontalScrollIndicator={false}
+          />
         </View>
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Ngày đưa vào sử dụng:</Text>
-          <TouchableOpacity style={styles.datePickerButton} onPress={() => setOpen(true)}>
-            <Text style={{ fontSize: 16, color: "#000" }}>{deploymentDate.toLocaleDateString()}</Text>
+          <Text style={styles.label}>Ngày triển khai:</Text>
+          <TouchableOpacity
+            style={styles.datePickerButton}
+            onPress={() => setOpen(true)}
+          >
+            <Text style={{ fontSize: 16, color: "#000" }}>
+              {deploymentDate.toLocaleDateString()}
+            </Text>
           </TouchableOpacity>
         </View>
 
-        <Button
-          mode="contained"
-          onPress={handleSaveDevice}
-          style={[styles.button, { backgroundColor: "#1FD2BD" }]}
-        >
+        <Button mode="contained" onPress={handleSaveDevice} style={styles.saveButton}>
           Lưu thiết bị
         </Button>
+
+        {/* Modal for selecting room */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <Text style={styles.modalTitle}>Chọn phòng ban</Text>
+              <FlatList
+                data={rooms}
+                renderItem={renderRoomItem}
+                keyExtractor={(item) => item.id}
+                style={styles.roomList}
+              />
+              <Button onPress={() => setModalVisible(false)}>Đóng</Button>
+            </View>
+          </View>
+        </Modal>
+
+        {/* Modal for selecting icon */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={iconModalVisible}
+          onRequestClose={() => setIconModalVisible(false)}
+        >
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <Text style={styles.modalTitle}>Chọn biểu tượng</Text>
+              <FlatList
+                data={icons}
+                renderItem={renderIconItem}
+                keyExtractor={(item) => item}
+                numColumns={4}
+                style={styles.iconList}
+              />
+              <Button onPress={() => setIconModalVisible(false)}>Đóng</Button>
+            </View>
+          </View>
+        </Modal>
+
+        {/* Date picker */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={open}
+          onRequestClose={() => setOpen(false)}
+        >
+          <View style={styles.centeredView}>
+            <View style={styles.datePickerModal}>
+              <DatePicker
+                date={datetime}
+                onDateChange={setDatetime}
+                mode="date"
+                textColor="#000"
+              />
+              <Button onPress={() => setOpen(false)}>Đóng</Button>
+            </View>
+          </View>
+        </Modal>
       </View>
-
-      <DatePicker
-        modal
-        open={open}
-        date={datetime}
-        mode={"date"}
-        title={"Chọn ngày mua"}
-        confirmText={"Xác nhận"}
-        cancelText={"Hủy"}
-        onConfirm={(date) => {
-          setOpen(false);
-          setDatetime(date);
-        }}
-        onCancel={() => {
-          setOpen(false);
-        }}
-      />
-
-      <Modal
-        visible={modalVisible}
-        animationType="slide"
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <Text style={styles.modalTitle}>Chọn phòng ban</Text>
-          <FlatList
-            data={rooms}
-            renderItem={renderRoomItem}
-            keyExtractor={(item) => item.id}
-          />
-        </View>
-      </Modal>
-
-      <Modal
-        visible={iconModalVisible}
-        animationType="slide"
-        onRequestClose={() => setIconModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <Text style={styles.modalTitle}>Chọn biểu tượng</Text>
-          <FlatList
-            data={icons}
-            renderItem={renderIconItem}
-            keyExtractor={(item, index) => index.toString()}
-            numColumns={4}
-          />
-        </View>
-      </Modal>
     </ScrollView>
   );
 };
@@ -337,101 +371,144 @@ const AddDeviceScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFF",
-    padding: 20,
+    backgroundColor: '#fff',
+    padding: 10,
   },
   content: {
     flex: 1,
+    padding: 10,
+  },
+  iconContainer: {
+    alignItems: 'center',
+    marginTop: 20,
+    marginBottom: 20,
   },
   inputContainer: {
-    marginBottom: 20,
+    marginBottom: 10,
   },
   label: {
     fontSize: 16,
+    fontWeight: 'bold',
     marginBottom: 5,
   },
   input: {
-    backgroundColor: "#FFF",
     height: 40,
     borderWidth: 1,
-    borderColor: "#DDD",
-    paddingHorizontal: 10,
+    borderColor: '#ccc',
     borderRadius: 5,
-  },
-  dropdownContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-  },
-  statusOption: {
-    padding: 10,
-    backgroundColor: "#EEE",
-    borderRadius: 5,
-    marginRight: 10,
-    marginBottom: 10,
-  },
-  selectedStatusOption: {
-    backgroundColor: "#1FD2BD",
-  },
-  statusOptionLabel: {
-    fontSize: 14,
-  },
-  button: {
-    borderRadius: 5,
-    marginBottom: 20,
-    width: 120,
-    alignSelf: 'center',
-  },
-  remainingTime: {
-    fontSize: 14,
-    color: "#FF0000",
-    marginTop: 5,
-  },
-  datePickerButton: {
-    height: 40,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#EEE",
-    borderRadius: 5,
+    paddingLeft: 10,
   },
   roomInput: {
     height: 40,
-    justifyContent: "center",
-    paddingHorizontal: 10,
-    backgroundColor: "#EEE",
+    borderWidth: 1,
+    borderColor: '#ccc',
     borderRadius: 5,
+    justifyContent: 'center',
+    paddingLeft: 10,
   },
   roomText: {
     fontSize: 16,
-  },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: "#FFF",
-    padding: 20,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 10,
+    color: '#000',
   },
   roomItem: {
     padding: 10,
-    backgroundColor: "#EEE",
-    borderRadius: 5,
-    marginBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
   },
   roomItemText: {
     fontSize: 16,
+    color: '#000',
   },
-  iconContainer: {
-    justifyContent: "center",
-    alignItems: "center",
+  datePickerButton: {
+    height: 40,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 5,
+  },
+  saveButton: {
+    marginTop: 20,
     marginBottom: 20,
   },
-  iconItem: {
-    padding: 10,
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalView: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    width: '80%',
+    maxHeight: '80%',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
     marginBottom: 10,
-    justifyContent: "center",
-    alignItems: "center",
+  },
+  roomList: {
+    maxHeight: 300,
+    marginBottom: 10,
+  },
+  datePickerModal: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  statusOption: {
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    marginRight: 10,
+  },
+  selectedStatus: {
+    backgroundColor: '#007bff',
+    borderColor: '#007bff',
+  },
+  statusOptionText: {
+    fontSize: 16,
+    color: '#000',
+  },
+  remainingTime: {
+    marginTop: 5,
+    fontSize: 12,
+    color: 'green',
+  },
+  iconList: {
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  iconItem: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: 5,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    borderWidth: 1,
+    borderColor: '#ccc',
   },
 });
 

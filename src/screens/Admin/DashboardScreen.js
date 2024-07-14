@@ -27,7 +27,7 @@ const DashboardScreen = ({ navigation }) => {
           id: doc.id,
           ...doc.data(),
           featureId: "1", // Example: Assign featureId based on document type
-          icon: "computer", // Example: Assign icon based on document type
+          icon: doc.data().icon, // Assume icon field exists in your Firestore document
         }));
         setDevices(devicesData);
       });
@@ -39,7 +39,7 @@ const DashboardScreen = ({ navigation }) => {
           id: doc.id,
           ...doc.data(),
           featureId: "2", // Example: Assign featureId based on document type
-          icon: "person", // Example: Assign icon based on document type
+          icon: doc.data().icon, // Assume icon field exists in your Firestore document
         }));
         setEmployees(employeesData);
       });
@@ -51,7 +51,7 @@ const DashboardScreen = ({ navigation }) => {
           id: doc.id,
           ...doc.data(),
           featureId: "3", // Example: Assign featureId based on document type
-          icon: "groups", // Example: Assign icon based on document type
+          icon: doc.data().icon, // Assume icon field exists in your Firestore document
         }));
         setRooms(roomsData);
       });
