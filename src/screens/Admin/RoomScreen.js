@@ -24,18 +24,31 @@ const RoomScreen = ({ navigation, route }) => {
 
   const handleDetailPress = (item) => {
     navigation.navigate('DevicesDetail', {
+      id: item.id,
       icon: item.icon,
       name: item.name,
-      status: item.status,
+      status: item.operationalStatus, // Sử dụng đúng tên trường
+      type: item.deviceType,
+      assetType: item.assetType,
+      brand: item.brand,
+      model: item.model,
+      supplier: item.supplier,
+      price: item.price,
+      purchaseDate: item.datetime, // Sử dụng đúng tên trường
+      warrantyPeriod: item.warrantyEndDate, // Sử dụng đúng tên trường
+      operationalStatus: item.operationalStatus,
+      deploymentDate: item.deploymentDate,
     });
   };
+  
+  
 
   const renderItem = ({ item }) => (
     <TouchableOpacity style={styles.itemContainer} onPress={() => handleDetailPress(item)}>
       <Icon name={item.icon} size={60} color="#000" />
       <View style={{ marginLeft: 20 }}>
         <Text style={styles.txtFeature}>Tên thiết bị: {item.name}</Text>
-        <Text style={styles.txtFeature}>Trạng thái: {item.status}</Text>
+        <Text style={styles.txtFeature}>Trạng thái: {item.operationalStatus}</Text>
       </View>
     </TouchableOpacity>
   );
