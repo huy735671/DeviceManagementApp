@@ -12,9 +12,7 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF' }}>
-     {/* <Header leftComponent={  <Text style={{fontSize:25,fontWeight:'bold',color:'white'}}>
-          Welcome Home, {userLogin.username}
-        </Text>} containerStyle ={style.header}/> */}
+    
       <ScrollView>
         <Devices style={style.Devices} />
         <RoomList />

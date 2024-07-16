@@ -10,7 +10,7 @@ const EmployeeDetail = ({ route }) => {
     <View style={styles.container}>
       <View style={styles.borderInfo}>
         <View style={styles.iconContainer}>
-          <Icon name={"account-circle"} size={200} color={"#000"} />
+          <Icon name="account-circle" size={200} color="#000" />
         </View>
         <View style={styles.infoContainer}>
           <View style={styles.row}>
@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
   },
   value: {
     flex: 2,
-    fontSize: 18, 
+    fontSize: 18,
     color: "#333",
   },
   buttonContainer: {

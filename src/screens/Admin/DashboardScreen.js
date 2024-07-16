@@ -88,10 +88,13 @@ const DashboardScreen = ({ navigation }) => {
       });
     }
     if (item.featureId === "2") {
-      navigation.navigate("EmployeeDetail", {
+      navigation.navigate('EmployeeDetail', {
         name: item.name,
+        employeeId: item.id,
+        department: item.roomId, // Assuming roomId is used as department
+        phoneNumber: item.numPhone,
       });
-    }
+    };
     if (item.featureId === "3") {
       navigation.navigate("RoomScreen", { roomId: item.id, roomName: item.name });
     }

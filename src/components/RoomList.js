@@ -16,7 +16,13 @@ const RoomList = () => {
           id: doc.id,
           ...doc.data(),
         }));
-        setRooms(roomsData);
+        
+        // Sắp xếp danh sách rooms
+        const sortedRooms = roomsData.sort((a, b) => {
+          const statusOrder = ["Maintenance", "Broken", "Normal"];
+          return statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status);
+        });
+        setRooms(sortedRooms);
       });
 
     return () => unsubscribe();

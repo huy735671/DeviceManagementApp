@@ -10,7 +10,7 @@ const RoomScreen = ({ navigation, route }) => {
   useEffect(() => {
     const unsubscribe = firestore()
       .collection('DEVICES')
-      .where('roomId', '==', roomId) // Filter devices by roomId
+      .where('roomId', '==', roomId) 
       .onSnapshot(querySnapshot => {
         const devicesData = querySnapshot.docs.map(doc => ({
           id: doc.id,
@@ -27,15 +27,15 @@ const RoomScreen = ({ navigation, route }) => {
       id: item.id,
       icon: item.icon,
       name: item.name,
-      status: item.operationalStatus, // Sử dụng đúng tên trường
+      status: item.operationalStatus, 
       type: item.deviceType,
       assetType: item.assetType,
       brand: item.brand,
       model: item.model,
       supplier: item.supplier,
       price: item.price,
-      purchaseDate: item.datetime, // Sử dụng đúng tên trường
-      warrantyPeriod: item.warrantyEndDate, // Sử dụng đúng tên trường
+      purchaseDate: item.datetime, 
+      warrantyPeriod: item.warrantyEndDate, 
       operationalStatus: item.operationalStatus,
       deploymentDate: item.deploymentDate,
     });
