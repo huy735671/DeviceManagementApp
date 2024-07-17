@@ -6,24 +6,17 @@ import DatePicker from 'react-native-date-picker';
 import firestore from '@react-native-firebase/firestore';
 
 const EditDeviceScreen = ({ route, navigation }) => {
+  const { deviceId } = route.params;
   const { id } = route.params;
-  
-  const [name, setName] = useState('');
-  const [selectedRoom, setSelectedRoom] = useState(null);
-  const [deviceType, setDeviceType] = useState('');
-  const [datetime, setDatetime] = useState(new Date());
-  const [open, setOpen] = useState(false);
+  const [device, setDevice] = useState(null);
+  const [price, setPrice] = useState([]);
   const [rooms, setRooms] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
-  const [warrantyPeriod, setWarrantyPeriod] = useState('');
-  const [remainingTime, setRemainingTime] = useState('');
-  const [price, setPrice] = useState('');
-  const [supplier, setSupplier] = useState('');
-  const [brand, setBrand] = useState('');
-  const [operationalStatus, setOperationalStatus] = useState('');
-  const [deploymentDate, setDeploymentDate] = useState(new Date());
-  const [selectedIcon, setSelectedIcon] = useState('');
   const [iconModalVisible, setIconModalVisible] = useState(false);
+  const [error, setError] = useState(null);
+  const [isDataReady, setIsDataReady] = useState(false);
+  const [isSpecificDevice, setIsSpecificDevice] = useState(false);
+
   const [icons, setIcons] = useState([
     'laptop',
     'phone-android',
@@ -40,102 +33,82 @@ const EditDeviceScreen = ({ route, navigation }) => {
     { label: 'Bảo trì', value: 'maintenance' },
   ];
 
+  const [datePickerVisible, setDatePickerVisible] = useState(false);
+  const [datePickerMode, setDatePickerMode] = useState('datetime');
+  const [selectedDateField, setSelectedDateField] = useState(null);
+
   useEffect(() => {
+    const fetchDevice = async () => {
+      const deviceDoc = await firestore().collection('DEVICES').doc(id).get();
+      const deviceData = deviceDoc.data();
+      setDevice({
+        id: deviceDoc.id,
+        ...deviceData,
+        datetime: deviceData?.datetime?.toDate() || new Date(),
+        deploymentDate: deviceData?.deploymentDate?.toDate() || new Date(),
+      });
+    };
+
     const fetchRooms = async () => {
       const roomsCollection = await firestore().collection('ROOMS').get();
       setRooms(roomsCollection.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     };
 
-    fetchRooms();
-  }, []);
-
-  useEffect(() => {
-    const fetchDevice = async () => {
-      try {
-        const deviceDoc = await firestore().collection('DEVICES').doc(id).get();
-        if (deviceDoc.exists) {
-          const deviceData = deviceDoc.data();
-          setName(deviceData.name);
-          setDeviceType(deviceData.deviceType);
-          setDatetime(new Date(deviceData.datetime.seconds * 1000));
-          setWarrantyPeriod(deviceData.warrantyPeriod.toString());
-          setPrice(deviceData.price.toString());
-          setSupplier(deviceData.supplier);
-          setBrand(deviceData.brand);
-          setOperationalStatus(deviceData.operationalStatus);
-          setDeploymentDate(new Date(deviceData.deploymentDate.seconds * 1000));
-          setSelectedIcon(deviceData.icon);
-          // Fetch selected room information
-          const roomDoc = await firestore().collection('ROOMS').doc(deviceData.roomId).get();
-          if (roomDoc.exists) {
-            setSelectedRoom({ id: roomDoc.id, ...roomDoc.data() });
-          }
-        } else {
-          console.error('Thiết bị không tồn tại trong Firestore');
-        }
-      } catch (error) {
-        console.error('Lỗi khi lấy dữ liệu thiết bị:', error);
-      }
-    };
-
     fetchDevice();
-  }, [id]);
-
-  useEffect(() => {
-    if (warrantyPeriod) {
-      const currentDate = new Date();
-      const warrantyEndDate = new Date(datetime);
-      warrantyEndDate.setMonth(warrantyEndDate.getMonth() + parseInt(warrantyPeriod, 10));
-
-      const timeDifference = warrantyEndDate.getTime() - currentDate.getTime();
-      const daysDifference = Math.ceil(timeDifference / (1000 * 3600 * 24));
-
-      if (daysDifference > 0) {
-        setRemainingTime(`Còn ${daysDifference} ngày bảo hành`);
-      } else {
-        setRemainingTime('Hết hạn bảo hành');
-      }
-    }
-  }, [warrantyPeriod, datetime]);
+    fetchRooms();
+  }, [deviceId]);
 
   const handleSaveDevice = async () => {
-    if (selectedRoom && name && deviceType && price && warrantyPeriod && operationalStatus) {
-      const warrantyEndDate = new Date(datetime);
-      warrantyEndDate.setMonth(warrantyEndDate.getMonth() + parseInt(warrantyPeriod, 10));
-
+    if (device.selectedRoom && device.name && device.deviceType && device.warrantyPeriod && device.operationalStatus && device.selectedIcon) {
+      let numericPrice = 0;
+      if (device.price) {
+        if (typeof device.price === 'string') {
+          numericPrice = parseInt(device.price.replace(/\./g, ''), 10);
+        } else {
+          numericPrice = parseInt(device.price, 10);
+        }
+      }
+  
+      const warrantyEndDate = new Date(device.datetime);
+      warrantyEndDate.setMonth(warrantyEndDate.getMonth() + parseInt(device.warrantyPeriod, 10));
+  
       try {
-        await firestore()
-          .collection('DEVICES')
-          .doc(id)
-          .update({
-            name,
-            deviceType,
-            price: parseInt(price.replace(/\./g, ''), 10),
-            datetime,
-            warrantyEndDate,
-            roomId: selectedRoom.id,
-            supplier,
-            brand,
-            operationalStatus,
-            deploymentDate,
-            icon: selectedIcon,
-          });
-
-        console.log('Thông tin thiết bị đã được cập nhật thành công trong Firestore');
-        navigation.goBack(); // or navigate to another screen after update
+        await firestore().collection('DEVICES').doc(id).update({
+          name: device.name,
+          id: id,
+          deviceType: device.deviceType,
+          price: numericPrice,
+          datetime: device.datetime,
+          warrantyEndDate,
+          roomId: device.selectedRoom.id,
+          supplier: device.supplier,
+          brand: device.brand,
+          operationalStatus: device.operationalStatus,
+          deploymentDate: device.deploymentDate,
+          icon: device.selectedIcon,
+        });
+  
+        navigation.navigate('AdminTab'); // Navigate back to the admin screen or device list
       } catch (error) {
-        console.error('Lỗi khi cập nhật thiết bị:', error);
+        console.error('Lỗi khi lưu thiết bị:', error);
       }
     } else {
       console.log('Vui lòng điền đầy đủ thông tin');
     }
   };
+  
+
+  
+  
 
   const renderRoomItem = ({ item }) => (
     <TouchableOpacity
       style={styles.roomItem}
       onPress={() => {
-        setSelectedRoom(item);
+        setDevice(prevDevice => ({
+          ...prevDevice,
+          selectedRoom: item
+        }));
         setModalVisible(false);
       }}
     >
@@ -147,7 +120,10 @@ const EditDeviceScreen = ({ route, navigation }) => {
     <TouchableOpacity
       style={styles.iconItem}
       onPress={() => {
-        setSelectedIcon(item);
+        setDevice(prevDevice => ({
+          ...prevDevice,
+          selectedIcon: item
+        }));
         setIconModalVisible(false);
       }}
     >
@@ -162,13 +138,29 @@ const EditDeviceScreen = ({ route, navigation }) => {
     return formattedPrice;
   };
 
+  const handleDateChange = (date) => {
+    setDevice(prevDevice => ({
+      ...prevDevice,
+      [selectedDateField]: date,
+    }));
+    setDatePickerVisible(false);
+  };
+
+  if (!device) {
+    return (
+      <View style={styles.container}>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.content}>
         <View style={styles.iconContainer}>
           <TouchableOpacity onPress={() => setIconModalVisible(true)}>
-            {selectedIcon ? (
-              <Icon name={selectedIcon} size={100} color={"#000"} />
+            {device.selectedIcon ? (
+              <Icon name={device.selectedIcon} size={100} color={"#000"} />
             ) : (
               <Icon name={"account-circle"} size={100} color={"#000"} />
             )}
@@ -179,8 +171,8 @@ const EditDeviceScreen = ({ route, navigation }) => {
           <Text style={styles.label}>Tên thiết bị:</Text>
           <TextInput
             placeholder={"Nhập tên thiết bị"}
-            value={name}
-            onChangeText={setName}
+            value={device.name}
+            onChangeText={(text) => setDevice(prevDevice => ({ ...prevDevice, name: text }))}
             style={styles.input}
           />
         </View>
@@ -189,16 +181,17 @@ const EditDeviceScreen = ({ route, navigation }) => {
           <Text style={styles.label}>Số series:</Text>
           <TextInput
             placeholder={"Nhập số series"}
-            value={id}
-            editable={false} // Disable editing ID for edit screen
+            value={device.id}
+            onChangeText={(text) => setDevice(prevDevice => ({ ...prevDevice, id: text }))}
             style={styles.input}
+            editable={device.name !== "specificDeviceName"} // Prevent editing if it's a specific device
           />
         </View>
 
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Phòng ban:</Text>
           <TouchableOpacity style={styles.roomInput} onPress={() => setModalVisible(true)}>
-            <Text style={styles.roomText}>{selectedRoom ? selectedRoom.name : 'Chọn phòng ban'}</Text>
+            <Text style={styles.roomText}>{device.selectedRoom ? device.selectedRoom.name : 'Chọn phòng ban'}</Text>
           </TouchableOpacity>
         </View>
 
@@ -206,8 +199,8 @@ const EditDeviceScreen = ({ route, navigation }) => {
           <Text style={styles.label}>Kiểu thiết bị:</Text>
           <TextInput
             placeholder={'Nhập kiểu thiết bị'}
-            value={deviceType}
-            onChangeText={setDeviceType}
+            value={device.deviceType}
+            onChangeText={(text) => setDevice(prevDevice => ({ ...prevDevice, deviceType: text }))}
             style={styles.input}
           />
         </View>
@@ -216,10 +209,10 @@ const EditDeviceScreen = ({ route, navigation }) => {
           <Text style={styles.label}>Giá:</Text>
           <TextInput
             placeholder={"Nhập giá"}
-            value={formatPrice(price)}
+            value={formatPrice(device.price)}
             onChangeText={(text) => {
               const formattedText = text.replace(/\D/g, '');
-              setPrice(formattedText);
+              setDevice(prevDevice => ({ ...prevDevice, price: formattedText }));
             }}
             keyboardType="numeric"
             style={styles.input}
@@ -228,8 +221,15 @@ const EditDeviceScreen = ({ route, navigation }) => {
 
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Ngày mua:</Text>
-          <TouchableOpacity style={styles.datePickerButton} onPress={() => setOpen(true)}>
-            <Text style={{ fontSize: 16, color: "#000" }}>{datetime.toLocaleDateString()}</Text>
+          <TouchableOpacity
+            style={styles.datePickerButton}
+            onPress={() => {
+              setDatePickerMode('datetime');
+              setSelectedDateField('datetime');
+              setDatePickerVisible(true);
+            }}
+          >
+            <Text style={{ fontSize: 16, color: "#000" }}>{device.datetime.toLocaleDateString()}</Text>
           </TouchableOpacity>
         </View>
 
@@ -237,20 +237,19 @@ const EditDeviceScreen = ({ route, navigation }) => {
           <Text style={styles.label}>Thời gian bảo hành (tháng):</Text>
           <TextInput
             placeholder={"Nhập thời gian bảo hành"}
-            value={warrantyPeriod}
-            onChangeText={setWarrantyPeriod}
+            value={device.warrantyPeriod}
+            onChangeText={(text) => setDevice(prevDevice => ({ ...prevDevice, warrantyPeriod: text }))}
             keyboardType="numeric"
             style={styles.input}
           />
-          {remainingTime ? <Text style={styles.remainingTime}>{remainingTime}</Text> : null}
         </View>
 
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Nhà cung cấp:</Text>
           <TextInput
             placeholder={"Nhập nhà cung cấp"}
-            value={supplier}
-            onChangeText={setSupplier}
+            value={device.supplier}
+            onChangeText={(text) => setDevice(prevDevice => ({ ...prevDevice, supplier: text }))}
             style={styles.input}
           />
         </View>
@@ -259,128 +258,95 @@ const EditDeviceScreen = ({ route, navigation }) => {
           <Text style={styles.label}>Thương hiệu:</Text>
           <TextInput
             placeholder={"Nhập thương hiệu"}
-            value={brand}
-            onChangeText={setBrand}
+            value={device.brand}
+            onChangeText={(text) => setDevice(prevDevice => ({ ...prevDevice, brand: text }))}
             style={styles.input}
           />
         </View>
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Tình trạng hoạt động:</Text>
-          <FlatList
-            data={statusOptions}
-            renderItem={({ item }) => (
-              <TouchableOpacity
+          <Text style={styles.label}>Trạng thái hoạt động:</Text>
+          {statusOptions.map((status) => (
+            <TouchableOpacity
+              key={status.value}
+              style={[
+                styles.statusOption,
+                device.operationalStatus === status.value && styles.selectedStatusOption,
+              ]}
+              onPress={() => setDevice(prevDevice => ({ ...prevDevice, operationalStatus: status.value }))}
+            >
+              <Text
                 style={[
-                  styles.statusOption,
-                  { backgroundColor: operationalStatus === item.value ? '#4CAF50' : '#DDD' },
+                  styles.statusOptionText,
+                  device.operationalStatus === status.value && styles.selectedStatusOptionText,
                 ]}
-                onPress={() => setOperationalStatus(item.value)}
               >
-                <Text style={styles.statusText}>{item.label}</Text>
-              </TouchableOpacity>
-            )}
-            keyExtractor={(item) => item.value}
-            horizontal={true}
-          />
+                {status.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
         </View>
 
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Ngày triển khai:</Text>
-          <TouchableOpacity style={styles.datePickerButton} onPress={() => setOpen(true)}>
-            <Text style={{ fontSize: 16, color: "#000" }}>{deploymentDate.toLocaleDateString()}</Text>
+          <TouchableOpacity
+            style={styles.datePickerButton}
+            onPress={() => {
+              setDatePickerMode('date');
+              setSelectedDateField('deploymentDate');
+              setDatePickerVisible(true);
+            }}
+          >
+            <Text style={{ fontSize: 16, color: "#000" }}>{device.deploymentDate.toLocaleDateString()}</Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.buttonContainer}>
-          <Button mode="contained" onPress={handleSaveDevice} style={styles.button}>
-            Lưu thay đổi
+          <Button mode="contained" onPress={handleSaveDevice} style={styles.saveButton}>
+            Lưu
           </Button>
         </View>
+
+        <Modal visible={modalVisible} animationType="slide" transparent={true}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <FlatList
+                data={rooms}
+                renderItem={renderRoomItem}
+                keyExtractor={(item) => item.id}
+              />
+              <Button mode="contained" onPress={() => setModalVisible(false)} style={styles.closeButton}>
+                Đóng
+              </Button>
+            </View>
+          </View>
+        </Modal>
+
+        <Modal visible={iconModalVisible} animationType="slide" transparent={true}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <FlatList
+                data={icons}
+                renderItem={renderIconItem}
+                keyExtractor={(item) => item}
+                numColumns={4}
+              />
+              <Button mode="contained" onPress={() => setIconModalVisible(false)} style={styles.closeButton}>
+                Đóng
+              </Button>
+            </View>
+          </View>
+        </Modal>
+
+        <DatePicker
+          modal
+          mode={datePickerMode}
+          open={datePickerVisible}
+          date={device[selectedDateField] || new Date()}
+          onConfirm={handleDateChange}
+          onCancel={() => setDatePickerVisible(false)}
+        />
       </View>
-
-      {/* Room Modal */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(false);
-        }}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <FlatList
-              data={rooms}
-              renderItem={renderRoomItem}
-              keyExtractor={(item) => item.id}
-              style={styles.roomList}
-            />
-            <TouchableOpacity
-              onPress={() => setModalVisible(false)}
-              style={styles.modalCloseButton}
-            >
-              <Text style={styles.modalCloseText}>Đóng</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Icon Modal */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={iconModalVisible}
-        onRequestClose={() => {
-          setIconModalVisible(false);
-        }}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <FlatList
-              data={icons}
-              renderItem={renderIconItem}
-              keyExtractor={(item) => item}
-              numColumns={3}
-              style={styles.iconList}
-            />
-            <TouchableOpacity
-              onPress={() => setIconModalVisible(false)}
-              style={styles.modalCloseButton}
-            >
-              <Text style={styles.modalCloseText}>Đóng</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Date Picker */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={open}
-        onRequestClose={() => setOpen(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <DatePicker
-              date={datetime}
-              onDateChange={setDatetime}
-              mode="date"
-              minimumDate={new Date('2000-01-01')}
-              maximumDate={new Date('2100-12-31')}
-              locale="vi"
-              textColor="#000"
-            />
-            <TouchableOpacity
-              onPress={() => setOpen(false)}
-              style={styles.modalCloseButton}
-            >
-              <Text style={styles.modalCloseText}>Đóng</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </ScrollView>
   );
 };
@@ -388,123 +354,96 @@ const EditDeviceScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF',
-    padding: 10,
+    backgroundColor: '#f5f5f5',
   },
   content: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-  },
-  iconContainer: {
-    alignItems: 'center',
-    marginBottom: 20,
+    padding: 20,
   },
   inputContainer: {
-    marginBottom: 20,
+    marginBottom: 15,
   },
   label: {
     fontSize: 16,
     marginBottom: 5,
-    color: '#000',
+    color: "#000"
   },
   input: {
-    height: 40,
+    backgroundColor: '#fff',
+  },
+  saveButton: {
+    marginTop: 20,
+  },
+  buttonContainer: {
+    alignItems: 'center',
+  },
+  datePickerButton: {
+    padding: 10,
+    backgroundColor: '#fff',
     borderWidth: 1,
-    borderColor: '#DDD',
+    borderColor: '#ddd',
     borderRadius: 5,
-    paddingHorizontal: 10,
-    backgroundColor: '#FFF',
   },
   roomInput: {
-    height: 40,
+    padding: 10,
+    backgroundColor: '#fff',
     borderWidth: 1,
-    borderColor: '#DDD',
+    borderColor: '#ddd',
     borderRadius: 5,
-    paddingHorizontal: 10,
-    backgroundColor: '#FFF',
-    justifyContent: 'center',
   },
   roomText: {
     fontSize: 16,
+  },
+  statusOption: {
+    padding: 10,
+    marginVertical: 5,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 5,
+  },
+  selectedStatusOption: {
+    borderColor: '#007BFF',
+  },
+  statusOptionText: {
+    fontSize: 16,
     color: '#000',
   },
-  datePickerButton: {
-    height: 40,
-    borderWidth: 1,
-    borderColor: '#DDD',
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    backgroundColor: '#FFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  remainingTime: {
-    fontSize: 14,
-    marginTop: 5,
-    color: '#FF0000',
-  },
-  buttonContainer: {
-    marginTop: 20,
-    alignItems: 'center',
-  },
-  button: {
-    width: '100%',
-    padding: 5,
+  selectedStatusOptionText: {
+    color: '#007BFF',
   },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalContent: {
-    backgroundColor: '#FFF',
     width: '80%',
-    maxHeight: '80%',
-    borderRadius: 10,
+    backgroundColor: '#fff',
     padding: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  modalCloseButton: {
-    position: 'absolute',
-    bottom: 10,
-    right: 10,
-  },
-  modalCloseText: {
-    fontSize: 16,
-    color: '#007BFF',
-  },
-  roomList: {
-    width: '100%',
+    borderRadius: 10,
   },
   roomItem: {
-    paddingVertical: 10,
+    padding: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#DDD',
+    borderBottomColor: '#ddd',
   },
   roomItemText: {
     fontSize: 16,
-    color: '#000',
+    color: '#000'
   },
-  iconList: {
-    width: '100%',
-    paddingHorizontal: 10,
+  iconContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
   },
   iconItem: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    padding: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  statusOption: {
-    paddingHorizontal: 15,
-    paddingVertical: 5,
-    marginRight: 10,
-    borderRadius: 5,
-  },
-  statusText: {
-    fontSize: 16,
-    color: '#FFF',
-  },
+  closeButton: {
+    marginTop: 10,
+  }
 });
 
 export default EditDeviceScreen;

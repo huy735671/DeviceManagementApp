@@ -58,9 +58,9 @@ const DeviceDetail = ({ route, navigation }) => {
         <Button
           mode="contained"
           style={[styles.button, { backgroundColor: "#1FD2BD" }]}
-          onPress={() => navigation.navigate('EditDevice', { id })} 
+          onPress={() => navigation.navigate('EditDevice', { id })}
         >
-          Chỉnh sửa 
+          Chỉnh sửa
         </Button>
         <Button
           mode="contained"
