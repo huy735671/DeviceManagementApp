@@ -6,6 +6,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import HomeScreen from '../screens/User/HomeScreen';
 import AccountScreen from '../screens/User/AccountScreen';
+import Notification from '../screens/User/Notification';
 
 
 
@@ -37,7 +38,7 @@ const UserTab = ({ route, navigation }) => {
                     headerStyle: {
                         backgroundColor: "#1CD2BD",
                     },
-                    headerTitle: "Device Management",
+                    headerTitle: "QUẢN LÝ THIẾT BỊ",
                     headerRight: () => (
                         <View style={{ flexDirection: "row" }}>
                             <TouchableOpacity onPress={SearchHandler}>
@@ -54,6 +55,17 @@ const UserTab = ({ route, navigation }) => {
                     ),
                 }}
             />
+            <Tab.Screen name='Notification' component={Notification}  options={{
+                tabBarIcon: ({ color, size }) => (
+                    <MaterialIcons name="notifications" color={color} size={size} />
+                ),
+                headerShown:true,
+                headerTitle: "QUẢN LÝ THIẾT BỊ",
+                headerStyle: {
+                    backgroundColor: "#1CD2BD",
+                    
+                },
+            }}/>
             <Tab.Screen
                 name="Account"
                 component={AccountScreen}
@@ -64,7 +76,7 @@ const UserTab = ({ route, navigation }) => {
                     headerStyle: {
                         backgroundColor: "#1CD2BD",
                     },
-                    headerTitle: "Device Management",
+                    headerTitle: "QUẢN LÝ THIẾT BỊ",
                     headerRight: () => (
                         <View style={{ flexDirection: "row" }}>
                             <TouchableOpacity>

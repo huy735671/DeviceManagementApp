@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Animated } from "react-native";
 import Icons from "react-native-vector-icons/MaterialIcons";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import firestore from "@react-native-firebase/firestore";
@@ -35,8 +35,24 @@ const Room = () => {
     return () => {};
   }, [room]);  // Add room to dependencies array
 
-  const handleDevicePress = (device) => {
-    navigation.navigate("InfoDevices", { device });
+  const handleDevicePress = (item) => {
+    //navigation.navigate("InfoDevices", { device });
+    navigation.navigate("InfoDevices", {
+      id: item.id,
+      icon: item.icon,
+      name: item.name,
+      status: item.operationalStatus,
+      type: item.deviceType,
+      assetType: item.assetType,
+      brand: item.brand,
+      model: item.model,
+      supplier: item.supplier,
+      price: item.price,
+      purchaseDate: item.datetime,
+      warrantyPeriod: item.warrantyEndDate,
+      operationalStatus: item.operationalStatus,
+      deploymentDate: item.deploymentDate,
+    });
   };
 
   const getStatusColor = (status) => {
@@ -58,12 +74,12 @@ const Room = () => {
         onPress={() => navigation.goBack()}
         style={{ position: "absolute", top: 20, left: 10 }}
       >
-        <Icons name="arrow-back" size={30} color="black" />
+        <Icons name="arrow-back" size={25} color="black" />
       </TouchableOpacity>
       
       <Text style={styles.title}>Devices in {room.name}</Text>
 
-      <View style={styles.content}>
+      <Animated.View animation='zoomIn' style={styles.content}>
         {devices.map((device) => (
           <TouchableOpacity
             key={device.id}
@@ -72,12 +88,12 @@ const Room = () => {
           >
             <Icons name="devices" size={50} color="black" />
             <View style={{ marginLeft: 10 }}>
-              <Text style={{ fontWeight: 'bold' }}>Device: {device.name}</Text>
-              <Text style={{ color: getStatusColor(device.status), fontWeight: 'bold' }}>Status: {device.status}</Text>
+              <Text style={{ fontWeight: 'bold', fontSize:18}}>Device: {device.name}</Text>
+              <Text style={{ color: getStatusColor(device.operationalStatus), fontWeight: 'bold', }}>Status: {device.operationalStatus}</Text>
             </View>
           </TouchableOpacity>
         ))}
-      </View>
+      </Animated.View>
     </View>
   );
 };
@@ -102,6 +118,7 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
     paddingHorizontal: 20,
+    marginTop:10,
   },
   item: {
     flexDirection: "row",

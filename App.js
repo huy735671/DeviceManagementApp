@@ -5,6 +5,7 @@ import { MyContextControllerProvider } from './src/context';
 import StackNavigation from './src/navigations/StackNavigation';
 
 const App = () => {
+  
   return (
     <MyContextControllerProvider>
     <PaperProvider>

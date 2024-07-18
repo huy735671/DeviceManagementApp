@@ -7,7 +7,7 @@ import firestore from "@react-native-firebase/firestore";
 const DeviceDetail = ({ route, navigation }) => {
   const {
     id, icon = "devices", name, status, type, assetType, brand,
-    model, supplier, price, purchaseDate, warrantyPeriod, 
+    model, supplier, price, purchaseDate, warrantyPeriod,
     operationalStatus, deploymentDate
   } = route.params;
 
@@ -23,6 +23,14 @@ const DeviceDetail = ({ route, navigation }) => {
       Alert.alert('Lỗi', 'Đã xảy ra lỗi khi xóa thiết bị.');
     }
   };
+
+  const ReportHandle = (item) => {
+    navigation.navigate('ReportDevice'),
+    {
+      name: item.name,
+      id: item.id,
+    }
+  }
 
   return (
     <View style={styles.container}>
@@ -51,7 +59,7 @@ const DeviceDetail = ({ route, navigation }) => {
         <Button
           mode="contained"
           style={[styles.button, { backgroundColor: "orange" }]}
-          onPress={() => navigation.navigate('ReportDevice', { id })}
+          onPress={ReportHandle}
         >
           Báo cáo
         </Button>

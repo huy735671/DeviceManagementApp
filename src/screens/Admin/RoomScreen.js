@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { Button } from 'react-native-paper';
 
 const RoomScreen = ({ navigation, route }) => {
   const { roomId, roomName } = route.params;
@@ -10,7 +11,7 @@ const RoomScreen = ({ navigation, route }) => {
   useEffect(() => {
     const unsubscribe = firestore()
       .collection('DEVICES')
-      .where('roomId', '==', roomId) 
+      .where('roomId', '==', roomId)
       .onSnapshot(querySnapshot => {
         const devicesData = querySnapshot.docs.map(doc => ({
           id: doc.id,
@@ -27,21 +28,64 @@ const RoomScreen = ({ navigation, route }) => {
       id: item.id,
       icon: item.icon,
       name: item.name,
-      status: item.operationalStatus, 
+      status: item.operationalStatus,
       type: item.deviceType,
       assetType: item.assetType,
       brand: item.brand,
       model: item.model,
       supplier: item.supplier,
       price: item.price,
-      purchaseDate: item.datetime, 
-      warrantyPeriod: item.warrantyEndDate, 
+      purchaseDate: item.datetime,
+      warrantyPeriod: item.warrantyEndDate,
       operationalStatus: item.operationalStatus,
       deploymentDate: item.deploymentDate,
     });
   };
+
+  const deleteAllDataInCollection = async (collectionName) => {
+    try {
+      const snapshot = await firestore().collection(collectionName).get();
+      const batch = firestore().batch();
   
+      snapshot.forEach((doc) => {
+        batch.delete(doc.ref);
+      });
   
+      await batch.commit();
+      console.log(`Đã xóa toàn bộ dữ liệu trong collection ${collectionName}`);
+    } catch (error) {
+      console.error(`Lỗi xóa dữ liệu trong collection ${collectionName}:`, error);
+    }
+  };
+
+  const handleDeleteRoom = async () => {
+    try {
+      await firestore().collection('ROOMS').doc(roomId).delete();
+      Alert.alert('Thành công', 'Phòng đã được xóa.');
+      navigation.goBack();
+    } catch (error) {
+      console.error('Lỗi xóa phòng:', error);
+      Alert.alert('Lỗi', 'Đã xảy ra lỗi khi xóa phòng.');
+    }
+  };
+
+  const confirmDeleteRoom = () => {
+    Alert.alert(
+      'Xác nhận',
+      'Bạn có chắc chắn muốn xóa phòng này không?',
+      [
+        {
+          text: 'Hủy',
+          style: 'cancel',
+        },
+        {
+          text: 'Xóa',
+          onPress: handleDeleteRoom,
+        },
+      ],
+      { cancelable: false }
+    );
+  };
 
   const renderItem = ({ item }) => (
     <TouchableOpacity style={styles.itemContainer} onPress={() => handleDetailPress(item)}>
@@ -56,12 +100,27 @@ const RoomScreen = ({ navigation, route }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Danh sách thiết bị trong phòng {roomName}</Text>
-      <FlatList
-        data={devices}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        showsVerticalScrollIndicator={false}
-      />
+      {devices.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>Phòng không có thiết bị.</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={devices}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
+      <Button
+        mode="contained"
+        onPress={confirmDeleteRoom}
+        style={[styles.deleteButton, devices.length > 0 && styles.disabledButton]}
+        labelStyle={styles.deleteButtonText}
+        disabled={devices.length > 0}
+      >
+        Xóa Phòng
+      </Button>
     </View>
   );
 };
@@ -89,6 +148,25 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginTop: 5,
+  },
+  deleteButton: {
+    marginTop: 20,
+    backgroundColor: '#ff5252',
+  },
+  deleteButtonText: {
+    color: '#FFF',
+  },
+  disabledButton: {
+    backgroundColor: '#ffcccc',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: 18,
+    color: '#888',
   },
 });
 

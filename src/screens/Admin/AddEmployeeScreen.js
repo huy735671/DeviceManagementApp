@@ -7,20 +7,27 @@ import firestore from '@react-native-firebase/firestore';
 
 const AddEmployeeScreen = ({ navigation }) => {
   const [name, setName] = useState('');
+  const [icon, setIcon] = useState('person'); // Default is 'person'
   const [id, setId] = useState('');
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [email, setEmail] = useState('');
   const [numPhone, setNumPhone] = useState('');
-  const [role, setRole] = useState('User'); // Mặc định là User
+  const [role, setRole] = useState('User'); // Default is User
   const [password, setPassword] = useState('');
   const [datetime, setDatetime] = useState(new Date());
   const [open, setOpen] = useState(false);
   const [showPass, setShowPass] = useState(false);
   const [rooms, setRooms] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
+  const [iconModalVisible, setIconModalVisible] = useState(false);
+
+  const availableIcons = [
+    'person', 'person-outline'
+    // Add more icons as needed
+  ];
 
   useEffect(() => {
-    // Lấy danh sách các phòng ban từ Firestore
+    // Fetch list of rooms from Firestore
     const fetchRooms = async () => {
       try {
         const roomsCollection = await firestore().collection('ROOMS').get();
@@ -37,21 +44,25 @@ const AddEmployeeScreen = ({ navigation }) => {
   const handleSaveEmployee = async () => {
     if (selectedRoom) {
       try {
-        // Lưu nhân viên vào bộ sưu tập 'EMPLOYEES' của phòng ban được chọn
-        await firestore()
-          .collection('EMPLOYEES')
-          .add({
-            name,
-            id,
-            email,
-            numPhone,
-            role,
-            datetime,
-            password,
-            roomId: selectedRoom.id,
-          });
+        // Get the current count of documents in 'EMPLOYEES' collection
+        const employeesRef = firestore().collection('EMPLOYEES');
+        const snapshot = await employeesRef.get();
+        const count = snapshot.size;
 
-        // Hiển thị thông báo lưu thành công và quay lại màn hình trước đó
+        // Add the employee with a numeric ID
+        await employeesRef.doc(String(count + 1)).set({
+          icon,
+          name,
+          id,
+          email,
+          numPhone,
+          role,
+          datetime,
+          password,
+          roomId: selectedRoom.id,
+        });
+
+        // Show success alert and navigate back
         Alert.alert('Thành công', 'Nhân viên đã được lưu thành công!', [
           { text: 'OK', onPress: () => navigation.goBack() }
         ]);
@@ -70,17 +81,29 @@ const AddEmployeeScreen = ({ navigation }) => {
       style={styles.roomItem}
       onPress={() => {
         setSelectedRoom(item);
-        setModalVisible(false); // Đóng modal sau khi chọn phòng ban
+        setModalVisible(false); 
       }}
     >
       <Text style={styles.roomItemText}>{item.name}</Text>
     </TouchableOpacity>
   );
 
+  const renderIconItem = ({ item }) => (
+    <TouchableOpacity
+      style={styles.iconItem}
+      onPress={() => {
+        setIcon(item);
+        setIconModalVisible(false);
+      }}
+    >
+      <Icon name={item} size={30} color="#000" />
+    </TouchableOpacity>
+  );
+
   return (
     <View style={{ flex: 1, backgroundColor: "#FFF" }}>
       <View style={{ alignItems: "center" }}>
-        <Icon name={"account-circle"} size={150} color={"#000"} />
+        <Icon name={icon} size={150} color={"#000"} onPress={() => setIconModalVisible(true)} />
       </View>
       <View style={{ margin: 20 }}>
         <View style={styles.txtAndInput}>
@@ -194,7 +217,7 @@ const AddEmployeeScreen = ({ navigation }) => {
         </Button>
       </View>
 
-      {/* Modal chọn phòng ban */}
+      {/* Modal select room */}
       <Modal
         visible={modalVisible}
         animationType="slide"
@@ -211,6 +234,32 @@ const AddEmployeeScreen = ({ navigation }) => {
             />
             <TouchableOpacity
               onPress={() => setModalVisible(false)}
+              style={styles.modalCloseButton}
+            >
+              <Text style={styles.modalCloseButtonText}>Đóng</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal select icon */}
+      <Modal
+        visible={iconModalVisible}
+        animationType="slide"
+        transparent
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalHeader}>Chọn icon</Text>
+            <FlatList
+              data={availableIcons}
+              renderItem={renderIconItem}
+              keyExtractor={(item) => item}
+              numColumns={3}
+              style={{ marginTop: 20 }}
+            />
+            <TouchableOpacity
+              onPress={() => setIconModalVisible(false)}
               style={styles.modalCloseButton}
             >
               <Text style={styles.modalCloseButtonText}>Đóng</Text>
@@ -240,66 +289,91 @@ const styles = StyleSheet.create({
     height: 40,
     flex: 1,
     borderWidth: 1,
-    marginBottom: 10,
     paddingLeft: 10,
   },
   txtAndInput: {
     flexDirection: "row",
     alignItems: "center",
+    marginTop: 10,
   },
   datePickerButton: {
+    backgroundColor: "#FFF",
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
     flex: 1,
-    paddingVertical: 10,
-    paddingLeft: 5,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#000",
+  },
+  roleButton: {
+    backgroundColor: "#FFF",
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    flex: 1,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#000",
+    flexDirection: "row",
+  },
+  roleText: {
+    color: "#000",
+    fontSize: 18,
   },
   iconStyle: {
-    position: "absolute",
-    right: 15,
-    top: 12,
+    marginLeft: 10,
+    justifyContent: "center",
+    alignItems: "center",
   },
   modalContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
-    backgroundColor: "#FFF",
-    borderRadius: 10,
+    backgroundColor: '#FFF',
+    width: '80%',
     padding: 20,
-    width: "80%",
-    maxHeight: "80%",
+    borderRadius: 10,
   },
   modalHeader: {
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 20,
+    fontWeight: 'bold',
     marginBottom: 10,
-  },
-  roomItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#DDD",
-  },
-  roomItemText: {
-    fontSize: 16,
-    color: "#000",
+    textAlign: 'center',
   },
   modalCloseButton: {
     marginTop: 20,
-    alignSelf: "center",
+    padding: 10,
+    backgroundColor: '#1FD2BD',
+    borderRadius: 5,
+    alignSelf: 'center',
   },
   modalCloseButtonText: {
+    color: '#FFF',
     fontSize: 16,
-    color: "#1FD2BD",
+    fontWeight: 'bold',
   },
-  roleItem: {
-    padding: 10,
+  roomItem: {
+    paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: "#DDD",
+    borderBottomColor: '#E0E0E0',
   },
-  roleItemText: {
-    fontSize: 16,
-    color: "#000",
+  roomItemText: {
+    fontSize: 18,
+    color: '#000',
+  },
+  iconItem: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 80,
+    height: 80,
+    margin: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
   },
 });
 

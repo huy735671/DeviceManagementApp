@@ -6,6 +6,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import DashboardScreen from '../screens/Admin/DashboardScreen';
 import AccountScreen from '../screens/User/AccountScreen';
 import Icon from "react-native-vector-icons/MaterialIcons";
+import Notification from '../screens/Admin/Notification';
 
 
 
@@ -38,7 +39,7 @@ const AdminTab = () => {
                     tabBarIcon: ({ color, size }) => (
                         <Ionicons name="grid-outline" color={color} size={size} />
                     ),
-                    headerTitle: "Device Management",
+                    headerTitle: "QUẢN LÝ THIẾT BỊ",
                     headerRight: () => (
                         <View style={{ flexDirection: "row" }}>
                             <TouchableOpacity onPress={() => alert("Search icon pressed")}>
@@ -64,6 +65,17 @@ const AdminTab = () => {
                     ),
                 })}
             />
+            <Tab.Screen name='Notification' component={Notification} options={{
+                tabBarIcon: ({ color, size }) => (
+                    <Ionicons name="notifications-outline" color={color} size={size} />
+                ),
+                headerTitle: "QUẢN LÝ THIẾT BỊ",
+                headerShown:true,
+                headerStyle: {
+                    backgroundColor: "#1CD2BD",
+                    
+                },
+            }}/>
             <Tab.Screen
                 name="Account"
                 component={AccountScreen}
@@ -71,11 +83,12 @@ const AdminTab = () => {
                 options={({ navigation }) => ({
                     headerStyle: {
                         backgroundColor: "#1CD2BD",
+                        
                     },
                     tabBarIcon: ({ color, size }) => (
                         <Ionicons name="person-circle-outline" color={color} size={size} />
                     ),
-                    headerTitle: "Device Management",
+                    headerTitle: "QUẢN LÝ THIẾT BỊ",
                     headerRight: () => (
                         <View style={{ flexDirection: "row" }}>
                             <TouchableOpacity onPress={() => alert("Search icon pressed")}>
@@ -92,6 +105,16 @@ const AdminTab = () => {
                             >
                                 <Icon
                                     name="add-circle"
+                                    size={25}
+                                    color="white"
+                                    style={{ marginRight: 15 }}
+                                />
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={() => navigation.navigate("Settings")}
+                            >
+                                <Icon
+                                    name="settings"
                                     size={25}
                                     color="white"
                                     style={{ marginRight: 15 }}

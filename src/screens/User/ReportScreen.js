@@ -47,7 +47,7 @@ const ReportScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+   // flex: 1,
     padding: 10,
     backgroundColor: '#fff',
 
@@ -64,8 +64,10 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderRadius: 5,
     padding: 10,
-    marginBottom: 10,
-    minHeight: 700,
+    marginTop:20,
+    marginBottom: 50,
+    minHeight: 500,
+    backgroundColor: '#fff',
   },
   btnReport: {
     backgroundColor: '#007BFF',
@@ -79,6 +81,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     width: 400,
+    
     height: 50,
     alignSelf: 'center',
   

@@ -86,22 +86,46 @@ const DashboardScreen = ({ navigation }) => {
         name: item.name,
         status: item.status,
       });
+      navigation.navigate("DevicesDetail", {
+        id: item.id,
+        icon: item.icon,
+        name: item.name,
+        status: item.operationalStatus,
+        type: item.deviceType,
+        assetType: item.assetType,
+        brand: item.brand,
+        model: item.model,
+        supplier: item.supplier,
+        price: item.price,
+        purchaseDate: item.datetime,
+        warrantyPeriod: item.warrantyEndDate,
+        operationalStatus: item.operationalStatus,
+        deploymentDate: item.deploymentDate,
+      });
     }
     if (item.featureId === "2") {
       navigation.navigate('EmployeeDetail', {
         name: item.name,
+        id: item.id,
         employeeId: item.id,
         department: item.roomId, // Assuming roomId is used as department
         phoneNumber: item.numPhone,
+        employeesPassword: item.password,
+        employeesEmail: item.email,
+        employeesRole: item.role,
+        employeesDatetime: item.datetime,
+
       });
     };
     if (item.featureId === "3") {
-      navigation.navigate("RoomScreen", { roomId: item.id, roomName: item.name });
+      navigation.navigate("RoomScreen", { roomId: item.id, roomName: item.name, roomStatus: item.status, roomIcon: item.icon });
     }
     if (item.featureId === "4") {
       navigation.navigate("MaintenanceDetail", {
+        id: item.id,
         icon: item.icon,
         name: item.name,
+        
       });
     }
   };
@@ -168,7 +192,7 @@ const DashboardScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
-    
+
     backgroundColor: "#FFF",
     paddingHorizontal: 10,
   },
@@ -181,6 +205,8 @@ const styles = StyleSheet.create({
   scrollViewContent: {
     flexDirection: "row",
     paddingVertical: 10,
+    marginTop: 10,
+    marginBottom: 50,
   },
   itemContainer: {
     alignItems: "center",

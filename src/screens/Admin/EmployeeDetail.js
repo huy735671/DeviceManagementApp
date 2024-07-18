@@ -1,10 +1,26 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Alert } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { Button } from "react-native-paper";
+import firestore from "@react-native-firebase/firestore";
 
-const EmployeeDetail = ({ route }) => {
-  const { name, employeeId, department, phoneNumber } = route.params;
+const EmployeeDetail = ({ route, navigation }) => {
+  const { name, employeeId, department, phoneNumber, employeesPassword, employeesEmail,
+    employeesRole, employeesDatetime, id } = route.params;
+
+  // delete employee button handler
+  const handleDelete = async () => {
+    try {
+      await firestore().collection('EMPLOYEES').doc(id).delete();
+      console.log('Employee has been deleted from Firestore');
+
+      navigation.navigate('AdminTab'); // Navigate back to admin screen after deletion
+      Alert.alert('Success', 'Employee deleted successfully');
+    } catch (error) {
+      console.error('Error deleting employee:', error);
+      Alert.alert('Error', 'An error occurred while deleting the employee.');
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -14,21 +30,18 @@ const EmployeeDetail = ({ route }) => {
         </View>
         <View style={styles.infoContainer}>
           <View style={styles.row}>
-            <Text style={styles.label}>Họ và tên:</Text>
-            <Text style={styles.value}>{name}</Text>
+            <Text style={styles.label}>Name:</Text>
+            <Text style={styles.value}>{" "}{name}</Text>
           </View>
           <View style={styles.row}>
-            <Text style={styles.label}>Mã nhân viên:</Text>
-            <Text style={styles.value}>{employeeId}</Text>
+            <Text style={styles.label}>Employee ID:</Text>
+            <Text style={styles.value}>{" "}{employeeId}</Text>
           </View>
           <View style={styles.row}>
-            <Text style={styles.label}>Phòng ban:</Text>
-            <Text style={styles.value}>{department}</Text>
+            <Text style={styles.label}>Phone Number:</Text>
+            <Text style={styles.value}>{" "}{phoneNumber}</Text>
           </View>
-          <View style={styles.row}>
-            <Text style={styles.label}>Số điện thoại:</Text>
-            <Text style={styles.value}>{phoneNumber}</Text>
-          </View>
+          {/* Add other fields as needed */}
         </View>
       </View>
       <View style={styles.buttonContainer}>
@@ -39,16 +52,14 @@ const EmployeeDetail = ({ route }) => {
             // Handle edit button press
           }}
         >
-          Chỉnh sửa
+          Edit
         </Button>
         <Button
           style={{ ...styles.button, backgroundColor: "red" }}
           mode="contained"
-          onPress={() => {
-            // Handle delete button press
-          }}
+          onPress={handleDelete} // Call handleDelete function on press
         >
-          Xóa
+          Delete
         </Button>
       </View>
     </View>
@@ -79,6 +90,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     marginBottom: 10,
+    width:400,
   },
   label: {
     flex: 1,

@@ -33,7 +33,7 @@ const AccountScreen = () => {
       }
     });
 
-    return unsubscribe; 
+    return unsubscribe;
   }, []);
 
   const handleSignOut = () => {
@@ -83,7 +83,10 @@ const AccountScreen = () => {
         </View>
       </View>
 
-      <View style={{ marginLeft: 10 }}>
+      
+
+
+      <View style={{ marginLeft: 10, marginTop:25}}>
         <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'black' }}>Các thiết bị đang bảo trì:</Text>
         <View style={styles.bodyContainer}>
           <Icon name={"computer"} size={60} color={"#000"} style={{ marginHorizontal: 10 }} />
@@ -99,6 +102,8 @@ const AccountScreen = () => {
           </View>
         </View>
       </View>
+
+
     </View>
   );
 }
@@ -111,6 +116,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
     flexDirection: 'row',
+    
   },
   bodyViewContainer: {
     padding: 10,

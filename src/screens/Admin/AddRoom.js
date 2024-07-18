@@ -3,6 +3,8 @@ import { View, StyleSheet, Text, TouchableOpacity, Modal } from "react-native";
 import { TextInput, Button, HelperText } from "react-native-paper";
 import firestore from '@react-native-firebase/firestore';
 
+
+
 const AddRoom = ({ navigation }) => {
   const [roomName, setRoomName] = useState("");
   const [roomId, setRoomId] = useState(null); // Initialize roomId as null
@@ -11,8 +13,8 @@ const AddRoom = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
 
   const roomStatuses = [
-    { label: "Bình thường", value: "Normal" },
-    { label: "Hỏng", value: "Broken" },
+    { label: "Hoạt động", value: "Active" },
+    { label: "Đóng", value: "Close" },
     { label: "Bảo trì", value: "Maintenance" },
   ];
 
@@ -34,7 +36,7 @@ const AddRoom = ({ navigation }) => {
         id: roomIdNumber,
         name: roomName,
         status: status,
-        icon: "laptop-outline", // Placeholder icon
+        icon: "apartment", // Placeholder icon
       });
 
       // Clear input fields after submission
