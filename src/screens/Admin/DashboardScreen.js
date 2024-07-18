@@ -20,29 +20,7 @@ const DashboardScreen = ({ navigation }) => {
   const [maintenance, setMaintenance] = useState([]);
 
   useEffect(() => {
-    const unsubscribeDevices = firestore()
-      .collection('DEVICES')
-      .onSnapshot(snapshot => {
-        const devicesData = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          featureId: "1", // Example: Assign featureId based on document type
-          icon: doc.data().icon, // Assume icon field exists in your Firestore document
-        }));
-        setDevices(devicesData);
-      });
 
-    const unsubscribeEmployees = firestore()
-      .collection('EMPLOYEES')
-      .onSnapshot(snapshot => {
-        const employeesData = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          featureId: "2", // Example: Assign featureId based on document type
-          icon: doc.data().icon, // Assume icon field exists in your Firestore document
-        }));
-        setEmployees(employeesData);
-      });
 
     const unsubscribeRooms = firestore()
       .collection('ROOMS')
@@ -50,7 +28,7 @@ const DashboardScreen = ({ navigation }) => {
         const roomsData = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
-          featureId: "3", // Example: Assign featureId based on document type
+          featureId: "1", // Example: Assign featureId based on document type
           icon: doc.data().icon, // Assume icon field exists in your Firestore document
         }));
         setRooms(roomsData);
@@ -59,8 +37,7 @@ const DashboardScreen = ({ navigation }) => {
     // Add similar listeners for maintenance data if needed
 
     return () => {
-      unsubscribeDevices();
-      unsubscribeEmployees();
+
       unsubscribeRooms();
       // Clean up maintenance listeners if added
     };
@@ -68,10 +45,8 @@ const DashboardScreen = ({ navigation }) => {
 
   const featuresData = [
     { id: "1", title: "Tất cả", icon: "menu" },
-    { id: "2", title: "Nhân viên", icon: "group" },
-    { id: "3", title: "Phòng ban", icon: "groups" },
-    { id: "4", title: "Bảo trì", icon: "settings" },
-    { id: "5", title: "Thống kê", icon: "insert-chart-outlined" },
+    { id: "2", title: "Bảo trì", icon: "settings" },
+    { id: "3", title: "Thống kê", icon: "insert-chart-outlined" },
     // Add more items as needed
   ];
 
@@ -80,52 +55,16 @@ const DashboardScreen = ({ navigation }) => {
   };
 
   const handleDetailPress = (item) => {
+   
     if (item.featureId === "1") {
-      navigation.navigate("DevicesDetail", {
-        icon: item.icon,
-        name: item.name,
-        status: item.status,
-      });
-      navigation.navigate("DevicesDetail", {
-        id: item.id,
-        icon: item.icon,
-        name: item.name,
-        status: item.operationalStatus,
-        type: item.deviceType,
-        assetType: item.assetType,
-        brand: item.brand,
-        model: item.model,
-        supplier: item.supplier,
-        price: item.price,
-        purchaseDate: item.datetime,
-        warrantyPeriod: item.warrantyEndDate,
-        operationalStatus: item.operationalStatus,
-        deploymentDate: item.deploymentDate,
-      });
-    }
-    if (item.featureId === "2") {
-      navigation.navigate('EmployeeDetail', {
-        name: item.name,
-        id: item.id,
-        employeeId: item.id,
-        department: item.roomId, // Assuming roomId is used as department
-        phoneNumber: item.numPhone,
-        employeesPassword: item.password,
-        employeesEmail: item.email,
-        employeesRole: item.role,
-        employeesDatetime: item.datetime,
-
-      });
-    };
-    if (item.featureId === "3") {
       navigation.navigate("RoomScreen", { roomId: item.id, roomName: item.name, roomStatus: item.status, roomIcon: item.icon });
     }
-    if (item.featureId === "4") {
+    if (item.featureId === "2") {
       navigation.navigate("MaintenanceDetail", {
         id: item.id,
         icon: item.icon,
         name: item.name,
-        
+
       });
     }
   };
@@ -149,8 +88,8 @@ const DashboardScreen = ({ navigation }) => {
   };
 
   const filteredData = [
-    ...devices.filter(item => item.featureId === selectedFeatureId),
-    ...employees.filter(item => item.featureId === selectedFeatureId),
+   // ...devices.filter(item => item.featureId === selectedFeatureId),
+   // ...employees.filter(item => item.featureId === selectedFeatureId),
     ...rooms.filter(item => item.featureId === selectedFeatureId),
     ...maintenance.filter(item => item.featureId === selectedFeatureId),
   ];
