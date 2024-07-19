@@ -1,9 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, StyleSheet, Text, TouchableOpacity, Modal } from "react-native";
 import { TextInput, Button, HelperText } from "react-native-paper";
 import firestore from '@react-native-firebase/firestore';
-
-
 
 const AddRoom = ({ navigation }) => {
   const [roomName, setRoomName] = useState("");
@@ -18,8 +16,27 @@ const AddRoom = ({ navigation }) => {
     { label: "Bảo trì", value: "Maintenance" },
   ];
 
+  useEffect(() => {
+    const getNextRoomId = async () => {
+      try {
+        const roomsSnapshot = await firestore().collection('ROOMS').orderBy('id', 'desc').limit(1).get();
+        if (!roomsSnapshot.empty) {
+          const lastRoom = roomsSnapshot.docs[0].data();
+          setRoomId(lastRoom.id + 1);
+        } else {
+          setRoomId(1); // Default to 1 if no rooms exist
+        }
+      } catch (error) {
+        console.error("Error getting next room ID: ", error);
+        setError("Lỗi khi lấy mã phòng, vui lòng thử lại sau");
+      }
+    };
+
+    getNextRoomId();
+  }, []);
+
   const handleAddRoom = async () => {
-    if (!roomId || !roomName || !status) {
+    if (!roomName || !status) {
       setError("Vui lòng điền đầy đủ thông tin");
       return;
     }
@@ -28,19 +45,16 @@ const AddRoom = ({ navigation }) => {
       // Reset error state
       setError("");
 
-      // Convert roomId to number
-      const roomIdNumber = parseInt(roomId, 10);
-
       // Add room to Firestore
-      await firestore().collection('ROOMS').doc(`${roomIdNumber}`).set({
-        id: roomIdNumber,
+      await firestore().collection('ROOMS').doc(`${roomId}`).set({
+        id: roomId,
         name: roomName,
         status: status,
         icon: "apartment", // Placeholder icon
       });
 
       // Clear input fields after submission
-      setRoomId(null);
+      setRoomId(null); // Will be automatically set on re-render
       setRoomName("");
       setStatus("");
 
@@ -63,13 +77,6 @@ const AddRoom = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <TextInput
-        label="Mã phòng"
-        value={roomId ? roomId.toString() : ""}
-        onChangeText={(numColumns) => setRoomId(numColumns)}
-        style={styles.input}
-        keyboardType="numeric" // Ensure numeric keyboard for input
-      />
       <TextInput
         label="Tên phòng"
         value={roomName}

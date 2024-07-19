@@ -26,6 +26,8 @@ import EditDeviceScreen from '../screens/Admin/EditDeviceScreen';
 import ReportDevice from '../screens/Admin/ReportDevice';
 import NotificationDetail from '../components/NotificationDetail';
 import Settings from '../screens/Settings';
+import ListEmployee from '../screens/Admin/ListEmployee';
+import ListDevices from '../screens/Admin/ListDevices';
 
 const Stack = createNativeStackNavigator();
 
@@ -116,7 +118,7 @@ const StackNavigation = () => {
         component={RoomScreen}
         options={{
           title: "Thông tin phòng ban",
-          headerShown: true,
+          headerShown: false,
           headerStyle: {
             backgroundColor: "#1FD2BD",
           },
@@ -182,29 +184,50 @@ const StackNavigation = () => {
           },
         }}
       />
-      <Stack.Screen 
-      name='NotificationDetail'
-      component={NotificationDetail}
-      options={{
-        headerShown: true,
-        headerTitle: "QUẢN LÝ THIẾT BỊ",
-        headerStyle: {
-          backgroundColor: "#1FD2BD",
-        },
-      }}
+      <Stack.Screen
+        name='NotificationDetail'
+        component={NotificationDetail}
+        options={{
+          headerShown: true,
+          headerTitle: "QUẢN LÝ THIẾT BỊ",
+          headerStyle: {
+            backgroundColor: "#1FD2BD",
+          },
+        }}
       />
-      <Stack.Screen 
-      name='Settings'
-      component={Settings}
-      options={{
-        headerShown: true,
-        headerStyle: {
-          backgroundColor: "#1FD2BD",
-        },
-      }}/>
+      <Stack.Screen
+        name='Settings'
+        component={Settings}
+        options={{
+          headerShown: true,
+          headerStyle: {
+            backgroundColor: "#1FD2BD",
+          },
+        }} />
+      <Stack.Screen
+        name='ListEmployee'
+        component={ListEmployee}
+        options={{
+          headerShown: true,
+          headerTitle: "QUẢN LÝ NHÂN VIÊN",
+          headerStyle: {
+            backgroundColor: "#1FD2BD",
+          },
+        }}
+      />
+      <Stack.Screen name='ListDevices'
+        component={ListDevices}
+        options={{
+          headerShown: true,
+          headerTitle: "QUẢN LÝ THIẾT BỊ",
+          headerStyle: {
+            backgroundColor: "#1FD2BD",
+          },
+        }}
+      />
 
     </Stack.Navigator>
-    
+
   )
 }
 

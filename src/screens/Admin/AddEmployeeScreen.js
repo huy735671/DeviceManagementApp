@@ -96,38 +96,38 @@ const AddEmployeeScreen = ({ navigation }) => {
         setIconModalVisible(false);
       }}
     >
-      <Icon name={item} size={30} color="#000" />
+      <Icon name={item} size={40} color="#000" />
     </TouchableOpacity>
   );
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#FFF" }}>
-      <View style={{ alignItems: "center" }}>
+    <View style={styles.container}>
+      <View style={styles.iconContainer}>
         <Icon name={icon} size={150} color={"#000"} onPress={() => setIconModalVisible(true)} />
       </View>
-      <View style={{ margin: 20 }}>
-        <View style={styles.txtAndInput}>
-          <Text style={styles.txt}>Tên nhân viên: </Text>
+      <View style={styles.formContainer}>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Tên nhân viên: </Text>
           <TextInput
             placeholder={"Tên nhân viên"}
             value={name}
             onChangeText={setName}
-            style={styles.txtInput}
+            style={styles.input}
           />
         </View>
-        <View style={styles.txtAndInput}>
-          <Text style={styles.txt}>Mã nhân viên: </Text>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Mã nhân viên: </Text>
           <TextInput
             placeholder={"Mã nhân viên"}
             value={id}
             onChangeText={setId}
-            style={styles.txtInput}
+            style={styles.input}
           />
         </View>
-        <View style={styles.txtAndInput}>
-          <Text style={styles.txt}>Phòng ban: </Text>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Phòng ban: </Text>
           <TouchableOpacity
-            style={styles.txtInput}
+            style={styles.input}
             onPress={() => setModalVisible(true)}
           >
             <Text style={styles.roomText}>
@@ -135,32 +135,32 @@ const AddEmployeeScreen = ({ navigation }) => {
             </Text>
           </TouchableOpacity>
         </View>
-        <View style={styles.txtAndInput}>
-          <Text style={styles.txt}>Email: </Text>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Email: </Text>
           <TextInput
             placeholder={"Email"}
             value={email}
             onChangeText={setEmail}
-            style={styles.txtInput}
+            style={styles.input}
           />
         </View>
-        <View style={styles.txtAndInput}>
-          <Text style={styles.txt}>Số điện thoại: </Text>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Số điện thoại: </Text>
           <TextInput
             placeholder={"Số điện thoại"}
             value={numPhone}
             onChangeText={setNumPhone}
             keyboardType="numeric"
-            style={styles.txtInput}
+            style={styles.input}
           />
         </View>
-        <View style={styles.txtAndInput}>
-          <Text style={styles.txt}>Ngày sinh: </Text>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Ngày sinh: </Text>
           <TouchableOpacity
             onPress={() => setOpen(true)}
             style={styles.datePickerButton}
           >
-            <Text style={{ fontSize: 18, color: "#000" }}>
+            <Text style={styles.dateText}>
               {datetime.toLocaleDateString()}
             </Text>
           </TouchableOpacity>
@@ -178,8 +178,8 @@ const AddEmployeeScreen = ({ navigation }) => {
             }}
           />
         </View>
-        <View style={styles.txtAndInput}>
-          <Text style={styles.txt}>Vai trò: </Text>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Vai trò: </Text>
           <TouchableOpacity
             style={styles.roleButton}
             onPress={() => setRole(role === 'User' ? 'Admin' : 'User')}
@@ -187,14 +187,14 @@ const AddEmployeeScreen = ({ navigation }) => {
             <Text style={styles.roleText}>{role}</Text>
           </TouchableOpacity>
         </View>
-        <View style={styles.txtAndInput}>
-          <Text style={styles.txt}>Mật khẩu: </Text>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Mật khẩu: </Text>
           <TextInput
             secureTextEntry={!showPass}
             placeholder={"Mật khẩu"}
             value={password}
             onChangeText={setPassword}
-            style={styles.txtInput}
+            style={styles.input}
           />
           <TouchableOpacity
             onPress={() => setShowPass(!showPass)}
@@ -208,12 +208,12 @@ const AddEmployeeScreen = ({ navigation }) => {
           </TouchableOpacity>
         </View>
       </View>
-      <View style={{ alignItems: "center" }}>
+      <View style={styles.buttonContainer}>
         <Button
-          style={{ backgroundColor: "#1FD2BD", ...styles.btn }}
+          style={styles.saveButton}
           onPress={handleSaveEmployee}
         >
-          <Text style={styles.txt}>Lưu thông tin</Text>
+          <Text style={styles.saveButtonText}>Lưu thông tin</Text>
         </Button>
       </View>
 
@@ -230,7 +230,7 @@ const AddEmployeeScreen = ({ navigation }) => {
               data={rooms}
               renderItem={renderRoomItem}
               keyExtractor={(item) => item.id}
-              style={{ marginTop: 20 }}
+              style={styles.flatList}
             />
             <TouchableOpacity
               onPress={() => setModalVisible(false)}
@@ -256,7 +256,7 @@ const AddEmployeeScreen = ({ navigation }) => {
               renderItem={renderIconItem}
               keyExtractor={(item) => item}
               numColumns={3}
-              style={{ marginTop: 20 }}
+              style={styles.flatList}
             />
             <TouchableOpacity
               onPress={() => setIconModalVisible(false)}
@@ -272,59 +272,90 @@ const AddEmployeeScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  txt: {
-    color: "#000",
-    fontSize: 18,
-  },
-  btn: {
-    borderRadius: 5,
-    width: 200,
-    marginBottom: 10,
-  },
-  txtInput: {
-    backgroundColor: null,
-    borderRadius: 10,
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
-    height: 40,
+  container: {
     flex: 1,
-    borderWidth: 1,
-    paddingLeft: 10,
+    backgroundColor: "#F0F4F8",
+    padding: 20,
   },
-  txtAndInput: {
+  iconContainer: {
+    alignItems: "center",
+    marginVertical: 20,
+  },
+  formContainer: {
+    backgroundColor: "#FFF",
+    borderRadius: 10,
+    padding: 20,
+    elevation: 2,
+  },
+  inputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 10,
+    marginBottom: 15,
+  },
+  label: {
+    color: "#333",
+    fontSize: 16,
+    flex: 1,
+  },
+  input: {
+    flex: 2,
+    backgroundColor: "#FAFAFA",
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: "#DDDDDD",
+    height: 40,
+    paddingHorizontal: 10,
+    fontSize: 16,
   },
   datePickerButton: {
+    flex: 1,
     backgroundColor: "#FFF",
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: "#DDDDDD",
     height: 40,
     justifyContent: "center",
     alignItems: "center",
-    flex: 1,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#000",
+    paddingHorizontal: 10,
+  },
+  dateText: {
+    fontSize: 16,
+    color: "#333",
   },
   roleButton: {
+    flex: 1,
     backgroundColor: "#FFF",
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: "#DDDDDD",
     height: 40,
     justifyContent: "center",
     alignItems: "center",
-    flex: 1,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#000",
-    flexDirection: "row",
   },
   roleText: {
-    color: "#000",
-    fontSize: 18,
+    fontSize: 16,
+    color: "#333",
   },
   iconStyle: {
     marginLeft: 10,
     justifyContent: "center",
     alignItems: "center",
+  },
+  buttonContainer: {
+    alignItems: "center",
+    marginVertical: 20,
+  },
+  saveButton: {
+    backgroundColor: "#1FD2BD",
+    borderRadius: 5,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    elevation: 3,
+  },
+  saveButtonText: {
+    color: "#FFF",
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   modalContainer: {
     flex: 1,
@@ -337,9 +368,10 @@ const styles = StyleSheet.create({
     width: '80%',
     padding: 20,
     borderRadius: 10,
+    elevation: 5,
   },
   modalHeader: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
     textAlign: 'center',
@@ -356,20 +388,23 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  flatList: {
+    marginTop: 10,
+  },
   roomItem: {
     paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#E0E0E0',
   },
   roomItemText: {
-    fontSize: 18,
+    fontSize: 16,
     color: '#000',
   },
   iconItem: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: 80,
-    height: 80,
+    width: 60,
+    height: 60,
     margin: 10,
     borderRadius: 10,
     borderWidth: 1,
