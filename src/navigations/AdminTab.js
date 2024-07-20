@@ -8,7 +8,7 @@ import AccountScreen from '../screens/User/AccountScreen';
 import Icon from "react-native-vector-icons/MaterialIcons";
 import Notification from '../screens/Admin/Notification';
 
-
+import { useNavigation } from '@react-navigation/native';
 
 
 
@@ -18,7 +18,7 @@ const Tab = createBottomTabNavigator();
 
 
 const AdminTab = () => {
-
+   const navigation = useNavigation();
     const [isAdmin] = useState();
     const AddDeviceHandler = () => {
         navigation.navigate('AddDevice');

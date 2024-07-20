@@ -93,6 +93,7 @@ const AddDeviceScreen = ({ navigation }) => {
           datetime,
           warrantyEndDate,
           roomId: selectedRoom.id,
+          roomName: selectedRoom.name,
           supplier,
           brand,
           operationalStatus,

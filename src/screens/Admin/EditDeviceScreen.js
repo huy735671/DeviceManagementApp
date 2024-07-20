@@ -40,12 +40,13 @@ const EditDeviceScreen = ({ route, navigation }) => {
   useEffect(() => {
     const fetchDevice = async () => {
       const deviceDoc = await firestore().collection('DEVICES').doc(id).get();
-      const deviceData = deviceDoc.data();
+      // const deviceData = deviceDoc.data();
       setDevice({
         id: deviceDoc.id,
-        ...deviceData,
-        datetime: deviceData?.datetime?.toDate() || new Date(),
-        deploymentDate: deviceData?.deploymentDate?.toDate() || new Date(),
+        ...deviceDoc.data(),
+        datetime: deviceDoc.data()?.datetime?.toDate() || new Date(),
+        deploymentDate: deviceDoc.data()?.deploymentDate?.toDate() || new Date(),
+        
       });
     };
 
@@ -53,7 +54,6 @@ const EditDeviceScreen = ({ route, navigation }) => {
       const roomsCollection = await firestore().collection('ROOMS').get();
       setRooms(roomsCollection.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     };
-
     fetchDevice();
     fetchRooms();
   }, [deviceId]);
@@ -97,10 +97,6 @@ const EditDeviceScreen = ({ route, navigation }) => {
     }
   };
   
-
-  
-  
-
   const renderRoomItem = ({ item }) => (
     <TouchableOpacity
       style={styles.roomItem}
@@ -184,6 +180,7 @@ const EditDeviceScreen = ({ route, navigation }) => {
             value={device.id}
             onChangeText={(text) => setDevice(prevDevice => ({ ...prevDevice, id: text }))}
             style={styles.input}
+             keyboardType="numeric"
             editable={device.name !== "specificDeviceName"} // Prevent editing if it's a specific device
           />
         </View>
