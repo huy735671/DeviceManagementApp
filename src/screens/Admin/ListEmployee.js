@@ -1,90 +1,142 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import React, { useEffect, useState } from 'react';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
+import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
-const ListEmployees = ({ navigation }) => {
+const ListEmployeeScreen = ({ route }) => {
+  const { roomId, roomName } = route.params;
+  const navigation = useNavigation();
   const [employees, setEmployees] = useState([]);
 
   useEffect(() => {
-    const unsubscribe = firestore()
-      .collection('EMPLOYEES')
-      .onSnapshot(snapshot => {
-        const employeesData = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+    const fetchEmployees = async () => {
+      try {
+        const employeesCollection = await firestore()
+          .collection('EMPLOYEES')
+          .where('roomId', '==', roomId)
+          .get();
+        const employeesData = employeesCollection.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setEmployees(employeesData);
-      });
-
-    return () => {
-      unsubscribe();
+      } catch (error) {
+        console.error('Error fetching employees:', error);
+      }
     };
-  }, []);
 
-  const handleEmployeePress = (item) => {
-    navigation.navigate('EmployeeDetail', { employeeId: item.id });
+    fetchEmployees();
+  }, [roomId]);
+
+  const handlePress = (employeeId) => {
+    navigation.navigate('EmployeeDetail', { employeeId });
   };
 
   const renderEmployeeItem = ({ item }) => (
     <TouchableOpacity
       style={styles.item}
-      onPress={() => handleEmployeePress(item)}
+      onPress={() => handlePress(item.id)}
     >
-      <Icon name={item.icon} size={40} color={"#000"} />
-      <View style={styles.itemTextContainer}>
-        <Text style={styles.itemName}>{item.name}</Text>
-        <Text style={styles.itemRole}>{item.role}</Text>
+      <View style={styles.itemContent}>
+        <Icon name="person" size={30} color="#007bff" style={styles.icon} />
+        <View style={styles.itemDetails}>
+          <Text style={styles.itemName}>{item.name}</Text>
+        </View>
       </View>
     </TouchableOpacity>
   );
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Danh Sách Nhân Viên</Text>
-      <FlatList
-        data={employees}
-        renderItem={renderEmployeeItem}
-        keyExtractor={item => item.id}
-      />
+      <Text style={styles.title}>Danh sách nhân viên - {roomName}</Text>
+      {employees.length > 0 ? (
+        <FlatList
+          data={employees}
+          renderItem={renderEmployeeItem}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.list}
+        />
+      ) : (
+        <Text style={styles.emptyText}>Phòng hiện không có nhân viên.</Text>
+      )}
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.goBack()}
+      >
+        <Text style={styles.buttonText}>Quay lại</Text>
+      </TouchableOpacity>
     </View>
   );
 };
+
+export default ListEmployeeScreen;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: '#f5f5f5',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
-    color: '#000',
     textAlign: 'center',
+    color: '#333',
+  },
+  list: {
+    paddingBottom: 20,
   },
   item: {
+    backgroundColor: '#fff',
+    padding: 15,
+    borderRadius: 12,
+    marginVertical: 10,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f9f9f9',
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 10,
-    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  itemTextContainer: {
-    marginLeft: 10,
+  itemContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+  },
+  icon: {
+    marginRight: 15,
+  },
+  itemDetails: {
+    flex: 1,
   },
   itemName: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '600',
     color: '#333',
   },
-  itemRole: {
-    fontSize: 14,
-    color: '#777',
+  button: {
+    backgroundColor: '#007bff',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  emptyText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#666',
+    textAlign: 'center',
+    marginTop: 20,
   },
 });
-
-export default ListEmployees;
