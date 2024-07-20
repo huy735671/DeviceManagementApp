@@ -26,21 +26,21 @@ const ListDevicesScreen = ({ route }) => {
     fetchDevices();
   }, [roomId]);
 
-  const handlePress = (deviceId) => {
-    navigation.navigate('DevicesDetail', { deviceId });
+  const handlePress = (device) => {
+    navigation.navigate('DevicesDetail', { device });
   };
 
   const renderDeviceItem = ({ item }) => (
     <TouchableOpacity
       style={styles.item}
-      onPress={() => handlePress(item.id)}
+      onPress={() => handlePress(item)}
     >
       <View style={styles.itemContent}>
         <Icon name="devices" size={30} color="#007bff" style={styles.icon} />
         <View style={styles.itemDetails}>
           <Text style={styles.itemName}>{item.name}</Text>
-          <Text style={styles.itemDetail}>Type: {item.type}</Text>
-          <Text style={styles.itemDetail}>Status: {item.status}</Text>
+          <Text style={styles.itemDetail}>Type: {item.deviceType}</Text>
+          <Text style={styles.itemDetail}>Status: {item.operationalStatus}</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -68,8 +68,6 @@ const ListDevicesScreen = ({ route }) => {
     </View>
   );
 };
-
-export default ListDevicesScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -146,3 +144,5 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
 });
+
+export default ListDevicesScreen;
