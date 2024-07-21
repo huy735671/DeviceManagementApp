@@ -1,42 +1,41 @@
 import React from "react";
-import { View, Text, StyleSheet, Alert, TouchableOpacity } from "react-native";
-import { Button } from "react-native-paper";
+import { View, Text, StyleSheet, Alert, TouchableOpacity, Image } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import firestore from "@react-native-firebase/firestore";
-import { Header } from "react-native-elements";
 
 const InfoDevices = ({ route, navigation }) => {
   const {
     id, icon = "devices", name, status, type, assetType, brand,
     model, supplier, price, purchaseDate, warrantyPeriod, 
-    operationalStatus, deploymentDate
+    operationalStatus, deploymentDate, image
   } = route.params;
 
-  const handleDeleteDevice = async () => {
-    try {
-      await firestore().collection('DEVICES').doc(id).delete();
-      console.log('Thiết bị đã được xóa khỏi Firestore');
-
-      navigation.navigate('AdminTab');
-      Alert.alert('Xóa thành công', 'Thiết bị đã được xóa khỏi hệ thống.');
-    } catch (error) {
-      console.error('Lỗi khi xóa thiết bị:', error);
-      Alert.alert('Lỗi', 'Đã xảy ra lỗi khi xóa thiết bị.');
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case "maintenance":
+        return "Bảo trì";
+      case "inactive":
+        return "Hư hỏng";
+      case "active":
+        return "Bình thường";
+      default:
+        return "Không xác định";
     }
   };
 
   return (
     <View style={styles.container}>
-        
-
       <View style={styles.card}>
         <View style={styles.header}>
-          <Icon name={icon} size={100} color="#000" />
+          {image ? (
+            <Image source={{ uri: image }} style={styles.deviceImage} />
+          ) : (
+            <Icon name={icon} size={100} color="#000" />
+          )}
           <View style={styles.headerText}>
             <Text style={styles.title}>Tên thiết bị:</Text>
             <Text style={styles.text}>{name}</Text>
             <Text style={styles.title}>Trạng thái:</Text>
-            <Text style={styles.text}>{status}</Text>
+            <Text style={styles.text}>{getStatusLabel(status)}</Text>
           </View>
         </View>
         <View style={styles.details}>
@@ -50,11 +49,13 @@ const InfoDevices = ({ route, navigation }) => {
           <Text style={styles.detailText}>Ngày đưa vào sử dụng: {new Date(deploymentDate).toLocaleDateString()}</Text>
         </View>
       </View>
-      <View style={styles.buttonContainer}>
-      <TouchableOpacity style={styles.btnReport} onPress={() => navigation.navigate("Report")}>
-        <Text style={{ fontSize: 30, fontWeight: 'bold', color: 'white', }}>Report</Text>
-      </TouchableOpacity>
-      </View>
+      {status === "active" && (
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.btnReport} onPress={() => navigation.navigate("Report")}>
+            <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'white' }}>Báo cáo thiết bị</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 };
@@ -79,6 +80,12 @@ const styles = StyleSheet.create({
   headerText: {
     marginLeft: 10,
   },
+  deviceImage: {
+    width: 100,
+    height: 100,
+    resizeMode: 'cover',
+    borderRadius: 10,
+  },
   title: {
     fontWeight: "bold",
     fontSize: 16,
@@ -102,19 +109,16 @@ const styles = StyleSheet.create({
   btnReport: {
     backgroundColor: '#007BFF',
     paddingVertical: 5,
-    paddingHorizontal: 5,
+    paddingHorizontal: 10,
     borderRadius: 25,
     marginTop: 10,
     marginBottom: 10,
     elevation: 10,
-    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    width: 400,
+    width: 200,
     height: 50,
-    alignSelf: 'center',
   }
-
 });
 
 export default InfoDevices;

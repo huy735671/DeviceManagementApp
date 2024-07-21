@@ -9,37 +9,46 @@ const RoomList = () => {
   const [rooms, setRooms] = useState([]);
 
   useEffect(() => {
-    const unsubscribe = firestore()
-      .collection("ROOMS")
-      .onSnapshot((snapshot) => {
-        const roomsData = snapshot.docs.map((doc) => ({
+    const fetchRooms = async () => {
+      try {
+        // Fetch all rooms
+        const roomsSnapshot = await firestore().collection("ROOMS").get();
+        const roomsData = roomsSnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
-        
-        // Sắp xếp danh sách rooms
-        const sortedRooms = roomsData.sort((a, b) => {
-          const statusOrder = ["Maintenance", "Broken", "Normal"];
+        console.log("Rooms Data:", roomsData);
+
+        // Fetch device counts for each room
+        const roomsWithDeviceCounts = await Promise.all(roomsData.map(async (room) => {
+          const devicesSnapshot = await firestore()
+            .collection("DEVICES")
+            .where("roomId", "==", room.id)
+            .get();
+          
+          const deviceCount = devicesSnapshot.size;
+          return {
+            ...room,
+            deviceCount,
+          };
+        }));
+
+        // Sort rooms by status with priority
+        const sortedRooms = roomsWithDeviceCounts.sort((a, b) => {
+          console.log(`Sorting: ${a.name} (${a.status}) vs ${b.name} (${b.status})`);
+          const statusOrder = ["maintenance", "inactive", "active"];
           return statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status);
         });
+
+        console.log("Sorted Rooms:", sortedRooms);
         setRooms(sortedRooms);
-      });
+      } catch (error) {
+        console.error("Error fetching rooms and device counts:", error);
+      }
+    };
 
-    return () => unsubscribe();
+    fetchRooms();
   }, []);
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "Normal":
-        return "blue";
-      case "Broken":
-        return "red";
-      case "Maintenance":
-        return "orange";
-      default:
-        return "gray";
-    }
-  };
 
   const handleRoomPress = (room) => {
     navigation.navigate("Room", { room });
@@ -59,7 +68,7 @@ const RoomList = () => {
           >
             <Icons name="list-alt" size={50} color="black" />
             <Text style={{ fontWeight: "bold" }}>{room.name}</Text>
-            <Text style={{ color: getStatusColor(room.status), fontWeight: 'bold' }}>{room.status}</Text>
+            <Text style={{ fontWeight: 'bold' }}>Số thiết bị: {room.deviceCount}</Text>
           </TouchableOpacity>
         ))}
       </View>
