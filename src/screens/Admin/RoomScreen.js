@@ -28,7 +28,7 @@ const RoomScreen = ({ route }) => {
       <Header
         leftComponent={{
           icon: 'arrow-back',
-          color: '#fff',
+          color: '#1c1c1c',
           onPress: () => navigation.goBack(),
         }}
         centerComponent={<Text style={styles.headerTitle}>Room Details</Text>}
@@ -55,13 +55,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
   header: {
-    backgroundColor: '#333',
+    backgroundColor: '#1cd2bd',
     borderBottomWidth: 0,
   },
   headerTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#1c1c1c',
   },
   content: {
     flex: 1,
