@@ -39,6 +39,7 @@ const EditProfileScreen = ({ navigation }) => {
             const userData = userDoc.data();
             setNumPhone(userData.phone || "");
             // setAvatar(userData.avatarUrl);
+            setImageUri(userData.avatarUrl || null); 
           }
         } catch (error) {
           console.error("Error fetching user data: ", error);
@@ -137,9 +138,9 @@ const EditProfileScreen = ({ navigation }) => {
         <Text style={styles.txt}>Lưu thông tin</Text>
       </Button>
       <View style={{ alignItems: "center", padding: 30 }}>
-        {imageSource ? (
+        {imageSource || imageUri ? (
           <Image
-            source={imageSource}
+            source={imageSource || { uri: imageUri }}
             style={{ width: 150, height: 150, borderRadius: 75, marginBottom: 10 }}
           />
         ) : (

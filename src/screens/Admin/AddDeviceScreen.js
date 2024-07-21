@@ -4,7 +4,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Button, TextInput } from 'react-native-paper';
 import DatePicker from 'react-native-date-picker';
 import firestore from '@react-native-firebase/firestore';
-
+import ImagePicker from 'react-native-image-picker';
 const AddDeviceScreen = ({ navigation }) => {
   const [name, setName] = useState('');
   const [id, setId] = useState('');
