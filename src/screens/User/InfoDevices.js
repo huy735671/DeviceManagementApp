@@ -7,7 +7,7 @@ const InfoDevices = ({ route, navigation }) => {
     id, icon = "devices", name, status, type, assetType, brand,
     model, supplier, price, purchaseDate, warrantyPeriod, 
     operationalStatus, deploymentDate, image
-  } = route.params;
+  } = route.params || {};
 
   const getStatusLabel = (status) => {
     switch (status) {
@@ -49,13 +49,13 @@ const InfoDevices = ({ route, navigation }) => {
           <Text style={styles.detailText}>Ngày đưa vào sử dụng: {new Date(deploymentDate).toLocaleDateString()}</Text>
         </View>
       </View>
-      {status === "active" && (
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.btnReport} onPress={() => navigation.navigate("Report")}>
-            <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'white' }}>Báo cáo thiết bị</Text>
+      <View style={styles.buttonContainer}>
+        {status === "active" && (
+          <TouchableOpacity style={styles.btnReport} onPress={() => navigation.navigate("Report", { id, name })}>
+            <Text style={styles.btnText}>Báo cáo thiết bị</Text>
           </TouchableOpacity>
-        </View>
-      )}
+        )}
+      </View>
     </View>
   );
 };
@@ -103,22 +103,25 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: "row",
-    justifyContent: "space-around",
+    justifyContent: "center",
     marginTop: 20,
   },
   btnReport: {
     backgroundColor: '#007BFF',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     borderRadius: 25,
-    marginTop: 10,
-    marginBottom: 10,
     elevation: 10,
     alignItems: 'center',
     justifyContent: 'center',
     width: 200,
     height: 50,
-  }
+  },
+  btnText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: 'white',
+  },
 });
 
 export default InfoDevices;

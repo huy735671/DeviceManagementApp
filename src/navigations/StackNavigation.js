@@ -175,8 +175,8 @@ const StackNavigation = () => {
       <Stack.Screen name='Report'
         component={ReportScreen}
         options={{
-
-          headerShown: false,
+          title: "Báo cáo thiết bị",
+          headerShown: true,
           headerStyle: {
             backgroundColor: "#1FD2BD",
           },
