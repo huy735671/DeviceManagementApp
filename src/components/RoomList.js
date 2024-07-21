@@ -48,7 +48,7 @@ const RoomList = () => {
   return (
     <View>
       <Text style={{ fontWeight: "bold", fontSize: 25, margin: 10 }}>
-        Room List
+        Danh sách phòng ban
       </Text>
       <View style={styles.container}>
         {rooms.map((room) => (
@@ -57,7 +57,7 @@ const RoomList = () => {
             style={styles.item}
             onPress={() => handleRoomPress(room)}
           >
-            <Icons name="computer" size={50} color="black" />
+            <Icons name="list-alt" size={50} color="black" />
             <Text style={{ fontWeight: "bold" }}>{room.name}</Text>
             <Text style={{ color: getStatusColor(room.status), fontWeight: 'bold' }}>{room.status}</Text>
           </TouchableOpacity>

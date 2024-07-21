@@ -70,14 +70,9 @@ const Room = () => {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-        onPress={() => navigation.goBack()}
-        style={{ position: "absolute", top: 20, left: 10 }}
-      >
-        <Icons name="arrow-back" size={25} color="black" />
-      </TouchableOpacity>
       
-      <Text style={styles.title}>Devices in {room.name}</Text>
+      
+      <Text style={styles.title}> {room.name}</Text>
 
       <Animated.View animation='zoomIn' style={styles.content}>
         {devices.map((device) => (
@@ -88,8 +83,8 @@ const Room = () => {
           >
             <Icons name="devices" size={50} color="black" />
             <View style={{ marginLeft: 10 }}>
-              <Text style={{ fontWeight: 'bold', fontSize:18}}>Device: {device.name}</Text>
-              <Text style={{ color: getStatusColor(device.operationalStatus), fontWeight: 'bold', }}>Status: {device.operationalStatus}</Text>
+              <Text style={{ fontWeight: 'bold', fontSize:18}}>Thiết bị: {device.name}</Text>
+              <Text style={{ color: getStatusColor(device.operationalStatus), fontWeight: 'bold', }}>Trạng thái: {device.operationalStatus}</Text>
             </View>
           </TouchableOpacity>
         ))}

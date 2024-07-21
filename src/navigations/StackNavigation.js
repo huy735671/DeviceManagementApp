@@ -42,10 +42,18 @@ const StackNavigation = () => {
       <Stack.Screen name='AdminTab' component={AdminTab} />
       <Stack.Screen name='UserTab' component={UserTab} />
       <Stack.Screen name='ForgotPassword' component={ForgotPassword} />
-      <Stack.Screen name='Room' component={Room} options={{ headerShown: false }} />
       <Stack.Screen name='Dashboard' component={DashboardScreen} options={{ headerShown: false }} />
       <Stack.Screen name='RoomList' component={RoomList} options={{ headerShown: false }} />
       <Stack.Screen name='Home' component={HomeScreen} options={{ headerShown: false }} />
+
+      <Stack.Screen name='Room'
+       component={Room}
+       options={{
+        title: "Danh sách thiết bị",
+        headerShown: true,
+        headerStyle: {
+          backgroundColor: "#1FD2BD",
+        }, }} />
 
       <Stack.Screen name='AddRoom'
        component={AddRoom}

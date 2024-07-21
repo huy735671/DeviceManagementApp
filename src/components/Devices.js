@@ -1,35 +1,17 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import Icons from "react-native-vector-icons/MaterialIcons";
+import { View, Text, StyleSheet, Dimensions } from "react-native";
 import * as Animatable from 'react-native-animatable';
+
+const { width } = Dimensions.get('window'); 
 
 const Devices = () => {
   return (
     <View>
-      <Text style={{ fontWeight: 'bold', fontSize: 25, margin: 10, color:'black' }}>Devices List</Text>
+      <Text style={{ fontWeight: 'bold', fontSize: 25, margin: 10, color:'black' }}>Gay Management</Text>
       <Animatable.View animation='lightSpeedIn' style={style.container}>
-        <View style={style.devices}>
-          <View style={style.icon}>
-            <Icons name="computer" size={25} color="black" />
-          </View>
-          <Text style={{color:'black',fontSize:16,fontWeight:'bold'}} > Computer</Text>
+        <View style={style.topImageContainer}>
+          <Animatable.Image source={require('../assets/bannerHome.png')} style={style.topImage}/>
         </View>
-
-        <View style={style.devices}>
-          <View style={style.icon}><Icons name="phone" size={25} color="black" /></View>
-          <Text style={{color:'black',fontSize:16,fontWeight:'bold'}}> Phone</Text>
-        </View>
-        <View style={style.devices}>
-          <View style={style.icon}><Icons name="tv" size={25} color="black" /></View>
-
-          <Text style={{color:'black',fontSize:16,fontWeight:'bold'}}> Screen</Text>
-        </View>
-        <View style={style.devices}>
-          <View style={style.icon}><Icons name="camera" size={25} color="black" /></View>
-
-          <Text style={{color:'black',fontSize:16,fontWeight:'bold'}} > Camera</Text>
-        </View>
-
       </Animatable.View>
     </View>
   );
@@ -44,23 +26,18 @@ const style = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     color:'black',
+    width: width, 
   },
-  devices: {
-    margin: 10,
-    alignItems: "center",
-    marginHorizontal: 5,
-    
-
+  
+  topImageContainer: {
+    marginHorizontal: 10,
+    marginTop: 10,
+    borderRadius: 10,
+    overflow: 'hidden',
+    width: '95%', 
   },
-  icon: {
-    width: 70,
-    height: 70,
-    alignItems: "center",
-    marginHorizontal: 5,
-    borderWidth: 2,
-    borderBlockColor: "black",
-    borderRadius: 50,
-    justifyContent: "center",
-    // alignItems: "center",
+  topImage:{
+    height: 200,
+    width: '100%',
   },
 });
