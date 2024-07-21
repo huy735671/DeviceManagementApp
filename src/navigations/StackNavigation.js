@@ -179,7 +179,11 @@ const StackNavigation = () => {
         name="SearchBar"
         component={SearchBar}
         options={{
-          headerShown: false,
+          title: "Tìm kiếm",
+          headerShown: true,
+          headerStyle: {
+            backgroundColor: "#1FD2BD",
+          },
         }}
       />
       <Stack.Screen

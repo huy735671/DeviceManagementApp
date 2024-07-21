@@ -96,13 +96,13 @@ const SearchBar = ({ userRole }) => {
 
   return (
     <View style={styles.container}>
-      <Header
+      {/* <Header
         leftComponent={{
           icon: "arrow-back",
           color: "#fff",
           onPress: () => navigation.goBack(),
         }}
-      />
+      /> */}
       <View style={styles.searchContainer}>
         <TouchableOpacity style={styles.searchIconContainer} onPress={handleSearch}>
           <Icons name="search" size={24} color="#666" />
