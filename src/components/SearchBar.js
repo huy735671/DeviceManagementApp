@@ -87,7 +87,7 @@ const SearchBar = ({ userRole }) => {
           <Text style={styles.itemTitle}>{item.name 
           // ||item.username
            }</Text>
-          <Text style={styles.itemTitle}>In Room: {item.roomName || "Unknow"}</Text>
+          <Text style={styles.itemTitle}>{item.roomName || " "}</Text>
        
         </View>
       </TouchableOpacity>
