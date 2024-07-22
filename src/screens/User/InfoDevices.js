@@ -1,18 +1,42 @@
 import React from "react";
-import { View, Text, StyleSheet, Alert, TouchableOpacity, Image } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 
 const InfoDevices = ({ route, navigation }) => {
   const {
-    id, icon = "devices", name, status, type, assetType, brand,
-    model, supplier, price, purchaseDate, warrantyPeriod, 
-    operationalStatus, deploymentDate, image
+    id, icon = "devices", name, status, type, brand,
+    supplier, price, purchaseDate, warrantyPeriod,
+    operationalStatus, deploymentDate, image, roomName,
   } = route.params || {};
 
+  // Hàm để định dạng giá tiền theo tiền tệ Việt Nam
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+      minimumFractionDigits: 0,
+    }).format(price);
+  };
+
+  // Hàm để lấy màu sắc trạng thái
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "maintenance":
+        return "#fff3cd"; // màu đỏ nhạt cho trạng thái maintenance
+      case "inactive":
+        return "#f8d7da"; // màu vàng nhạt cho trạng thái inactive
+      case "active":
+        return "#d4edda"; // màu xanh nhạt cho trạng thái active
+      default:
+        return "#e2e3e5"; // màu xám nhạt cho trạng thái khác
+    }
+  };
+
+  // Hàm để lấy nhãn trạng thái
   const getStatusLabel = (status) => {
     switch (status) {
       case "maintenance":
-        return "Bảo trì";
+        return "Đang bảo trì";
       case "inactive":
         return "Hư hỏng";
       case "active":
@@ -22,10 +46,24 @@ const InfoDevices = ({ route, navigation }) => {
     }
   };
 
+  // Hàm để định dạng ngày
+  const formatDate = (date) => {
+    if (!date) return "Chưa có thông tin";
+    return new Date(date).toLocaleDateString('vi-VN');
+  };
+
+  const handleReport = () => {
+    navigation.navigate('Report', {
+      id: id,
+      name: name,
+      room: roomName,
+    });
+  };
+
   return (
     <View style={styles.container}>
-      <View style={styles.card}>
-        <View style={styles.header}>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={[styles.header, { backgroundColor: getStatusColor(status) }]}>
           {image ? (
             <Image source={{ uri: image }} style={styles.deviceImage} />
           ) : (
@@ -36,26 +74,70 @@ const InfoDevices = ({ route, navigation }) => {
             <Text style={styles.text}>{name}</Text>
             <Text style={styles.title}>Trạng thái:</Text>
             <Text style={styles.text}>{getStatusLabel(status)}</Text>
+            <Text style={styles.title}>Tên phòng:</Text>
+            <Text style={styles.text}>{roomName}</Text>
           </View>
         </View>
-        <View style={styles.details}>
-          <Text style={styles.detailText}>Kiểu thiết bị: {type}</Text>
-          <Text style={styles.detailText}>Thương hiệu: {brand}</Text>
-          <Text style={styles.detailText}>Nhà cung cấp: {supplier}</Text>
-          <Text style={styles.detailText}>Giá: {price}</Text>
-          <Text style={styles.detailText}>Ngày mua: {purchaseDate?.toDate().toLocaleDateString()}</Text>
-          <Text style={styles.detailText}>Thời hạn bảo hành: {warrantyPeriod?.toDate().toLocaleDateString()}</Text>
-          <Text style={styles.detailText}>Trạng thái hoạt động: {operationalStatus}</Text>
-          <Text style={styles.detailText}>Ngày đưa vào sử dụng: {new Date(deploymentDate).toLocaleDateString()}</Text>
+
+        <View style={styles.card}>
+          <View style={styles.details}>
+            <View style={styles.detailItem}>
+              <Text style={styles.detailTitle}>Kiểu thiết bị:</Text>
+              <Text style={styles.detailText}>{type}</Text>
+            </View>
+            <View style={styles.separator} />
+            <View style={styles.detailItem}>
+              <Text style={styles.detailTitle}>Thương hiệu:</Text>
+              <Text style={styles.detailText}>{brand}</Text>
+            </View>
+            <View style={styles.separator} />
+            <View style={styles.detailItem}>
+              <Text style={styles.detailTitle}>Nhà cung cấp:</Text>
+              <Text style={styles.detailText}>{supplier}</Text>
+            </View>
+            <View style={styles.separator} />
+            <View style={styles.detailItem}>
+              <Text style={styles.detailTitle}>Giá:</Text>
+              <Text style={styles.detailText}>{formatPrice(price)}</Text>
+            </View>
+            <View style={styles.separator} />
+            <View style={styles.detailItem}>
+              <Text style={styles.detailTitle}>Ngày mua:</Text>
+              <Text style={styles.detailText}>{formatDate(purchaseDate?.toDate())}</Text>
+            </View>
+            <View style={styles.separator} />
+            <View style={styles.detailItem}>
+              <Text style={styles.detailTitle}>Thời hạn bảo hành:</Text>
+              <Text style={styles.detailText}>{formatDate(warrantyPeriod?.toDate())}</Text>
+            </View>
+            <View style={styles.separator} />
+            <View style={styles.detailItem}>
+              <Text style={styles.detailTitle}>Ngày đưa vào sử dụng:</Text>
+              <Text style={styles.detailText}>{formatDate(deploymentDate)}</Text>
+            </View>
+          </View>
         </View>
-      </View>
-      <View style={styles.buttonContainer}>
-        {status === "active" && (
-          <TouchableOpacity style={styles.btnReport} onPress={() => navigation.navigate("Report", { id, name })}>
+
+        {status === "maintenance" && (
+          <View style={styles.statusMessage}>
+            <Text style={styles.statusText}>Thiết bị đang bảo trì</Text>
+          </View>
+        )}
+
+        {status === "inactive" && (
+          <View style={styles.statusMessage}>
+            <Text style={styles.statusText}>Đang chờ bảo trì</Text>
+          </View>
+        )}
+      </ScrollView>
+
+      {status === "active" && (
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.btnReport} onPress={handleReport}>
             <Text style={styles.btnText}>Báo cáo thiết bị</Text>
           </TouchableOpacity>
-        )}
-      </View>
+        </View>
+      )}
     </View>
   );
 };
@@ -63,22 +145,29 @@ const InfoDevices = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFF",
-    padding: 20,
+    backgroundColor: "#eff5f9",
   },
-  card: {
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#000",
-    marginBottom: 20,
+  scrollContainer: {
+    flexGrow: 1,
+    padding: 10,
+    paddingBottom: 70, 
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     padding: 10,
+    borderRadius: 20,
+  },
+  card: {
+    borderRadius: 20,
+    borderColor: "#000",
+    marginVertical: 10,
+    backgroundColor: "#eff5f9",
+    elevation: 5,
   },
   headerText: {
     marginLeft: 10,
+    flex: 1,
   },
   deviceImage: {
     width: 100,
@@ -88,23 +177,42 @@ const styles = StyleSheet.create({
   },
   title: {
     fontWeight: "bold",
-    fontSize: 16,
+    fontSize: 18,
+    color: 'black',
   },
   text: {
-    fontSize: 16,
+    fontSize: 18,
     marginBottom: 5,
+    color: 'black',
   },
   details: {
     padding: 10,
+    backgroundColor: "#ffffff",
+    borderRadius: 20,
+  },
+  detailItem: {
+    paddingVertical: 10,
+  },
+  detailTitle: {
+    fontWeight: "bold",
+    fontSize: 16,
+    marginBottom: 5,
+    color: 'black',
   },
   detailText: {
     fontSize: 16,
-    marginBottom: 5,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: '#cccccc',
+    marginVertical: 5,
   },
   buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginTop: 20,
+    position: "absolute",
+    bottom: 10,
+    left: 0,
+    right: 0,
+    alignItems: "center",
   },
   btnReport: {
     backgroundColor: '#007BFF',
@@ -121,6 +229,17 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: 'white',
+  },
+  statusMessage: {
+    padding: 10,
+    backgroundColor: '#ffdddd',
+    borderRadius: 10,
+    marginVertical: 10,
+    alignItems: 'center',
+  },
+  statusText: {
+    fontSize: 16,
+    color: '#d9534f',
   },
 });
 
