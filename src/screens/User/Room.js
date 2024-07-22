@@ -75,11 +75,7 @@ const Room = () => {
       operationalStatus: item.operationalStatus,
       deploymentDate: item.deploymentDate,
       image: item.image, 
-<<<<<<< HEAD
       
-=======
-      roomName: room.name,
->>>>>>> 088ac23345a7ef3e08424d1fbc4340ad3a57ec01
     });
   };
   
@@ -99,11 +95,7 @@ const Room = () => {
 
   const statusLabels = {
     active: "Bình thường",
-<<<<<<< HEAD
     maintenance: "Đang Bảo trì",
-=======
-    maintenance: "Đang bảo trì",
->>>>>>> 088ac23345a7ef3e08424d1fbc4340ad3a57ec01
     inactive: "Hư hỏng",
   };
 

@@ -31,12 +31,8 @@ const ReportScreen = ({ route, navigation }) => {
         image: imageUri, 
         reporterName: user ? user.displayName : "Khách",
         reporterEmail: userEmail,
-<<<<<<< HEAD
         room: room, // Thêm thông tin phòng ban vào báo cáo
         
-=======
-        room: room,
->>>>>>> 088ac23345a7ef3e08424d1fbc4340ad3a57ec01
         timestamp: firestore.FieldValue.serverTimestamp(),
       });
       Alert.alert("Thành công", "Báo cáo đã được gửi thành công.");
@@ -107,11 +103,7 @@ const ReportScreen = ({ route, navigation }) => {
       <View style={styles.reportContainer}>
         <View style={styles.reportInfo}>
           <Text style={styles.deviceName}>Thiết bị: {name}</Text>
-<<<<<<< HEAD
           <Text style={styles.roomName}>Phòng ban: {room || "Unknow"}</Text>
-=======
-          <Text style={styles.roomName}>Phòng: {room}</Text>
->>>>>>> 088ac23345a7ef3e08424d1fbc4340ad3a57ec01
         </View>
         <TouchableOpacity style={styles.btnSubmit} onPress={handleSubmit}>
           <Text style={styles.btnSubmitText}>Gửi báo cáo</Text>
