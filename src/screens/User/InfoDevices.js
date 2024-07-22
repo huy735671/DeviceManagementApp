@@ -1,12 +1,12 @@
 import React from "react";
-import { View, Text, StyleSheet, Alert, TouchableOpacity, Image } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 
 const InfoDevices = ({ route, navigation }) => {
   const {
-    id, icon = "devices", name, status, type, assetType, brand,
-    model, supplier, price, purchaseDate, warrantyPeriod, 
-    operationalStatus, deploymentDate, image, roomName, department
+    id, icon = "devices", name, status, type, brand,
+     supplier, price, purchaseDate, warrantyPeriod, 
+    operationalStatus, deploymentDate, image, roomName, 
   } = route.params || {};
 
   const getStatusLabel = (status) => {
@@ -32,41 +32,77 @@ const InfoDevices = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.card}>
-        <View style={styles.header}>
-          {image ? (
-            <Image source={{ uri: image }} style={styles.deviceImage} />
-          ) : (
-            <Icon name={icon} size={100} color="#000" />
-          )}
-          <View style={styles.headerText}>
-            <Text style={styles.title}>Tên thiết bị:</Text>
-            <Text style={styles.text}>{name}</Text>
-            <Text style={styles.title}>Trạng thái:</Text>
-            <Text style={styles.text}>{getStatusLabel(status)}</Text>
-            <Text style={styles.title}>Tên phòng:</Text>
-            <Text style={styles.text}>{roomName}</Text>
-            
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+
+
+      <View style={styles.header}>
+            {image ? (
+              <Image source={{ uri: image }} style={styles.deviceImage} />
+            ) : (
+              <Icon name={icon} size={100} color="#000" />
+            )}
+            <View style={styles.headerText}>
+              <Text style={styles.title}>Tên thiết bị:</Text>
+              <Text style={styles.text}>{name}</Text>
+              <Text style={styles.title}>Trạng thái:</Text>
+              <Text style={styles.text}>{getStatusLabel(status)}</Text>
+              <Text style={styles.title}>Tên phòng:</Text>
+              <Text style={styles.text}>{roomName}</Text>
+            </View>
+          </View>
+
+        <View style={styles.card}>
+         
+          <View style={styles.details}>
+            <View style={styles.detailItem}>
+              <Text style={styles.detailTitle}>Kiểu thiết bị:</Text>
+              <Text style={styles.detailText}>{type}</Text>
+            </View>
+            <View style={styles.separator} />
+            <View style={styles.detailItem}>
+              <Text style={styles.detailTitle}>Thương hiệu:</Text>
+              <Text style={styles.detailText}>{brand}</Text>
+            </View>
+            <View style={styles.separator} />
+            <View style={styles.detailItem}>
+              <Text style={styles.detailTitle}>Nhà cung cấp:</Text>
+              <Text style={styles.detailText}>{supplier}</Text>
+            </View>
+            <View style={styles.separator} />
+            <View style={styles.detailItem}>
+              <Text style={styles.detailTitle}>Giá:</Text>
+              <Text style={styles.detailText}>{price}</Text>
+            </View>
+            <View style={styles.separator} />
+            <View style={styles.detailItem}>
+              <Text style={styles.detailTitle}>Ngày mua:</Text>
+              <Text style={styles.detailText}>{purchaseDate?.toDate().toLocaleDateString()}</Text>
+            </View>
+            <View style={styles.separator} />
+            <View style={styles.detailItem}>
+              <Text style={styles.detailTitle}>Thời hạn bảo hành:</Text>
+              <Text style={styles.detailText}>{warrantyPeriod?.toDate().toLocaleDateString()}</Text>
+            </View>
+            <View style={styles.separator} />
+            <View style={styles.detailItem}>
+              <Text style={styles.detailTitle}>Trạng thái hoạt động:</Text>
+              <Text style={styles.detailText}>{operationalStatus}</Text>
+            </View>
+            <View style={styles.separator} />
+            <View style={styles.detailItem}>
+              <Text style={styles.detailTitle}>Ngày đưa vào sử dụng:</Text>
+              <Text style={styles.detailText}>{new Date(deploymentDate).toLocaleDateString()}</Text>
+            </View>
           </View>
         </View>
-        <View style={styles.details}>
-          <Text style={styles.detailText}>Kiểu thiết bị: {type}</Text>
-          <Text style={styles.detailText}>Thương hiệu: {brand}</Text>
-          <Text style={styles.detailText}>Nhà cung cấp: {supplier}</Text>
-          <Text style={styles.detailText}>Giá: {price}</Text>
-          <Text style={styles.detailText}>Ngày mua: {purchaseDate?.toDate().toLocaleDateString()}</Text>
-          <Text style={styles.detailText}>Thời hạn bảo hành: {warrantyPeriod?.toDate().toLocaleDateString()}</Text>
-          <Text style={styles.detailText}>Trạng thái hoạt động: {operationalStatus}</Text>
-          <Text style={styles.detailText}>Ngày đưa vào sử dụng: {new Date(deploymentDate).toLocaleDateString()}</Text>
-        </View>
-      </View>
-      <View style={styles.buttonContainer}>
-        {status === "active" && (
+      </ScrollView>
+      {status === "active" && (
+        <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.btnReport} onPress={handleReport}>
             <Text style={styles.btnText}>Báo cáo thiết bị</Text>
           </TouchableOpacity>
-        )}
-      </View>
+        </View>
+      )}
     </View>
   );
 };
@@ -74,22 +110,33 @@ const InfoDevices = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFF",
-    padding: 20,
+    backgroundColor: "#eff5f9",
   },
-  card: {
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#000",
-    marginBottom: 20,
+  scrollContainer: {
+    flexGrow: 1,
+    padding: 10,
+    paddingBottom: 70, 
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     padding: 10,
+    backgroundColor: '#007bff',
+    borderRadius:20,
+    borderWidth:1, 
   },
+  card: {
+    borderRadius: 20, 
+    borderWidth: 1,
+    borderColor: "#000",
+    marginVertical: 10,
+    backgroundColor: "#eff5f9",
+    elevation: 5,
+  },
+  
   headerText: {
     marginLeft: 10,
+    flex: 1,
   },
   deviceImage: {
     width: 100,
@@ -99,23 +146,43 @@ const styles = StyleSheet.create({
   },
   title: {
     fontWeight: "bold",
-    fontSize: 16,
+    fontSize: 18,
+    color: '#ffffff',
   },
   text: {
-    fontSize: 16,
+    fontSize: 18,
     marginBottom: 5,
+    color: '#ffffff',
   },
   details: {
     padding: 10,
+    backgroundColor: "#ffffff",
+    borderRadius:20, 
+ 
+  },
+  detailItem: {
+    paddingVertical: 10,
+  },
+  detailTitle: {
+    fontWeight: "bold",
+    fontSize: 16,
+    marginBottom: 5,
+    color:'black',
   },
   detailText: {
     fontSize: 16,
-    marginBottom: 5,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: '#cccccc',
+    marginVertical: 5,
   },
   buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginTop: 20,
+    position: "absolute",
+    bottom: 10,
+    left: 0,
+    right: 0,
+    alignItems: "center",
   },
   btnReport: {
     backgroundColor: '#007BFF',
