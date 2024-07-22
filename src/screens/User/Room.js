@@ -85,9 +85,9 @@ const Room = () => {
       case "active":
         return "#d4edda"; // màu xanh nhạt cho trạng thái active
       case "maintenance":
-        return "#f8d7da"; // màu đỏ nhạt cho trạng thái maintenance
+        return "#fff3cd"; // màu đỏ nhạt cho trạng thái maintenance
       case "inactive":
-        return "#fff3cd"; // màu vàng nhạt cho trạng thái inactive
+        return "#f8d7da"; // màu vàng nhạt cho trạng thái inactive
       default:
         return "#e2e3e5"; // màu xám nhạt cho trạng thái khác
     }
@@ -95,7 +95,7 @@ const Room = () => {
 
   const statusLabels = {
     active: "Bình thường",
-    maintenance: "Bảo trì",
+    maintenance: "Đang bảo trì",
     inactive: "Hư hỏng",
   };
 
@@ -112,7 +112,7 @@ const Room = () => {
           <Text style={styles.infoValue}>{deviceCounts.active}</Text>
         </View>
         <View style={styles.infoBox}>
-          <Text style={styles.infoLabel}>Bảo trì:</Text>
+          <Text style={styles.infoLabel}>Đang bảo trì:</Text>
           <Text style={styles.infoValue}>{deviceCounts.maintenance}</Text>
         </View>
         <View style={styles.infoBox}>
@@ -121,23 +121,29 @@ const Room = () => {
         </View>
       </View>
       <Animated.View animation="zoomIn" style={styles.content}>
-        {devices.map((device) => (
-          <TouchableOpacity
-            key={device.id}
-            onPress={() => handleDevicePress(device)}
-            style={[styles.item, { backgroundColor: getStatusColor(device.operationalStatus) }]}
-          >
-            {device.image ? (
-              <Image source={{ uri: device.image }} style={styles.deviceImage} />
-            ) : (
-              <Icons name="devices" size={50} color="black" />
-            )}
-            <View style={styles.deviceInfo}>
-              <Text style={styles.deviceName}>Thiết bị: {device.name}</Text>
-              <Text style={styles.deviceStatus}>Trạng thái: {statusLabels[device.operationalStatus]}</Text>
-            </View>
-          </TouchableOpacity>
-        ))}
+        {devices.length === 0 ? (
+          <View style={styles.noDevicesContainer}>
+            <Text style={styles.noDevicesText}>Không có thiết bị nào trong phòng này.</Text>
+          </View>
+        ) : (
+          devices.map((device) => (
+            <TouchableOpacity
+              key={device.id}
+              onPress={() => handleDevicePress(device)}
+              style={[styles.item, { backgroundColor: getStatusColor(device.operationalStatus) }]}
+            >
+              {device.image ? (
+                <Image source={{ uri: device.image }} style={styles.deviceImage} />
+              ) : (
+                <Icons name="devices" size={50} color="black" />
+              )}
+              <View style={styles.deviceInfo}>
+                <Text style={styles.deviceName}>Thiết bị: {device.name}</Text>
+                <Text style={styles.deviceStatus}>Trạng thái: {statusLabels[device.operationalStatus]}</Text>
+              </View>
+            </TouchableOpacity>
+          ))
+        )}
       </Animated.View>
     </View>
   );
@@ -247,5 +253,14 @@ const styles = StyleSheet.create({
   deviceStatus: {
     color: 'black',
     fontWeight: 'bold',
+  },
+  noDevicesContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  noDevicesText: {
+    fontSize: 18,
+    color: '#6c757d',
   },
 });

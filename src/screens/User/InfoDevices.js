@@ -5,14 +5,38 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 const InfoDevices = ({ route, navigation }) => {
   const {
     id, icon = "devices", name, status, type, brand,
-     supplier, price, purchaseDate, warrantyPeriod, 
-    operationalStatus, deploymentDate, image, roomName, 
+    supplier, price, purchaseDate, warrantyPeriod,
+    operationalStatus, deploymentDate, image, roomName,
   } = route.params || {};
 
+  // Hàm để định dạng giá tiền theo tiền tệ Việt Nam
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+      minimumFractionDigits: 0,
+    }).format(price);
+  };
+
+  // Hàm để lấy màu sắc trạng thái
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "maintenance":
+        return "#fff3cd"; // màu đỏ nhạt cho trạng thái maintenance
+      case "inactive":
+        return "#f8d7da"; // màu vàng nhạt cho trạng thái inactive
+      case "active":
+        return "#d4edda"; // màu xanh nhạt cho trạng thái active
+      default:
+        return "#e2e3e5"; // màu xám nhạt cho trạng thái khác
+    }
+  };
+
+  // Hàm để lấy nhãn trạng thái
   const getStatusLabel = (status) => {
     switch (status) {
       case "maintenance":
-        return "Bảo trì";
+        return "Đang bảo trì";
       case "inactive":
         return "Hư hỏng";
       case "active":
@@ -20,6 +44,12 @@ const InfoDevices = ({ route, navigation }) => {
       default:
         return "Không xác định";
     }
+  };
+
+  // Hàm để định dạng ngày
+  const formatDate = (date) => {
+    if (!date) return "Chưa có thông tin";
+    return new Date(date).toLocaleDateString('vi-VN');
   };
 
   const handleReport = () => {
@@ -33,26 +63,23 @@ const InfoDevices = ({ route, navigation }) => {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-
-
-      <View style={styles.header}>
-            {image ? (
-              <Image source={{ uri: image }} style={styles.deviceImage} />
-            ) : (
-              <Icon name={icon} size={100} color="#000" />
-            )}
-            <View style={styles.headerText}>
-              <Text style={styles.title}>Tên thiết bị:</Text>
-              <Text style={styles.text}>{name}</Text>
-              <Text style={styles.title}>Trạng thái:</Text>
-              <Text style={styles.text}>{getStatusLabel(status)}</Text>
-              <Text style={styles.title}>Tên phòng:</Text>
-              <Text style={styles.text}>{roomName}</Text>
-            </View>
+        <View style={[styles.header, { backgroundColor: getStatusColor(status) }]}>
+          {image ? (
+            <Image source={{ uri: image }} style={styles.deviceImage} />
+          ) : (
+            <Icon name={icon} size={100} color="#000" />
+          )}
+          <View style={styles.headerText}>
+            <Text style={styles.title}>Tên thiết bị:</Text>
+            <Text style={styles.text}>{name}</Text>
+            <Text style={styles.title}>Trạng thái:</Text>
+            <Text style={styles.text}>{getStatusLabel(status)}</Text>
+            <Text style={styles.title}>Tên phòng:</Text>
+            <Text style={styles.text}>{roomName}</Text>
           </View>
+        </View>
 
         <View style={styles.card}>
-         
           <View style={styles.details}>
             <View style={styles.detailItem}>
               <Text style={styles.detailTitle}>Kiểu thiết bị:</Text>
@@ -71,31 +98,39 @@ const InfoDevices = ({ route, navigation }) => {
             <View style={styles.separator} />
             <View style={styles.detailItem}>
               <Text style={styles.detailTitle}>Giá:</Text>
-              <Text style={styles.detailText}>{price}</Text>
+              <Text style={styles.detailText}>{formatPrice(price)}</Text>
             </View>
             <View style={styles.separator} />
             <View style={styles.detailItem}>
               <Text style={styles.detailTitle}>Ngày mua:</Text>
-              <Text style={styles.detailText}>{purchaseDate?.toDate().toLocaleDateString()}</Text>
+              <Text style={styles.detailText}>{formatDate(purchaseDate?.toDate())}</Text>
             </View>
             <View style={styles.separator} />
             <View style={styles.detailItem}>
               <Text style={styles.detailTitle}>Thời hạn bảo hành:</Text>
-              <Text style={styles.detailText}>{warrantyPeriod?.toDate().toLocaleDateString()}</Text>
-            </View>
-            <View style={styles.separator} />
-            <View style={styles.detailItem}>
-              <Text style={styles.detailTitle}>Trạng thái hoạt động:</Text>
-              <Text style={styles.detailText}>{operationalStatus}</Text>
+              <Text style={styles.detailText}>{formatDate(warrantyPeriod?.toDate())}</Text>
             </View>
             <View style={styles.separator} />
             <View style={styles.detailItem}>
               <Text style={styles.detailTitle}>Ngày đưa vào sử dụng:</Text>
-              <Text style={styles.detailText}>{new Date(deploymentDate).toLocaleDateString()}</Text>
+              <Text style={styles.detailText}>{formatDate(deploymentDate)}</Text>
             </View>
           </View>
         </View>
+
+        {status === "maintenance" && (
+          <View style={styles.statusMessage}>
+            <Text style={styles.statusText}>Thiết bị đang bảo trì</Text>
+          </View>
+        )}
+
+        {status === "inactive" && (
+          <View style={styles.statusMessage}>
+            <Text style={styles.statusText}>Đang chờ bảo trì</Text>
+          </View>
+        )}
       </ScrollView>
+
       {status === "active" && (
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.btnReport} onPress={handleReport}>
@@ -121,19 +156,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: 10,
-    backgroundColor: '#007bff',
-    borderRadius:20,
-    borderWidth:1, 
+    borderRadius: 20,
   },
   card: {
-    borderRadius: 20, 
-    borderWidth: 1,
+    borderRadius: 20,
     borderColor: "#000",
     marginVertical: 10,
     backgroundColor: "#eff5f9",
     elevation: 5,
   },
-  
   headerText: {
     marginLeft: 10,
     flex: 1,
@@ -147,18 +178,17 @@ const styles = StyleSheet.create({
   title: {
     fontWeight: "bold",
     fontSize: 18,
-    color: '#ffffff',
+    color: 'black',
   },
   text: {
     fontSize: 18,
     marginBottom: 5,
-    color: '#ffffff',
+    color: 'black',
   },
   details: {
     padding: 10,
     backgroundColor: "#ffffff",
-    borderRadius:20, 
- 
+    borderRadius: 20,
   },
   detailItem: {
     paddingVertical: 10,
@@ -167,7 +197,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 16,
     marginBottom: 5,
-    color:'black',
+    color: 'black',
   },
   detailText: {
     fontSize: 16,
@@ -199,6 +229,17 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: 'white',
+  },
+  statusMessage: {
+    padding: 10,
+    backgroundColor: '#ffdddd',
+    borderRadius: 10,
+    marginVertical: 10,
+    alignItems: 'center',
+  },
+  statusText: {
+    fontSize: 16,
+    color: '#d9534f',
   },
 });
 
