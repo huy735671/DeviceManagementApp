@@ -75,6 +75,7 @@ const Room = () => {
       operationalStatus: item.operationalStatus,
       deploymentDate: item.deploymentDate,
       image: item.image, 
+      
     });
   };
   
@@ -94,7 +95,7 @@ const Room = () => {
 
   const statusLabels = {
     active: "Bình thường",
-    maintenance: "Bảo trì",
+    maintenance: "Đang Bảo trì",
     inactive: "Hư hỏng",
   };
 

@@ -1,16 +1,33 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, Dimensions } from "react-native";
 import * as Animatable from 'react-native-animatable';
 
 const { width } = Dimensions.get('window'); 
 
 const Devices = () => {
+  const [currentImage, setCurrentImage] = useState(require('../assets/bannerHome.png'));
+  const images = [
+    require('../assets/bannerHome.png'),
+    require('../assets/banner2.jpg'),
+    require('../assets/banner3.jpg'),
+  ];
+
+  useEffect(() => {
+    let currentIndex = 0;
+    const intervalId = setInterval(() => {
+      currentIndex = (currentIndex + 1) % images.length;
+      setCurrentImage(images[currentIndex]);
+    }, 3000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
   return (
     <View>
       <Text style={{ fontWeight: 'bold', fontSize: 25, margin: 10, color:'black' }}>Gay Management</Text>
       <Animatable.View animation='lightSpeedIn' style={style.container}>
         <View style={style.topImageContainer}>
-          <Animatable.Image source={require('../assets/bannerHome.png')} style={style.topImage}/>
+          <Animatable.Image source={currentImage} style={style.topImage}/>
         </View>
       </Animatable.View>
     </View>

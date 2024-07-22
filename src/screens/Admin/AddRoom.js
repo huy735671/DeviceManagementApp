@@ -13,7 +13,7 @@ const AddRoom = ({ navigation }) => {
   const roomStatuses = [
     { label: "Hoạt động", value: "Active" },
     { label: "Đóng", value: "Close" },
-    { label: "Bảo trì", value: "Maintenance" },
+    { label: "Đang Bảo trì", value: "Maintenance" },
   ];
 
   useEffect(() => {

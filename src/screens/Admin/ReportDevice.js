@@ -14,7 +14,7 @@ const ReportDeviceScreen = ({ route, navigation }) => {
   const statusOptions = [
     { label: 'Hoạt động', value: 'active' },
     { label: 'Không hoạt động', value: 'inactive' },
-    { label: 'Bảo trì', value: 'maintenance' },
+    { label: 'Đang Bảo trì', value: 'maintenance' },
   ];
 
   const handleReportDevice = async () => {
