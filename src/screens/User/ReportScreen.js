@@ -28,10 +28,10 @@ const ReportScreen = ({ route, navigation }) => {
         deviceId: id,
         deviceName: name,
         description: description,
-        image: imageUri, // Lưu URL hoặc dữ liệu của hình ảnh
+        image: imageUri, 
         reporterName: user ? user.displayName : "Khách",
         reporterEmail: userEmail,
-        room: room, // Thêm thông tin phòng ban vào báo cáo
+        room: room,
         timestamp: firestore.FieldValue.serverTimestamp(),
       });
       Alert.alert("Thành công", "Báo cáo đã được gửi thành công.");
@@ -78,7 +78,9 @@ const ReportScreen = ({ route, navigation }) => {
         {imageUri ? (
           <Image source={{ uri: imageUri }} style={styles.imagePreview} />
         ) : (
-          <Text style={styles.imagePlaceholder}>Chưa có hình ảnh</Text>
+          <View style={styles.imagePlaceholderContainer}>
+            <Text style={styles.imagePlaceholder}>Chưa có hình ảnh</Text>
+          </View>
         )}
       </View>
       <View style={styles.buttonsContainer}>
@@ -100,7 +102,7 @@ const ReportScreen = ({ route, navigation }) => {
       <View style={styles.reportContainer}>
         <View style={styles.reportInfo}>
           <Text style={styles.deviceName}>Thiết bị: {name}</Text>
-          <Text style={styles.roomName}>Phòng ban: {room}</Text>
+          <Text style={styles.roomName}>Phòng: {room}</Text>
         </View>
         <TouchableOpacity style={styles.btnSubmit} onPress={handleSubmit}>
           <Text style={styles.btnSubmitText}>Gửi báo cáo</Text>
@@ -115,7 +117,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FFF",
     padding: 10,
-    paddingBottom: 80, // Đảm bảo không bị chồng lên bởi nút gửi báo cáo
+    paddingBottom: 80, 
   },
   title: {
     fontSize: 24,
@@ -125,37 +127,40 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 16,
     marginBottom: 20,
-    color: "#555",
   },
   input: {
-    borderColor: "#CCC",
     borderWidth: 1,
+    borderColor: "#ccc",
     borderRadius: 5,
-    padding: 15,
-    textAlignVertical: "top",
+    padding: 10,
     fontSize: 16,
+    height: 250,
+    textAlignVertical: "top",
     marginBottom: 20,
-    flex: 1,
   },
   imageContainer: {
-    borderColor: "#CCC",
-    borderWidth: 1,
-    borderRadius: 10,
-    height: 150,
-    marginBottom: 20,
-    justifyContent: "center",
     alignItems: "center",
-    overflow: "hidden",
-    backgroundColor: "#F8F8F8",
+    marginBottom: 20,
   },
   imagePreview: {
-    width: "100%",
-    height: "100%",
-    resizeMode: 'cover',
+    width: 400,
+    height: 250,
+    resizeMode: "cover",
+    borderRadius: 10,
+  },
+  imagePlaceholderContainer: {
+    width: 400,
+    height: 250,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f8f8f8",
   },
   imagePlaceholder: {
     fontSize: 16,
-    color: "#AAA",
+    color: "#999",
   },
   buttonsContainer: {
     flexDirection: "row",
@@ -163,20 +168,18 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   btnImage: {
-    backgroundColor: '#007BFF',
+    backgroundColor: "#007BFF",
     paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 25,
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 5,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    alignItems: "center",
     flex: 1,
     marginHorizontal: 5,
   },
   btnText: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: 'white',
+    fontWeight: "bold",
+    color: "white",
   },
   reportContainer: {
     position: 'absolute',
@@ -184,8 +187,8 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     backgroundColor: '#FFF',
-    borderTopWidth: 2,
-    borderTopColor: '#CCC',
+    borderTopWidth: 1,
+    borderTopColor: '#ddd',
     paddingHorizontal: 20,
     paddingVertical: 10,
     flexDirection: 'row',
@@ -201,21 +204,19 @@ const styles = StyleSheet.create({
   },
   roomName: {
     fontSize: 16,
-    color: "#555",
   },
   btnSubmit: {
-    backgroundColor: '#007BFF',
-    paddingVertical: 15,
+    backgroundColor: "#28A745",
+    paddingVertical: 10,
     paddingHorizontal: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 10,
-    width: '40%', 
+    borderRadius: 5,
+    alignItems: "center",
+    justifyContent: "center",
   },
   btnSubmitText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: 'white',
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "white",
   },
 });
 

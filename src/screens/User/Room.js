@@ -49,7 +49,7 @@ const Room = () => {
       }
     };
 
-    fetchDevices();
+    fetchDevices(); 
 
     // Fetch devices every 10 seconds
     const intervalId = setInterval(fetchDevices, 10000);
@@ -75,6 +75,7 @@ const Room = () => {
       operationalStatus: item.operationalStatus,
       deploymentDate: item.deploymentDate,
       image: item.image, 
+      roomName: room.name,
     });
   };
   

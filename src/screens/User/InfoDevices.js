@@ -6,7 +6,7 @@ const InfoDevices = ({ route, navigation }) => {
   const {
     id, icon = "devices", name, status, type, assetType, brand,
     model, supplier, price, purchaseDate, warrantyPeriod, 
-    operationalStatus, deploymentDate, image
+    operationalStatus, deploymentDate, image, roomName, department
   } = route.params || {};
 
   const getStatusLabel = (status) => {
@@ -20,6 +20,14 @@ const InfoDevices = ({ route, navigation }) => {
       default:
         return "Không xác định";
     }
+  };
+
+  const handleReport = () => {
+    navigation.navigate('Report', {
+      id: id,
+      name: name,
+      room: roomName,
+    });
   };
 
   return (
@@ -36,6 +44,9 @@ const InfoDevices = ({ route, navigation }) => {
             <Text style={styles.text}>{name}</Text>
             <Text style={styles.title}>Trạng thái:</Text>
             <Text style={styles.text}>{getStatusLabel(status)}</Text>
+            <Text style={styles.title}>Tên phòng:</Text>
+            <Text style={styles.text}>{roomName}</Text>
+            
           </View>
         </View>
         <View style={styles.details}>
@@ -51,7 +62,7 @@ const InfoDevices = ({ route, navigation }) => {
       </View>
       <View style={styles.buttonContainer}>
         {status === "active" && (
-          <TouchableOpacity style={styles.btnReport} onPress={() => navigation.navigate("Report", { id, name })}>
+          <TouchableOpacity style={styles.btnReport} onPress={handleReport}>
             <Text style={styles.btnText}>Báo cáo thiết bị</Text>
           </TouchableOpacity>
         )}
