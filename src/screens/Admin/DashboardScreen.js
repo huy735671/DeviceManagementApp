@@ -10,6 +10,7 @@ import {
 import Icon from "react-native-vector-icons/MaterialIcons";
 import * as Animatable from 'react-native-animatable';
 import firestore from '@react-native-firebase/firestore';
+import Modal from 'react-native-modal';
 
 const DashboardScreen = ({ navigation }) => {
   const [numColumns, setNumColumns] = useState(2);
@@ -18,28 +19,24 @@ const DashboardScreen = ({ navigation }) => {
   const [employees, setEmployees] = useState([]);
   const [rooms, setRooms] = useState([]);
   const [maintenance, setMaintenance] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedRoom, setSelectedRoom] = useState(null);
 
   useEffect(() => {
-
-
     const unsubscribeRooms = firestore()
       .collection('ROOMS')
       .onSnapshot(snapshot => {
         const roomsData = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
-          featureId: "1", // Example: Assign featureId based on document type
-          icon: doc.data().icon, // Assume icon field exists in your Firestore document
+          featureId: "1",
+          icon: doc.data().icon,
         }));
         setRooms(roomsData);
       });
 
-    // Add similar listeners for maintenance data if needed
-
     return () => {
-
       unsubscribeRooms();
-      // Clean up maintenance listeners if added
     };
   }, []);
 
@@ -47,24 +44,35 @@ const DashboardScreen = ({ navigation }) => {
     { id: "1", title: "Tất cả", icon: "menu" },
     { id: "2", title: "Bảo trì", icon: "settings" },
     { id: "3", title: "Thống kê", icon: "insert-chart-outlined" },
-    // Add more items as needed
   ];
 
   const handleFeaturePress = (featureId) => {
     setSelectedFeatureId(featureId);
   };
 
-  const handleDetailPress = (item) => {
-   
+  const handleDetailPress = async (item) => {
     if (item.featureId === "1") {
-      navigation.navigate("RoomScreen", { roomId: item.id, roomName: item.name, roomStatus: item.status, roomIcon: item.icon });
+      setSelectedRoom(item);
+      setModalVisible(true);
+      
+      // Fetch employees and devices counts for the selected room
+      const employeeSnapshot = await firestore()
+        .collection('EMPLOYEES')
+        .where('roomId', '==', item.id)
+        .get();
+      const deviceSnapshot = await firestore()
+        .collection('DEVICES')
+        .where('roomId', '==', item.id)
+        .get();
+
+      setEmployees(employeeSnapshot.size);
+      setDevices(deviceSnapshot.size);
     }
     if (item.featureId === "2") {
       navigation.navigate("MaintenanceDetail", {
         id: item.id,
         icon: item.icon,
         name: item.name,
-
       });
     }
   };
@@ -88,8 +96,6 @@ const DashboardScreen = ({ navigation }) => {
   };
 
   const filteredData = [
-   // ...devices.filter(item => item.featureId === selectedFeatureId),
-   // ...employees.filter(item => item.featureId === selectedFeatureId),
     ...rooms.filter(item => item.featureId === selectedFeatureId),
     ...maintenance.filter(item => item.featureId === selectedFeatureId),
   ];
@@ -125,13 +131,52 @@ const DashboardScreen = ({ navigation }) => {
         keyExtractor={(item) => item.id}
         numColumns={numColumns}
       />
+
+      <Modal
+        isVisible={modalVisible}
+        onBackdropPress={() => setModalVisible(false)}
+        backdropOpacity={0.6}
+        style={styles.modal}
+        avoidKeyboard={true}
+      >
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>{selectedRoom?.name}</Text>
+          <Text style={styles.modalText}>Số lượng nhân viên: {employees}</Text>
+          <Text style={styles.modalText}>Số lượng thiết bị: {devices}</Text>
+          <View style={styles.modalButtons}>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={() => {
+                navigation.navigate('ListEmployee', { roomId: selectedRoom.id });
+                setModalVisible(false);
+              }}
+            >
+              <Text style={styles.modalButtonText}>Nhân viên</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={() => {
+                navigation.navigate('ListDevices', { roomId: selectedRoom.id });
+                setModalVisible(false);
+              }}
+            >
+              <Text style={styles.modalButtonText}>Thiết bị</Text>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => setModalVisible(false)}
+          >
+            <Text style={styles.closeButtonText}>Đóng</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-
     backgroundColor: "#FFF",
     paddingHorizontal: 10,
   },
@@ -176,6 +221,49 @@ const styles = StyleSheet.create({
     padding: 10,
     flexDirection: "row",
     alignItems: "center",
+  },
+  modal: {
+    justifyContent: 'flex-end',
+    margin: 0,
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  modalText: {
+    fontSize: 18,
+    marginVertical: 5,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    marginTop: 20,
+    marginBottom: 20,
+  },
+  modalButton: {
+    backgroundColor: '#1cd2bd',
+    padding: 10,
+    borderRadius: 5,
+    marginHorizontal: 10,
+  },
+  modalButtonText: {
+    color: 'white',
+    fontSize: 18,
+  },
+  closeButton: {
+    backgroundColor: '#f44336',
+    padding: 10,
+    borderRadius: 5,
+  },
+  closeButtonText: {
+    color: 'white',
+    fontSize: 18,
   },
 });
 
