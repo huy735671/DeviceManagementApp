@@ -28,7 +28,7 @@ import NotificationDetail from '../components/NotificationDetail';
 import Settings from '../screens/Settings';
 import ListEmployee from '../screens/Admin/ListEmployee';
 import ListDevices from '../screens/Admin/ListDevices';
-
+import BannerScreen from '../screens/Admin/BannerScreen';
 const Stack = createNativeStackNavigator();
 
 const StackNavigation = () => {
@@ -45,7 +45,7 @@ const StackNavigation = () => {
       <Stack.Screen name='Dashboard' component={DashboardScreen} options={{ headerShown: false }} />
       <Stack.Screen name='RoomList' component={RoomList} options={{ headerShown: false }} />
       <Stack.Screen name='Home' component={HomeScreen} options={{ headerShown: false }} />
-
+      <Stack.Screen name='Banner' component={BannerScreen} options={{ headerShown: false }} />
       <Stack.Screen name='Room'
        component={Room}
        options={{

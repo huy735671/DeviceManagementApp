@@ -6,10 +6,12 @@ import {
   TouchableOpacity,
   ScrollView,
   FlatList,
+  Button
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import * as Animatable from 'react-native-animatable';
 import firestore from '@react-native-firebase/firestore';
+
 
 const DashboardScreen = ({ navigation }) => {
   const [numColumns, setNumColumns] = useState(2);
@@ -47,9 +49,12 @@ const DashboardScreen = ({ navigation }) => {
     { id: "1", title: "Tất cả", icon: "menu" },
     { id: "2", title: "Bảo trì", icon: "settings" },
     { id: "3", title: "Thống kê", icon: "insert-chart-outlined" },
+    // { id: "4", title: "Banner", icon: "insert-chart-outlined" },
     // Add more items as needed
   ];
-
+  const goToBannerScreen = () => {
+    navigation.navigate('Banner');
+  };
   const handleFeaturePress = (featureId) => {
     setSelectedFeatureId(featureId);
   };
@@ -68,7 +73,7 @@ const DashboardScreen = ({ navigation }) => {
       });
     }
   };
-
+ 
   const renderDetailItem = ({ item }) => {
     return (
       <Animatable.View animation='zoomIn' style={styles.items}>
@@ -125,6 +130,7 @@ const DashboardScreen = ({ navigation }) => {
         keyExtractor={(item) => item.id}
         numColumns={numColumns}
       />
+    <Button title="Edit Banner" onPress={goToBannerScreen} />
     </View>
   );
 };
