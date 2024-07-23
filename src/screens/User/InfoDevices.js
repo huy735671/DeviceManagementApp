@@ -5,19 +5,11 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 const InfoDevices = ({ route, navigation }) => {
   const {
     id, icon = "devices", name, status, type, brand,
-    supplier, price, purchaseDate, warrantyPeriod,
+    supplier, purchaseDate, warrantyPeriod,
     operationalStatus, deploymentDate, image, roomName,
   } = route.params || {};
 
-  // Hàm để định dạng giá tiền theo tiền tệ Việt Nam
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
-      minimumFractionDigits: 0,
-    }).format(price);
-  };
-
+  
   // Hàm để lấy màu sắc trạng thái
   const getStatusColor = (status) => {
     switch (status) {
@@ -96,10 +88,7 @@ const InfoDevices = ({ route, navigation }) => {
               <Text style={styles.detailText}>{supplier}</Text>
             </View>
             <View style={styles.separator} />
-            <View style={styles.detailItem}>
-              <Text style={styles.detailTitle}>Giá:</Text>
-              <Text style={styles.detailText}>{formatPrice(price)}</Text>
-            </View>
+            
             <View style={styles.separator} />
             <View style={styles.detailItem}>
               <Text style={styles.detailTitle}>Ngày mua:</Text>

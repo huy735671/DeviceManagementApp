@@ -9,7 +9,6 @@ import RoomList from '../components/RoomList';
 import AddDeviceScreen from '../screens/Admin/AddDeviceScreen';
 import AddEmployeeScreen from '../screens/Admin/AddEmployeeScreen';
 import AddScreen from '../screens/Admin/AddScreen';
-import RoomScreen from '../screens/Admin/RoomScreen';
 import DevicesDetail from '../screens/Admin/DevicesDetail';
 import EmployeeDetail from '../screens/Admin/EmployeeDetail';
 import MaintenanceDetail from '../screens/Admin/MaintenanceDetail';
@@ -130,17 +129,7 @@ const StackNavigation = () => {
           },
         }}
       />
-      <Stack.Screen
-        name="RoomScreen"
-        component={RoomScreen}
-        options={{
-          title: "Thông tin phòng ban",
-          headerShown: false,
-          headerStyle: {
-            backgroundColor: "#1FD2BD",
-          },
-        }}
-      />
+      
       <Stack.Screen
         name="MaintenanceDetail"
         component={MaintenanceDetail}

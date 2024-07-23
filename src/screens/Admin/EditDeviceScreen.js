@@ -1,415 +1,265 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal, FlatList, Image } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import { Button, TextInput } from 'react-native-paper';
-import DatePicker from 'react-native-date-picker';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image, Alert, ScrollView, TouchableWithoutFeedback } from 'react-native';
+import { launchImageLibrary } from 'react-native-image-picker';
 import firestore from '@react-native-firebase/firestore';
+import storage from '@react-native-firebase/storage';
+import { Picker } from '@react-native-picker/picker';
 
 const EditDeviceScreen = ({ route, navigation }) => {
-  const { deviceId } = route.params;
-  const { id } = route.params;
-  const [device, setDevice] = useState(null);
-  const [price, setPrice] = useState([]);
-  const [rooms, setRooms] = useState([]);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [iconModalVisible, setIconModalVisible] = useState(false);
-  const [error, setError] = useState(null);
-  const [isDataReady, setIsDataReady] = useState(false);
-  const [isSpecificDevice, setIsSpecificDevice] = useState(false);
-
-  const [icons, setIcons] = useState([
-    'laptop',
-    'phone-android',
-    'tv',
-    'tablet',
-    'keyboard',
-    'headset',
-    // Add more icons as needed
-  ]);
-
-  const statusOptions = [
-    { label: 'Hoạt động', value: 'active' },
-    { label: 'Không hoạt động', value: 'inactive' },
-    { label: 'Đang Bảo trì', value: 'maintenance' },
-  ];
-
-  const [datePickerVisible, setDatePickerVisible] = useState(false);
-  const [datePickerMode, setDatePickerMode] = useState('datetime');
-  const [selectedDateField, setSelectedDateField] = useState(null);
+  const { device } = route.params;
+  const [deviceInfo, setDeviceInfo] = useState(device);
+  const [imageUri, setImageUri] = useState('');
+  const [status, setStatus] = useState(device.operationalStatus || 'active');
 
   useEffect(() => {
-    const fetchDevice = async () => {
-      const deviceDoc = await firestore().collection('DEVICES').doc(id).get();
-      // const deviceData = deviceDoc.data();
-      setDevice({
-        id: deviceDoc.id,
-        ...deviceDoc.data(),
-        datetime: deviceDoc.data()?.datetime?.toDate() || new Date(),
-        deploymentDate: deviceDoc.data()?.deploymentDate?.toDate() || new Date(),
-        
-      });
-    };
-
-    const fetchRooms = async () => {
-      const roomsCollection = await firestore().collection('ROOMS').get();
-      setRooms(roomsCollection.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-    };
-    fetchDevice();
-    fetchRooms();
-  }, [deviceId]);
-
-  const handleSaveDevice = async () => {
-    if (device.selectedRoom && device.name && device.deviceType && device.warrantyPeriod && device.operationalStatus && device.selectedIcon) {
-      let numericPrice = 0;
-      if (device.price) {
-        if (typeof device.price === 'string') {
-          numericPrice = parseInt(device.price.replace(/\./g, ''), 10);
-        } else {
-          numericPrice = parseInt(device.price, 10);
-        }
+    if (device) {
+      setDeviceInfo(device);
+      if (device.icon) {
+        fetchImageUri(device.icon);
+      } else {
+        setImageUri('');
       }
-  
-      const warrantyEndDate = new Date(device.datetime);
-      warrantyEndDate.setMonth(warrantyEndDate.getMonth() + parseInt(device.warrantyPeriod, 10));
-  
-      try {
-        await firestore().collection('DEVICES').doc(id).update({
-          name: device.name,
-          id: id,
-          deviceType: device.deviceType,
-          price: numericPrice,
-          datetime: device.datetime,
-          warrantyEndDate,
-          roomId: device.selectedRoom.id,
-          supplier: device.supplier,
-          brand: device.brand,
-          operationalStatus: device.operationalStatus,
-          deploymentDate: device.deploymentDate,
-          icon: device.selectedIcon,
-          image: device.image, // Add this line if you want to save the image URL
-          
-        });
-  
-        navigation.navigate('AdminTab'); // Navigate back to the admin screen or device list
-      } catch (error) {
-        console.error('Lỗi khi lưu thiết bị:', error);
-      }
-    } else {
-      console.log('Vui lòng điền đầy đủ thông tin');
+      setStatus(device.operationalStatus || 'active');
+    }
+  }, [device]);
+
+  const fetchImageUri = async (imagePath) => {
+    if (!imagePath) {
+      setImageUri(''); // Set to empty if no image path
+      return;
+    }
+
+    try {
+      const imageUrl = await storage().refFromURL(imagePath).getDownloadURL();
+      setImageUri(imageUrl);
+    } catch (error) {
+      console.error("Error fetching image URL: ", error.message);
+      Alert.alert("Lỗi", "Không thể tải hình ảnh.");
+      setImageUri(''); // Set to empty if there's an error
     }
   };
 
-  const renderRoomItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.roomItem}
-      onPress={() => {
-        setDevice(prevDevice => ({
-          ...prevDevice,
-          selectedRoom: item
-        }));
-        setModalVisible(false);
-      }}
-    >
-      <Text style={styles.roomItemText}>{item.name}</Text>
-    </TouchableOpacity>
-  );
-
-  const renderIconItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.iconItem}
-      onPress={() => {
-        setDevice(prevDevice => ({
-          ...prevDevice,
-          selectedIcon: item
-        }));
-        setIconModalVisible(false);
-      }}
-    >
-      <Icon name={item} size={30} color="#000" />
-    </TouchableOpacity>
-  );
-
-  const formatPrice = (price) => {
-    let formattedPrice = String(price).replace(/\./g, '');
-    formattedPrice = formattedPrice.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-
-    return formattedPrice;
+  const handleChange = (field, value) => {
+    setDeviceInfo({ ...deviceInfo, [field]: value });
   };
 
-  const handleDateChange = (date) => {
-    setDevice(prevDevice => ({
-      ...prevDevice,
-      [selectedDateField]: date,
-    }));
-    setDatePickerVisible(false);
+  const handleSave = async () => {
+    try {
+      await firestore().collection('DEVICES').doc(deviceInfo.id).update({
+        ...deviceInfo,
+        icon: imageUri, // Ensure this is set to the new image URL or path
+        operationalStatus: status
+      });
+      Alert.alert("Thành công", "Thông tin thiết bị đã được cập nhật.");
+      navigation.goBack();
+    } catch (error) {
+      console.error("Error updating device: ", error.message);
+      Alert.alert("Lỗi", "Không thể cập nhật thông tin thiết bị.");
+    }
   };
 
-  if (!device) {
-    return (
-      <View style={styles.container}>
-        <Text>Loading...</Text>
-      </View>
-    );
-  }
+  const selectImage = () => {
+    launchImageLibrary({ mediaType: 'photo', quality: 1 }, async (response) => {
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+      } else if (response.errorCode) {
+        console.log('ImagePicker Error: ', response.errorCode);
+      } else {
+        const uri = response.assets[0].uri;
+        uploadImage(uri);
+      }
+    });
+  };
+
+  const uploadImage = async (uri) => {
+    const fileName = uri.substring(uri.lastIndexOf('/') + 1);
+    const reference = storage().ref(fileName);
+
+    try {
+      await reference.putFile(uri);
+      const imageUrl = await reference.getDownloadURL();
+      setImageUri(imageUrl);
+      setDeviceInfo({ ...deviceInfo, icon: imageUrl }); // Update the deviceInfo with the new image URL
+    } catch (error) {
+      console.error("Error uploading image: ", error.message);
+      Alert.alert("Lỗi", "Không thể tải lên hình ảnh.");
+    }
+  };
+
+  const statusOptions = [
+    { label: 'Bình thường', value: 'active' },
+    { label: 'Hư hỏng', value: 'inactive' },
+    { label: 'Đang bảo trì', value: 'maintenance' },
+  ];
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.content}>
-        <View style={styles.iconContainer}>
-          <TouchableOpacity onPress={() => setIconModalVisible(true)}>
-            {device.image ? (
-              <Image source={{ uri: device.image }} style={styles.deviceImage} />
+    <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.form}>
+        <TouchableWithoutFeedback onPress={selectImage}>
+          <View style={styles.imageContainer}>
+            {imageUri ? (
+              <Image source={{ uri: imageUri }} style={styles.image} />
             ) : (
-              <Icon name={device.selectedIcon || 'account-circle'} size={100} color={"#000"} />
+              <View style={styles.imagePlaceholder}>
+                <Text style={styles.placeholderText}>Chọn hình ảnh</Text>
+              </View>
             )}
-          </TouchableOpacity>
-        </View>
+          </View>
+        </TouchableWithoutFeedback>
 
-        <View style={styles.inputContainer}>
+        <View style={styles.deviceInfoContainer}>
           <Text style={styles.label}>Tên thiết bị:</Text>
           <TextInput
-            placeholder={"Nhập tên thiết bị"}
-            value={device.name}
-            onChangeText={(text) => setDevice(prevDevice => ({ ...prevDevice, name: text }))}
             style={styles.input}
+            value={deviceInfo.name}
+            onChangeText={(text) => handleChange('name', text)}
           />
-        </View>
 
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Số series:</Text>
-          <TextInput
-            placeholder={"Nhập số series"}
-            value={device.id}
-            onChangeText={(text) => setDevice(prevDevice => ({ ...prevDevice, id: text }))}
-            style={styles.input}
-             keyboardType="numeric"
-            editable={device.name !== "specificDeviceName"} // Prevent editing if it's a specific device
-          />
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Phòng ban:</Text>
-          <TouchableOpacity style={styles.roomInput} onPress={() => setModalVisible(true)}>
-            <Text style={styles.roomText}>{device.selectedRoom ? device.selectedRoom.name : 'Chọn phòng ban'}</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Kiểu thiết bị:</Text>
-          <TextInput
-            placeholder={'Nhập kiểu thiết bị'}
-            value={device.deviceType}
-            onChangeText={(text) => setDevice(prevDevice => ({ ...prevDevice, deviceType: text }))}
-            style={styles.input}
-          />
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Giá:</Text>
-          <TextInput
-            placeholder={"Nhập giá"}
-            value={formatPrice(device.price)}
-            onChangeText={(text) => {
-              const formattedText = text.replace(/\D/g, '');
-              setDevice(prevDevice => ({ ...prevDevice, price: formattedText }));
-            }}
-            keyboardType="numeric"
-            style={styles.input}
-          />
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Ngày mua:</Text>
-          <TouchableOpacity
-            style={styles.datePickerButton}
-            onPress={() => {
-              setDatePickerMode('datetime');
-              setSelectedDateField('datetime');
-              setDatePickerVisible(true);
-            }}
+          <Text style={styles.label}>Trạng thái:</Text>
+          <Picker
+            selectedValue={status}
+            style={styles.picker}
+            onValueChange={(itemValue) => setStatus(itemValue)}
           >
-            <Text style={{ fontSize: 16, color: "#000" }}>{device.datetime.toLocaleDateString()}</Text>
-          </TouchableOpacity>
-        </View>
+            {statusOptions.map(option => (
+              <Picker.Item key={option.value} label={option.label} value={option.value} />
+            ))}
+          </Picker>
 
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Thời gian bảo hành (tháng):</Text>
+          <Text style={styles.label}>Loại thiết bị:</Text>
           <TextInput
-            placeholder={"Nhập thời gian bảo hành"}
-            value={device.warrantyPeriod}
-            onChangeText={(text) => setDevice(prevDevice => ({ ...prevDevice, warrantyPeriod: text }))}
-            keyboardType="numeric"
             style={styles.input}
+            value={deviceInfo.deviceType}
+            onChangeText={(text) => handleChange('deviceType', text)}
           />
-        </View>
 
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Tình trạng hoạt động:</Text>
-          <TouchableOpacity
-            style={styles.statusButton}
-            onPress={() => setDevice(prevDevice => ({
-              ...prevDevice,
-              operationalStatus: prevDevice.operationalStatus === 'active' ? 'inactive' : 'active'
-            }))}
-          >
-            <Text style={styles.statusText}>
-              {statusOptions.find(status => status.value === device.operationalStatus)?.label || 'Chọn tình trạng'}
-            </Text>
-          </TouchableOpacity>
-        </View>
+          <Text style={styles.label}>Thương hiệu:</Text>
+          <TextInput
+            style={styles.input}
+            value={deviceInfo.brand}
+            onChangeText={(text) => handleChange('brand', text)}
+          />
 
-        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Nhà cung cấp:</Text>
+          <TextInput
+            style={styles.input}
+            value={deviceInfo.supplier}
+            onChangeText={(text) => handleChange('supplier', text)}
+          />
+
           <Text style={styles.label}>Ngày triển khai:</Text>
-          <TouchableOpacity
-            style={styles.datePickerButton}
-            onPress={() => {
-              setDatePickerMode('date');
-              setSelectedDateField('deploymentDate');
-              setDatePickerVisible(true);
-            }}
-          >
-            <Text style={{ fontSize: 16, color: "#000" }}>{device.deploymentDate.toLocaleDateString()}</Text>
-          </TouchableOpacity>
+          <TextInput
+            style={styles.input}
+            value={deviceInfo.deploymentDate?.toDate().toISOString().split('T')[0] || ''}
+            onChangeText={(text) => handleChange('deploymentDate', new Date(text))}
+            placeholder="YYYY-MM-DD"
+          />
+
+          <Text style={styles.label}>Ngày mua:</Text>
+          <TextInput
+            style={styles.input}
+            value={deviceInfo.purchaseDate?.toDate().toISOString().split('T')[0] || ''}
+            onChangeText={(text) => handleChange('purchaseDate', new Date(text))}
+            placeholder="YYYY-MM-DD"
+          />
+
+          <Text style={styles.label}>Ngày hết hạn bảo hành:</Text>
+          <TextInput
+            style={styles.input}
+            value={deviceInfo.warrantyEndDate?.toDate().toISOString().split('T')[0] || ''}
+            onChangeText={(text) => handleChange('warrantyEndDate', new Date(text))}
+            placeholder="YYYY-MM-DD"
+          />
         </View>
 
-        <Button mode="contained" onPress={handleSaveDevice} style={styles.saveButton}>
-          Lưu
-        </Button>
+        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+          <Text style={styles.saveButtonText}>Lưu thay đổi</Text>
+        </TouchableOpacity>
       </View>
-
-      {/* Modal for room selection */}
-      <Modal
-        visible={modalVisible}
-        transparent={true}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <FlatList
-              data={rooms}
-              keyExtractor={item => item.id}
-              renderItem={renderRoomItem}
-            />
-          </View>
-        </View>
-      </Modal>
-
-      {/* Modal for icon selection */}
-      <Modal
-        visible={iconModalVisible}
-        transparent={true}
-        onRequestClose={() => setIconModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <FlatList
-              data={icons}
-              keyExtractor={item => item}
-              renderItem={renderIconItem}
-              numColumns={3}
-            />
-          </View>
-        </View>
-      </Modal>
-
-      {/* DatePicker Modal */}
-      <DatePicker
-        modal
-        mode={datePickerMode}
-        open={datePickerVisible}
-        date={device[selectedDateField] || new Date()}
-        onConfirm={handleDateChange}
-        onCancel={() => setDatePickerVisible(false)}
-      />
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#fff',
+    flexGrow: 1,
+    backgroundColor: '#f8f9fa',
   },
-  content: {
-    padding: 16,
+  form: {
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
+    padding: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
   },
-  iconContainer: {
+  imageContainer: {
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
+    width: '100%',
+    height: 200,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    justifyContent: 'center',
   },
-  deviceImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+  image: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 10,
   },
-  inputContainer: {
-    marginBottom: 16,
+  imagePlaceholder: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#e0e0e0',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    width: '100%',
+    height: 200,
+  },
+  placeholderText: {
+    fontSize: 16,
+    color: '#888',
+    textAlign: 'center',
   },
   label: {
+    fontWeight: 'bold',
     fontSize: 16,
     marginBottom: 8,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
+    borderColor: '#ddd',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 15,
   },
-  roomInput: {
+  picker: {
+    height: 50,
+    width: '100%',
+    marginBottom: 15,
+  },
+  deviceInfoContainer: {
+    backgroundColor: '#f5f5f5',
+    borderRadius: 10,
+    padding: 10,
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 12,
-    backgroundColor: '#f9f9f9',
-    justifyContent: 'center',
-  },
-  roomText: {
-    fontSize: 16,
-  },
-  datePickerButton: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 12,
-    backgroundColor: '#f9f9f9',
-    justifyContent: 'center',
-  },
-  statusButton: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 12,
-    backgroundColor: '#f9f9f9',
-    justifyContent: 'center',
-  },
-  statusText: {
-    fontSize: 16,
+    borderColor: '#ddd',
+    marginBottom: 15,
   },
   saveButton: {
-    marginTop: 16,
-  },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'center',
+    backgroundColor: '#007bff',
+    padding: 15,
+    borderRadius: 5,
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
   },
-  modalContent: {
-    width: '80%',
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 16,
-  },
-  iconItem: {
-    alignItems: 'center',
-    margin: 8,
-  },
-  roomItem: {
-    padding: 16,
-  },
-  roomItemText: {
+  saveButtonText: {
+    color: '#fff',
     fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 

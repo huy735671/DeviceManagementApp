@@ -3,35 +3,64 @@ import { View, Text, FlatList, StyleSheet, TouchableOpacity, Image } from 'react
 import firestore from '@react-native-firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+
+// Các tùy chọn trạng thái với nhãn và giá trị tương ứng
+const statusOptions = [
+  { label: 'Bình thường', value: 'active' },
+  { label: 'Hư hỏng', value: 'inactive' },
+  { label: 'Đang bảo trì', value: 'maintenance' },
+];
+
+// Hàm lấy màu sắc dựa trên trạng thái
+const getStatusColor = (status) => {
+  switch (status) {
+    case 'maintenance':
+      return "#fff3cd"; // Màu vàng nhạt cho trạng thái maintenance
+    case 'inactive':
+      return "#f8d7da"; // Màu đỏ nhạt cho trạng thái inactive
+    case 'active':
+      return "#d4edda"; // Màu xanh nhạt cho trạng thái active
+    default:
+      return "#e2e3e5"; // Màu xám nhạt cho trạng thái khác
+  }
+};
+
+// Hàm ánh xạ giá trị trạng thái thành nhãn
+const getStatusLabel = (status) => {
+  const statusOption = statusOptions.find(option => option.value === status);
+  return statusOption ? statusOption.label : 'Không xác định'; // Nếu không tìm thấy, trả về 'Không xác định'
+};
+
 const ListDevicesScreen = ({ route }) => {
   const { roomId, roomName } = route.params;
   const navigation = useNavigation();
   const [devices, setDevices] = useState([]);
 
+  // Lấy danh sách thiết bị từ Firestore
   useEffect(() => {
-    const fetchDevices = async () => {
-      try {
-        const devicesCollection = await firestore()
-          .collection('DEVICES')
-          .where('roomId', '==', roomId)
-          .get();
-        const devicesData = devicesCollection.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const unsubscribe = firestore()
+      .collection('DEVICES')
+      .where('roomId', '==', roomId)
+      .onSnapshot(snapshot => {
+        const devicesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setDevices(devicesData);
-      } catch (error) {
+      }, error => {
         console.error('Error fetching devices:', error);
-      }
-    };
+      });
 
-    fetchDevices();
+    // Clean up subscription on unmount
+    return () => unsubscribe();
   }, [roomId]);
 
+  // Xử lý khi nhấn vào thiết bị
   const handlePress = (device) => {
     navigation.navigate('DevicesDetail', { device });
   };
 
+  // Render một thiết bị
   const renderDeviceItem = ({ item }) => (
     <TouchableOpacity
-      style={styles.item}
+      style={[styles.item, { backgroundColor: getStatusColor(item.operationalStatus) }]}
       onPress={() => handlePress(item)}
     >
       <View style={styles.itemContent}>
@@ -43,7 +72,7 @@ const ListDevicesScreen = ({ route }) => {
         <View style={styles.itemDetails}>
           <Text style={styles.itemName}>{item.name}</Text>
           <Text style={styles.itemDetail}>Type: {item.deviceType}</Text>
-          <Text style={styles.itemDetail}>Status: {item.operationalStatus}</Text>
+          <Text style={styles.itemDetail}>Trạng thái: {getStatusLabel(item.operationalStatus)}</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -89,7 +118,6 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   item: {
-    backgroundColor: '#fff',
     padding: 15,
     borderRadius: 12,
     marginVertical: 10,
@@ -155,4 +183,3 @@ const styles = StyleSheet.create({
 });
 
 export default ListDevicesScreen;
-

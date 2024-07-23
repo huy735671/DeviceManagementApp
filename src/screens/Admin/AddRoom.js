@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Text, TouchableOpacity, Modal } from "react-native";
+import { View, StyleSheet, Text, TouchableOpacity, Modal, FlatList } from "react-native";
 import { TextInput, Button, HelperText } from "react-native-paper";
 import firestore from '@react-native-firebase/firestore';
 
@@ -75,22 +75,32 @@ const AddRoom = ({ navigation }) => {
     toggleModal();
   };
 
+  const renderStatusItem = ({ item }) => (
+    <TouchableOpacity
+      style={styles.modalItem}
+      onPress={() => selectStatus(item.value)}
+    >
+      <Text style={styles.modalText}>{item.label}</Text>
+    </TouchableOpacity>
+  );
+
   return (
     <View style={styles.container}>
+      <Text style={styles.title}>Thêm Phòng</Text>
       <TextInput
         label="Tên phòng"
         value={roomName}
         onChangeText={(text) => setRoomName(text)}
         style={styles.input}
+        mode="outlined"
       />
       <TouchableOpacity onPress={toggleModal} style={styles.input}>
-        <View pointerEvents="none">
-          <TextInput
-            label="Trạng thái"
-            value={status}
-            style={{ backgroundColor: "transparent" }}
-          />
-        </View>
+        <TextInput
+          label="Trạng thái"
+          value={status}
+          style={[styles.input, { backgroundColor: "transparent" }]}
+          editable={false}
+        />
       </TouchableOpacity>
 
       <Modal
@@ -101,15 +111,11 @@ const AddRoom = ({ navigation }) => {
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            {roomStatuses.map((item, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.modalItem}
-                onPress={() => selectStatus(item.value)}
-              >
-                <Text style={styles.modalText}>{item.label}</Text>
-              </TouchableOpacity>
-            ))}
+            <FlatList
+              data={roomStatuses}
+              renderItem={renderStatusItem}
+              keyExtractor={(item) => item.value}
+            />
           </View>
         </View>
       </Modal>
@@ -132,6 +138,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFF",
     flex: 1,
     justifyContent: "center",
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
+    textAlign: "center",
   },
   input: {
     marginBottom: 10,
