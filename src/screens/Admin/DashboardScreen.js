@@ -38,6 +38,7 @@ const DashboardScreen = ({ navigation }) => {
 
     const unsubscribeMaintenance = firestore()
       .collection('DEVICES')
+      .where('operationalStatus', '==', 'maintenance')
       .onSnapshot(snapshot => {
         const mainData = snapshot.docs.map(doc => ({
           id: doc.id,
@@ -58,12 +59,16 @@ const DashboardScreen = ({ navigation }) => {
     { id: "1", title: "Tất cả", icon: "menu" },
     { id: "2", title: "Bảo trì", icon: "settings" },
     { id: "3", title: "Thống kê", icon: "insert-chart-outlined" },
-    // { id: "4", title: "Banner", icon: "insert-chart-outlined" },
-    // Add more items as needed
+    { id: "4", title: "Banner", icon: "insert-chart-outlined" }, // Mục Banner
   ];
 
   const handleFeaturePress = (featureId) => {
-    setSelectedFeatureId(featureId);
+    if (featureId === "4") {
+      // Điều hướng đến BannerScreen
+      navigation.navigate("Banner");
+    } else {
+      setSelectedFeatureId(featureId);
+    }
   };
 
   const handleDetailPress = async (item) => {
@@ -83,15 +88,39 @@ const DashboardScreen = ({ navigation }) => {
 
       setEmployees(employeeSnapshot.size);
       setDevices(deviceSnapshot.size);
+      
     } else if (item.featureId === "2") {
-      navigation.navigate("MaintenanceDetail", {
-        id: item.id,
-        icon: item.icon,
-        name: item.name,
-      });
+      try {
+        const deviceDoc = await firestore()
+          .collection('DEVICES')
+          .doc(item.id)
+          .get();
+
+        if (deviceDoc.exists) {
+          const deviceData = deviceDoc.data();
+            navigation.navigate("MaintenanceDetail", {
+            id: deviceData.id || '',
+            icon: deviceData.icon || '',
+            name: deviceData.name || '',
+            deviceType: deviceData.deviceType || '',
+            brand: deviceData.brand || '',
+            supplier: deviceData.supplier || '',
+            deploymentDate: deviceData.deploymentDate || new Date(),
+            warrantyEndDate: deviceData.warrantyEndDate || new Date(),
+            operationalStatus: deviceData.operationalStatus || '',
+            image: deviceData.image || '',
+            roomId: deviceData.roomId || 0,
+            roomName: deviceData.roomName || '',
+          });
+        } else {
+          console.log('Device document does not exist');
+        }
+      } catch (error) {
+        console.error('Error fetching device data:', error);
+      }
     }
   };
-
+  
   const renderDetailItem = ({ item }) => {
     return (
       <Animatable.View animation='zoomIn' style={styles.items}>
@@ -147,7 +176,47 @@ const DashboardScreen = ({ navigation }) => {
         keyExtractor={(item) => item.id}
         numColumns={numColumns}
       />
-      {/* <Button title="Edit Banner" onPress={goToBannerScreen} /> */}
+
+      <Modal 
+        isVisible={modalVisible}
+        onBackdropPress={() => setModalVisible(false)}
+        style={styles.modal}
+      >
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>{selectedRoom?.name}</Text>
+          <Text style={styles.modalText}>Số nhân viên: {employees}</Text>
+          <Text style={styles.modalText}>Số thiết bị: {devices}</Text>
+          <View style={styles.modalButtons}>
+            <TouchableOpacity 
+              style={styles.modalButton} 
+              onPress={() => {
+                setModalVisible(false);
+                navigation.navigate("ListEmployee", {
+                   roomId: selectedRoom.id 
+                  
+                  });
+              }}
+            >
+              <Text style={styles.modalButtonText}>Nhân viên</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.modalButton} 
+              onPress={() => {
+                setModalVisible(false);
+                navigation.navigate("ListDevices", { roomId: selectedRoom.id });
+              }}
+            >
+              <Text style={styles.modalButtonText}>Thiết bị</Text>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity 
+            style={styles.closeButton} 
+            onPress={() => setModalVisible(false)}
+          >
+            <Text style={styles.closeButtonText}>Đóng</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -224,23 +293,23 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   modalButton: {
-    backgroundColor: '#1cd2bd',
+    backgroundColor: '#007bff',
     padding: 10,
     borderRadius: 5,
     marginHorizontal: 10,
   },
   modalButtonText: {
     color: 'white',
-    fontSize: 18,
+    fontSize: 16,
   },
   closeButton: {
-    backgroundColor: '#f44336',
+    backgroundColor: '#dc3545',
     padding: 10,
     borderRadius: 5,
   },
   closeButtonText: {
     color: 'white',
-    fontSize: 18,
+    fontSize: 16,
   },
 });
 

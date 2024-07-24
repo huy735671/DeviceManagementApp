@@ -74,7 +74,8 @@ const Room = () => {
       warrantyPeriod: item.warrantyEndDate,
       operationalStatus: item.operationalStatus,
       deploymentDate: item.deploymentDate,
-      image: item.image, 
+      image: item.image,
+      roomName: item.roomName,
       
     });
   };

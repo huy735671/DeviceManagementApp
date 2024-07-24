@@ -1,101 +1,76 @@
-// import React, { useState, useEffect } from "react";
-// import { View, Text, StyleSheet, Dimensions } from "react-native";
-// import * as Animatable from 'react-native-animatable';
-
-// const { width } = Dimensions.get('window'); 
-
-// const Devices = () => {
-//   const [currentImage, setCurrentImage] = useState(require('../assets/bannerHome.png'));
-//   const images = [
-//     require('../assets/bannerHome.png'),
-//     require('../assets/banner2.jpg'),
-//     require('../assets/banner3.jpg'),
-//   ];
-
-//   useEffect(() => {
-//     let currentIndex = 0;
-//     const intervalId = setInterval(() => {
-//       currentIndex = (currentIndex + 1) % images.length;
-//       setCurrentImage(images[currentIndex]);
-//     }, 3000);
-
-//     return () => clearInterval(intervalId);
-//   }, []);
-
-//   return (
-//     <View>
-//       <Text style={{ fontWeight: 'bold', fontSize: 25, margin: 10, color:'black' }}>Gay Management</Text>
-//       <Animatable.View animation='lightSpeedIn' style={style.container}>
-//         <View style={style.topImageContainer}>
-//           <Animatable.Image source={currentImage} style={style.topImage}/>
-//         </View>
-//       </Animatable.View>
-//     </View>
-//   );
-// };
-
-// export default Devices;
-
-// const style = StyleSheet.create({
-//   container: {
-//     display: "flex",
-//     flexDirection: "row",
-//     justifyContent: "center",
-//     alignItems: "center",
-//     color:'black',
-//     width: width, 
-//   },
-  
-//   topImageContainer: {
-//     marginHorizontal: 10,
-//     marginTop: 10,
-//     borderRadius: 10,
-//     overflow: 'hidden',
-//     width: '95%', 
-//   },
-//   topImage:{
-//     height: 200,
-//     width: '100%',
-//   },
-// });
 import React, { useState, useEffect } from "react";
-import { View, Text, Image, StyleSheet, Dimensions,Button } from "react-native";
+import { View, Text, Image, StyleSheet, Dimensions, FlatList } from "react-native";
 import firestore from '@react-native-firebase/firestore';
 import { useNavigation } from "@react-navigation/native";
-const { width } = Dimensions.get('window'); 
+
+const { width } = Dimensions.get('window');
 
 const Devices = () => {
-  const [currentImage, setCurrentImage] = useState(null);
+  const [images, setImages] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const navigation = useNavigation();
 
   useEffect(() => {
-    const fetchImage = async () => {
-      const imageDoc = await firestore().collection('BANNER').doc('currentImage').get();
-      if (imageDoc.exists) {
-        setCurrentImage(imageDoc.data().url);
-      }
-    };
-    
-    fetchImage();
+    // Hàm lắng nghe thay đổi từ Firestore
+    const unsubscribe = firestore()
+      .collection('BANNER')
+      .onSnapshot((snapshot) => {
+        const fetchedImages = snapshot.docs.map(doc => doc.data().url);
+        setImages(fetchedImages);
+      }, (error) => {
+        console.error("Error fetching images: ", error);
+      });
+
+    // Dọn dẹp khi component bị hủy
+    return () => unsubscribe();
   }, []);
-  // const goToBannerScreen = () => {
-  //   navigation.navigate('Banner');
-  // };
+
+  useEffect(() => {
+    // Chuyển đổi hình ảnh mỗi 5 giây nếu có nhiều hình ảnh
+    let interval;
+    if (images.length > 1) {
+      interval = setInterval(() => {
+        setCurrentIndex(prevIndex => (prevIndex + 1) % images.length);
+      }, 5000); // 5000ms = 5 giây
+    }
+    return () => clearInterval(interval);
+  }, [images]);
+
   return (
-    <View>
-      <Text style={{ fontWeight: 'bold', fontSize: 25, margin: 10, color:'black' }}>Gay Management</Text>
-      {currentImage && <Image source={{ uri: currentImage }} style={style.topImage} />}
-      {/* <Button title="Edit Banner" onPress={goToBannerScreen} /> */}
+    <View style={styles.container}>
+      <Text style={styles.headerText}>Gay Management</Text>
+      {images.length > 0 ? (
+        <Image source={{ uri: images[currentIndex] }} style={styles.topImage} />
+      ) : (
+        <Text style={styles.noImageText}>No images available</Text>
+      )}
     </View>
   );
 };
 
-export default Devices;
-
-const style = StyleSheet.create({
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 10,
+    backgroundColor: '#fff',
+  },
+  headerText: {
+    fontWeight: 'bold',
+    fontSize: 25,
+    color: 'black',
+    marginBottom: 10,
+  },
   topImage: {
     height: 200,
-    width: '100%',
+    width: width - 20, // Adjust width according to padding
     borderRadius: 10,
   },
+  noImageText: {
+    fontSize: 16,
+    color: '#888',
+    textAlign: 'center',
+    marginTop: 20,
+  },
 });
+
+export default Devices;

@@ -44,7 +44,15 @@ const StackNavigation = () => {
       <Stack.Screen name='Dashboard' component={DashboardScreen} options={{ headerShown: false }} />
       <Stack.Screen name='RoomList' component={RoomList} options={{ headerShown: false }} />
       <Stack.Screen name='Home' component={HomeScreen} options={{ headerShown: false }} />
-      <Stack.Screen name='Banner' component={BannerScreen} options={{ headerShown: false }} />
+      <Stack.Screen name='Banner'
+       component={BannerScreen}
+       options={{
+        title: "Ảnh bìa trang chủ",
+        headerShown: true,
+        headerStyle: {
+          backgroundColor: "#1FD2BD",
+        }, }} />
+
       <Stack.Screen name='Room'
        component={Room}
        options={{

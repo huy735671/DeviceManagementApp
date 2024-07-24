@@ -1,89 +1,103 @@
 import React, { useState, useEffect } from "react";
-import { View, Button, Image, StyleSheet, Platform,Text } from "react-native";
+import { View, Button, Image, StyleSheet, Platform, FlatList, TouchableOpacity, Text } from "react-native";
 import { launchImageLibrary } from "react-native-image-picker";
 import storage from '@react-native-firebase/storage';
 import firestore from '@react-native-firebase/firestore';
-import {Header} from 'react-native-elements';
-const BannerScreen = ({ navigation }) => {
-  const [imageUri, setImageUri] = useState(null);
+import Icon from 'react-native-vector-icons/MaterialIcons'; // Đảm bảo cài đặt react-native-vector-icons
+
+const BannerScreen = () => {
+  const [images, setImages] = useState([]);
 
   useEffect(() => {
-    const fetchImageUrl = async () => {
+    const fetchImages = async () => {
       try {
-        // Lấy URL của ảnh từ Firestore
-        const doc = await firestore().collection('BANNER').doc('currentImage').get();
-        if (doc.exists) {
-          const { url } = doc.data();
-          setImageUri(url);
-        }
+        const snapshot = await firestore().collection('BANNER').get();
+        const fetchedImages = snapshot.docs.map(doc => doc.data().url);
+        setImages(fetchedImages);
       } catch (error) {
-        console.error("Error fetching image URL: ", error);
+        console.error("Error fetching images: ", error);
       }
     };
 
-    fetchImageUrl();
+    fetchImages();
   }, []);
 
   const pickImage = () => {
     launchImageLibrary({}, response => {
       if (response.assets) {
-        setImageUri(response.assets[0].uri);
+        const uri = response.assets[0].uri;
+        saveImage(uri); // Lưu ảnh ngay khi chọn
       }
     });
   };
 
-  const deleteImage = () => {
-    setImageUri(null);
+  const deleteImage = async (url) => {
+    if (url) {
+      try {
+        // Xóa ảnh khỏi Firebase Storage
+        const filename = url.substring(url.lastIndexOf('/') + 1);
+        const reference = storage().ref(`BannerImage/${filename}`);
+        await reference.delete();
+
+        // Xóa URL ảnh khỏi Firestore
+        const doc = firestore().collection('BANNER').where('url', '==', url);
+        const snapshot = await doc.get();
+        snapshot.forEach(async (doc) => {
+          await doc.ref.delete();
+        });
+
+        // Cập nhật trạng thái ảnh
+        setImages(prevImages => prevImages.filter(image => image !== url));
+      } catch (error) {
+        console.error("Error deleting image: ", error);
+      }
+    }
   };
 
-  const saveImage = async () => {
-    if (imageUri) {
-      const filename = imageUri.substring(imageUri.lastIndexOf('/') + 1);
-      const uploadUri = Platform.OS === 'ios' ? imageUri.replace('file://', '') : imageUri;
+  const saveImage = async (uri) => {
+    if (uri) {
+      const filename = uri.substring(uri.lastIndexOf('/') + 1);
+      const uploadUri = Platform.OS === 'ios' ? uri.replace('file://', '') : uri;
 
       try {
-        // Tạo tham chiếu đến thư mục 'banners' trong Firebase Storage
         const reference = storage().ref(`BannerImage/${filename}`);
-
         await reference.putFile(uploadUri);
 
         const downloadUrl = await reference.getDownloadURL();
         console.log('File available at:', downloadUrl);
 
-        // Lưu URL vào Firestore
-        await firestore().collection('BANNER').doc('currentImage').set({
+        await firestore().collection('BANNER').add({
           url: downloadUrl
         });
 
-        // Cập nhật URL ảnh hiện tại
-        setImageUri(downloadUrl);
+        // Cập nhật trạng thái ảnh
+        setImages(prevImages => [downloadUrl, ...prevImages]);
       } catch (error) {
         console.error("Error saving image: ", error);
       }
     }
   };
 
+  const renderImageItem = ({ item }) => (
+    <View style={styles.imgContainer}>
+      <Image source={{ uri: item }} style={styles.image} />
+      <TouchableOpacity style={styles.deleteButton} onPress={() => deleteImage(item)}>
+        <Icon name="delete" size={30} color="#fff" />
+      </TouchableOpacity>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
-        <Header
-        leftComponent={{
-          icon: 'arrow-back',
-          color: '#1c1c1c',
-          onPress: () => navigation.goBack(),
-        }}
-        centerComponent={<Text style={styles.headerTitle}>Edit Banner</Text>}
-        containerStyle={styles.header}
+      <FlatList
+        data={images}
+        renderItem={renderImageItem}
+        keyExtractor={(item) => item}
+        ListEmptyComponent={<Text style={styles.noImagesText}>No images available</Text>}
       />
-      <View style={styles.imgcontainer}>
-        {imageUri && <Image source={{ uri: imageUri }} style={styles.image} />}
-      </View>
-    
       <View style={styles.buttonContainer}>
-        <Button title="Đổi ảnh" onPress={pickImage} style={styles.btn} />
-        <Button title="Xóa ảnh" onPress={deleteImage} />
-       
+        <Button title="Thêm ảnh" onPress={pickImage} />
       </View>
-      <Button title="Lưu ảnh" onPress={saveImage} />
     </View>
   );
 };
@@ -91,40 +105,42 @@ const BannerScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // justifyContent: 'center',
-    // alignItems: 'center',
-  },
-  header: {
-    backgroundColor: '#1cd2bd',
-    borderBottomWidth: 0,
-  },
-  headerTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#1c1c1c',
+    padding: 5, // Thêm padding cho container chính
+    backgroundColor: '#fff',
   },
   image: {
-    height: 300,
+    height: 200, // Giảm chiều cao của ảnh để phù hợp với danh sách
     width: '100%',
+    borderRadius: 10,
   },
-  imgcontainer: {
+  imgContainer: {
     borderWidth: 2,
     borderColor: 'black',
-    height: 300,
-    width: '100%',
+    marginBottom: 5, // Thêm margin dưới mỗi ảnh
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
+    position: 'relative', // Để vị trí của nút xóa
+    overflow: 'hidden', // Đảm bảo rằng nút xóa không bị vượt ra ngoài ảnh
   },
-
+  deleteButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Nền mờ để nổi bật nút
+    borderRadius: 20,
+    padding: 10,
+  },
   buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100',
-    paddingHorizontal: 10,
+    marginTop: 20, // Thêm khoảng cách trên giữa danh sách ảnh và nút thêm ảnh
+    alignItems: 'center',
   },
-  
+  noImagesText: {
+    textAlign: 'center',
+    color: '#888',
+    fontSize: 16,
+    marginVertical: 20, // Thêm khoảng cách dọc cho văn bản khi không có ảnh
+  },
 });
 
 export default BannerScreen;

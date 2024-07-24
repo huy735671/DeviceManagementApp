@@ -1,131 +1,154 @@
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import React from "react";
-import Icon from "react-native-vector-icons/MaterialIcons";
-import { Button } from "react-native-paper";
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Image, FlatList, Dimensions } from 'react-native';
+import firestore from '@react-native-firebase/firestore';
 
-const MaintenanceDetail = ({ route, navigation }) => {
-  const { icon, name, status } = route.params;
+const { width } = Dimensions.get('window');
+
+const MaintenanceDetail = ({ route }) => {
+  const { id } = route.params;
+  const [device, setDevice] = useState(null);
+
+  useEffect(() => {
+    const fetchDeviceDetails = async () => {
+      try {
+        const deviceDoc = await firestore().collection('DEVICES').doc(id).get();
+        if (deviceDoc.exists) {
+          setDevice(deviceDoc.data());
+        }
+      } catch (error) {
+        console.error("Error fetching device details: ", error);
+      }
+    };
+
+    fetchDeviceDetails();
+  }, [id]);
+
+  if (!device) {
+    return (
+      <View style={styles.container}>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+
+  const data = [
+    {
+      type: 'image',
+      content: device.image,
+    },
+    {
+      type: 'info',
+      content: [
+        { label: 'Brand', value: device.brand },
+        { label: 'Device Type', value: device.deviceType },
+        { label: 'Deployment Date', value: device.deploymentDate.toDate().toLocaleDateString() },
+        { label: 'Warranty End Date', value: device.warrantyEndDate.toDate().toLocaleDateString() },
+        { label: 'Supplier', value: device.supplier },
+        { label: 'Operational Status', value: device.operationalStatus },
+        { label: 'Room Name', value: device.roomName },
+      ],
+    },
+  ];
+
+  const renderItem = ({ item }) => {
+    if (item.type === 'image') {
+      return (
+        <View style={styles.imageContainer}>
+          {item.content ? (
+            <Image source={{ uri: item.content }} style={styles.image} />
+          ) : (
+            <View style={styles.noImageContainer}>
+              <Text style={styles.noImageText}>Không có hình ảnh</Text>
+            </View>
+          )}
+        </View>
+      );
+    }
+
+    if (item.type === 'info') {
+      return (
+        <View style={styles.infoContainer}>
+          {item.content.map((info, index) => (
+            <View key={index} style={styles.infoItem}>
+              <Text style={styles.label}>{info.label}:</Text>
+              <Text style={styles.text}>{info.value}</Text>
+            </View>
+          ))}
+        </View>
+      );
+    }
+
+    return null;
+  };
+
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: "#FFF",
-      }}
-    >
-      <View style={{ margin: 30, borderRadius: 10, borderWidth: 1 }}>
-        <View
-          style={{
-            padding: 10,
-            flexDirection: "row",
-            justifyContent: "center",
-          }}
-        >
-          <Icon name={icon} size={100} color={"#000"} />
-          <View
-            style={{
-              flexDirection: "column",
-              justifyContent: "center",
-              marginLeft: 10,
-            }}
-          >
-            <View style={{ flexDirection: "row" }}>
-              <Text style={{ ...styles.txt, fontWeight: "bold" }}>
-                Tên thiết bị:{" "}
-              </Text>
-              <Text style={styles.txt}>{name}</Text>
-            </View>
-            <View style={{ flexDirection: "row" }}>
-              <Text style={{ ...styles.txt, fontWeight: "bold" }}>
-                Phòng:{" "}
-              </Text>
-              <Text style={styles.txt}>{name}</Text>
-            </View>
-          </View>
-        </View>
-        <View
-          style={{
-            flexDirection: "column",
-            padding: 10,
-          }}
-        >
-          
-
-          
-
-          <View style={{ flexDirection: "row" }}>
-            <Text style={{ ...styles.txt, fontWeight: "bold" }}>
-              Thương hiệu:{" "}
-            </Text>
-
-            <Text style={styles.txt}>NaN</Text>
-          </View>
-
-          <View style={{ flexDirection: "row" }}>
-            <Text style={{ ...styles.txt, fontWeight: "bold" }}>Mẫu: </Text>
-            <Text style={styles.txt}>NaN</Text>
-          </View>
-
-          <View style={{ flexDirection: "row" }}>
-            <Text style={{ ...styles.txt, fontWeight: "bold" }}>
-              Nhà cung cấp:{" "}
-            </Text>
-            <Text style={styles.txt}>NaN</Text>
-          </View>
-
-          <View style={{ flexDirection: "row" }}>
-            <Text style={{ ...styles.txt, fontWeight: "bold" }}>Giá: </Text>
-            <Text style={styles.txt}>NaN</Text>
-          </View>
-
-          <View style={{ flexDirection: "row" }}>
-            <Text style={{ ...styles.txt, fontWeight: "bold" }}>
-              Ngày mua:{" "}
-            </Text>
-            <Text style={styles.txt}>NaN</Text>
-          </View>
-
-          <View style={{ flexDirection: "row" }}>
-            <Text style={{ ...styles.txt, fontWeight: "bold" }}>
-              Thời hạn bảo hành:{" "}
-            </Text>
-            <Text style={styles.txt}>NaN</Text>
-          </View>
-
-          <View style={{ flexDirection: "row" }}>
-            <Text style={{ ...styles.txt, fontWeight: "bold" }}>
-              Trạng thái hoạt động:{" "}
-            </Text>
-            <Text style={styles.txt}>{status}</Text>
-          </View>
-
-          <View style={{ flexDirection: "row" }}>
-            <Text style={{ ...styles.txt, fontWeight: "bold" }}>
-              Ngày đưa vào sử dụng:{" "}
-            </Text>
-            <Text style={styles.txt}>NaN</Text>
-          </View>
-        </View>
-      </View>
-      <View style={{ alignItems: "center" }}>
-        <Button style={{ backgroundColor: "orange", ...styles.btn }}>
-          <Text style={styles.txt}>Bảo trì thành công</Text>
-        </Button>
-      </View>
-    </View>
+    <FlatList
+      data={data}
+      renderItem={renderItem}
+      keyExtractor={(item, index) => item.type + index}
+      contentContainerStyle={styles.container}
+    />
   );
 };
 
-export default MaintenanceDetail;
-
 const styles = StyleSheet.create({
-  txt: {
-    color: "#000",
-    fontSize: 17,
+  container: {
+    flex: 1,
+    padding: 10,
+    backgroundColor: '#fff',
   },
-
-  btn: {
-    borderRadius: 5,
-    width: 200,
-    marginBottom: 10,
+  imageContainer: {
+    marginBottom: 20,
+    borderRadius: 10,
+    overflow: 'hidden',
+    elevation: 5, // Shadow for Android
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+  },
+  image: {
+    width: width - 10, // Adjust based on padding
+    height: 200,
+    resizeMode: 'cover',
+  },
+  noImageContainer: {
+    width: width - 10, // Adjust based on padding
+    height: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f0f0f0',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 10,
+  },
+  noImageText: {
+    fontSize: 18,
+    color: '#888',
+  },
+  infoContainer: {
+    borderRadius: 10,
+    overflow: 'hidden',
+    backgroundColor: '#f9f9f9',
+    elevation: 5, // Shadow for Android
+    shadowColor: '#000', // Shadow for iOS
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    marginBottom: 20,
+  },
+  infoItem: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  text: {
+    fontSize: 16,
   },
 });
+
+export default MaintenanceDetail;
