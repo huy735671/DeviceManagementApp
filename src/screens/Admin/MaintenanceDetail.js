@@ -36,9 +36,9 @@ const MaintenanceDetail = ({ route, navigation }) => {
             </View>
             <View style={{ flexDirection: "row" }}>
               <Text style={{ ...styles.txt, fontWeight: "bold" }}>
-                Tên thiết bị:{" "}
+                Phòng:{" "}
               </Text>
-              <Text style={styles.txt}>NaN</Text>
+              <Text style={styles.txt}>{name}</Text>
             </View>
           </View>
         </View>
@@ -48,19 +48,9 @@ const MaintenanceDetail = ({ route, navigation }) => {
             padding: 10,
           }}
         >
-          <View style={{ flexDirection: "row" }}>
-            <Text style={{ ...styles.txt, fontWeight: "bold" }}>
-              Kiểu thiết bị:{" "}
-            </Text>
-            <Text style={styles.txt}>NaN</Text>
-          </View>
+          
 
-          <View style={{ flexDirection: "row" }}>
-            <Text style={{ ...styles.txt, fontWeight: "bold" }}>
-              Loại tài sản:{" "}
-            </Text>
-            <Text style={styles.txt}>NaN</Text>
-          </View>
+          
 
           <View style={{ flexDirection: "row" }}>
             <Text style={{ ...styles.txt, fontWeight: "bold" }}>

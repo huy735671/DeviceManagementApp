@@ -87,7 +87,7 @@ const InfoDevices = ({ route, navigation }) => {
               <Text style={styles.detailTitle}>Nhà cung cấp:</Text>
               <Text style={styles.detailText}>{supplier}</Text>
             </View>
-            <View style={styles.separator} />
+         
             
             <View style={styles.separator} />
             <View style={styles.detailItem}>

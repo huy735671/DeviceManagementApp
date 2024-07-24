@@ -6,13 +6,12 @@ import {
   TouchableOpacity,
   ScrollView,
   FlatList,
-  Button
+  Button,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import * as Animatable from 'react-native-animatable';
 import firestore from '@react-native-firebase/firestore';
 import Modal from 'react-native-modal';
-
 
 const DashboardScreen = ({ navigation }) => {
   const [numColumns, setNumColumns] = useState(2);
@@ -37,8 +36,21 @@ const DashboardScreen = ({ navigation }) => {
         setRooms(roomsData);
       });
 
+    const unsubscribeMaintenance = firestore()
+      .collection('DEVICES')
+      .onSnapshot(snapshot => {
+        const mainData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          featureId: "2",
+          icon: doc.data().icon,
+        }));
+        setMaintenance(mainData);
+      });
+
     return () => {
       unsubscribeRooms();
+      unsubscribeMaintenance();
     };
   }, []);
 
@@ -49,9 +61,7 @@ const DashboardScreen = ({ navigation }) => {
     // { id: "4", title: "Banner", icon: "insert-chart-outlined" },
     // Add more items as needed
   ];
-  const goToBannerScreen = () => {
-    navigation.navigate('Banner');
-  };
+
   const handleFeaturePress = (featureId) => {
     setSelectedFeatureId(featureId);
   };
@@ -60,7 +70,7 @@ const DashboardScreen = ({ navigation }) => {
     if (item.featureId === "1") {
       setSelectedRoom(item);
       setModalVisible(true);
-      
+
       // Fetch employees and devices counts for the selected room
       const employeeSnapshot = await firestore()
         .collection('EMPLOYEES')
@@ -73,8 +83,7 @@ const DashboardScreen = ({ navigation }) => {
 
       setEmployees(employeeSnapshot.size);
       setDevices(deviceSnapshot.size);
-    }
-    if (item.featureId === "2") {
+    } else if (item.featureId === "2") {
       navigation.navigate("MaintenanceDetail", {
         id: item.id,
         icon: item.icon,
@@ -82,7 +91,7 @@ const DashboardScreen = ({ navigation }) => {
       });
     }
   };
- 
+
   const renderDetailItem = ({ item }) => {
     return (
       <Animatable.View animation='zoomIn' style={styles.items}>
@@ -101,10 +110,11 @@ const DashboardScreen = ({ navigation }) => {
     setDevices(prevDevices => prevDevices.filter(device => device.id !== deviceId));
   };
 
-  const filteredData = [
-    ...rooms.filter(item => item.featureId === selectedFeatureId),
-    ...maintenance.filter(item => item.featureId === selectedFeatureId),
-  ];
+  const filteredData = selectedFeatureId === "1" 
+    ? rooms 
+    : selectedFeatureId === "2" 
+      ? maintenance 
+      : [];
 
   return (
     <View style={styles.container}>
@@ -137,7 +147,7 @@ const DashboardScreen = ({ navigation }) => {
         keyExtractor={(item) => item.id}
         numColumns={numColumns}
       />
-    <Button title="Edit Banner" onPress={goToBannerScreen} />
+      {/* <Button title="Edit Banner" onPress={goToBannerScreen} /> */}
     </View>
   );
 };
