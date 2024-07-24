@@ -6,12 +6,14 @@ import {
   TouchableOpacity,
   ScrollView,
   FlatList,
-  Button,
+  Dimensions,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import * as Animatable from 'react-native-animatable';
 import firestore from '@react-native-firebase/firestore';
 import Modal from 'react-native-modal';
+
+const { width } = Dimensions.get('window'); // Get screen width for responsive layout
 
 const DashboardScreen = ({ navigation }) => {
   const [numColumns, setNumColumns] = useState(2);
@@ -39,13 +41,13 @@ const DashboardScreen = ({ navigation }) => {
     const unsubscribeMaintenance = firestore()
       .collection('DEVICES')
       .onSnapshot(snapshot => {
-        const mainData = snapshot.docs.map(doc => ({
+        const maintenanceData = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
           featureId: "2",
           icon: doc.data().icon,
         }));
-        setMaintenance(mainData);
+        setMaintenance(maintenanceData);
       });
 
     return () => {
@@ -58,8 +60,6 @@ const DashboardScreen = ({ navigation }) => {
     { id: "1", title: "Tất cả", icon: "menu" },
     { id: "2", title: "Bảo trì", icon: "settings" },
     { id: "3", title: "Thống kê", icon: "insert-chart-outlined" },
-    // { id: "4", title: "Banner", icon: "insert-chart-outlined" },
-    // Add more items as needed
   ];
 
   const handleFeaturePress = (featureId) => {
@@ -83,7 +83,8 @@ const DashboardScreen = ({ navigation }) => {
 
       setEmployees(employeeSnapshot.size);
       setDevices(deviceSnapshot.size);
-    } else if (item.featureId === "2") {
+    }
+    if (item.featureId === "2") {
       navigation.navigate("MaintenanceDetail", {
         id: item.id,
         icon: item.icon,
@@ -110,50 +111,89 @@ const DashboardScreen = ({ navigation }) => {
     setDevices(prevDevices => prevDevices.filter(device => device.id !== deviceId));
   };
 
-  const filteredData = selectedFeatureId === "1" 
-    ? rooms 
-    : selectedFeatureId === "2" 
-      ? maintenance 
-      : [];
+  const filteredData = selectedFeatureId === "1" ? rooms : maintenance;
 
   return (
     <View style={styles.container}>
-      <Text style={styles.txt}>Các chức năng quản lý</Text>
-      <ScrollView
-        horizontal
-        contentContainerStyle={styles.scrollViewContent}
-        showsHorizontalScrollIndicator={false}
-      >
-        {featuresData.map((item) => (
-          <Animatable.View
-            key={item.id}
-            animation='zoomIn'
-            style={styles.itemContainer}
-          >
-            <TouchableOpacity
-              style={styles.btnFearture}
-              onPress={() => handleFeaturePress(item.id)}
+      <ScrollView contentContainerStyle={styles.scrollViewContent}>
+        <Text style={styles.txt}>Các chức năng quản lý</Text>
+        <ScrollView
+          horizontal
+          contentContainerStyle={styles.horizontalScrollView}
+          showsHorizontalScrollIndicator={false}
+        >
+          {featuresData.map((item) => (
+            <Animatable.View
+              key={item.id}
+              animation='zoomIn'
+              style={styles.itemContainer}
             >
-              <Icon name={item.icon} size={40} color={"#000"} />
-            </TouchableOpacity>
-            <Text style={styles.txtFearture}>{item.title}</Text>
-          </Animatable.View>
-        ))}
+              <TouchableOpacity
+                style={styles.btnFearture}
+                onPress={() => handleFeaturePress(item.id)}
+              >
+                <Icon name={item.icon} size={40} color={"#000"} />
+              </TouchableOpacity>
+              <Text style={styles.txtFearture}>{item.title}</Text>
+            </Animatable.View>
+          ))}
+        </ScrollView>
+
+        <FlatList
+          data={filteredData}
+          renderItem={renderDetailItem}
+          keyExtractor={(item) => item.id}
+          numColumns={numColumns}
+          contentContainerStyle={styles.flatListContent}
+        />
       </ScrollView>
 
-      <FlatList
-        data={filteredData}
-        renderItem={renderDetailItem}
-        keyExtractor={(item) => item.id}
-        numColumns={numColumns}
-      />
-      {/* <Button title="Edit Banner" onPress={goToBannerScreen} /> */}
+      <Modal
+        isVisible={modalVisible}
+        onBackdropPress={() => setModalVisible(false)}
+        backdropOpacity={0.6}
+        style={styles.modal}
+        avoidKeyboard={true}
+      >
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>{selectedRoom?.name}</Text>
+          <Text style={styles.modalText}>Số lượng nhân viên: {employees}</Text>
+          <Text style={styles.modalText}>Số lượng thiết bị: {devices}</Text>
+          <View style={styles.modalButtons}>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={() => {
+                navigation.navigate('ListEmployee', { roomId: selectedRoom.id });
+                setModalVisible(false);
+              }}
+            >
+              <Text style={styles.modalButtonText}>Nhân viên</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={() => {
+                navigation.navigate('ListDevices', { roomId: selectedRoom.id });
+                setModalVisible(false);
+              }}
+            >
+              <Text style={styles.modalButtonText}>Thiết bị</Text>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => setModalVisible(false)}
+          >
+            <Text style={styles.closeButtonText}>Đóng</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     backgroundColor: "#FFF",
     paddingHorizontal: 10,
   },
@@ -163,11 +203,10 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 5,
   },
-  scrollViewContent: {
+  horizontalScrollView: {
     flexDirection: "row",
     paddingVertical: 10,
-    marginTop: 10,
-    marginBottom: 50,
+    marginBottom: 10,
   },
   itemContainer: {
     alignItems: "center",
@@ -241,6 +280,12 @@ const styles = StyleSheet.create({
   closeButtonText: {
     color: 'white',
     fontSize: 18,
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+  },
+  flatListContent: {
+    flexGrow: 1,
   },
 });
 
