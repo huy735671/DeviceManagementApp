@@ -6,12 +6,14 @@ import {
   TouchableOpacity,
   ScrollView,
   FlatList,
-  Button,
+  Dimensions,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import * as Animatable from 'react-native-animatable';
 import firestore from '@react-native-firebase/firestore';
 import Modal from 'react-native-modal';
+
+const { width } = Dimensions.get('window'); // Get screen width for responsive layout
 
 const DashboardScreen = ({ navigation }) => {
   const [numColumns, setNumColumns] = useState(2);
@@ -40,13 +42,13 @@ const DashboardScreen = ({ navigation }) => {
       .collection('DEVICES')
       .where('operationalStatus', '==', 'maintenance')
       .onSnapshot(snapshot => {
-        const mainData = snapshot.docs.map(doc => ({
+        const maintenanceData = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
           featureId: "2",
           icon: doc.data().icon,
         }));
-        setMaintenance(mainData);
+        setMaintenance(maintenanceData);
       });
 
     return () => {
@@ -91,14 +93,14 @@ const DashboardScreen = ({ navigation }) => {
       
     } else if (item.featureId === "2") {
       try {
-        const deviceDoc = await firestore()
+        const deviceSnapshot = await firestore()
           .collection('DEVICES')
           .doc(item.id)
           .get();
 
-        if (deviceDoc.exists) {
-          const deviceData = deviceDoc.data();
-            navigation.navigate("MaintenanceDetail", {
+        if (deviceSnapshot.exists) {
+          const deviceData = deviceSnapshot.data();
+          navigation.navigate("MaintenanceDetail", {
             id: deviceData.id || '',
             icon: deviceData.icon || '',
             name: deviceData.name || '',
@@ -135,22 +137,14 @@ const DashboardScreen = ({ navigation }) => {
     );
   };
 
-  const deleteDeviceFromState = (deviceId) => {
-    setDevices(prevDevices => prevDevices.filter(device => device.id !== deviceId));
-  };
-
-  const filteredData = selectedFeatureId === "1" 
-    ? rooms 
-    : selectedFeatureId === "2" 
-      ? maintenance 
-      : [];
+  const filteredData = selectedFeatureId === "1" ? rooms : maintenance;
 
   return (
     <View style={styles.container}>
       <Text style={styles.txt}>Các chức năng quản lý</Text>
       <ScrollView
         horizontal
-        contentContainerStyle={styles.scrollViewContent}
+        contentContainerStyle={styles.horizontalScrollView}
         showsHorizontalScrollIndicator={false}
       >
         {featuresData.map((item) => (
@@ -192,9 +186,8 @@ const DashboardScreen = ({ navigation }) => {
               onPress={() => {
                 setModalVisible(false);
                 navigation.navigate("ListEmployee", {
-                   roomId: selectedRoom.id 
-                  
-                  });
+                   roomId: selectedRoom?.id
+                });
               }}
             >
               <Text style={styles.modalButtonText}>Nhân viên</Text>
@@ -203,7 +196,7 @@ const DashboardScreen = ({ navigation }) => {
               style={styles.modalButton} 
               onPress={() => {
                 setModalVisible(false);
-                navigation.navigate("ListDevices", { roomId: selectedRoom.id });
+                navigation.navigate("ListDevices", { roomId: selectedRoom?.id });
               }}
             >
               <Text style={styles.modalButtonText}>Thiết bị</Text>
@@ -223,6 +216,7 @@ const DashboardScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     backgroundColor: "#FFF",
     paddingHorizontal: 10,
   },
@@ -232,11 +226,10 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 5,
   },
-  scrollViewContent: {
+  horizontalScrollView: {
     flexDirection: "row",
     paddingVertical: 10,
-    marginTop: 10,
-    marginBottom: 50,
+    marginBottom: 10,
   },
   itemContainer: {
     alignItems: "center",
@@ -279,30 +272,33 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalTitle: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
   },
   modalText: {
-    fontSize: 18,
-    marginVertical: 5,
+    fontSize: 16,
+    marginBottom: 10,
   },
   modalButtons: {
     flexDirection: 'row',
-    marginTop: 20,
-    marginBottom: 20,
+    justifyContent: 'space-between',
+    width: '100%',
   },
   modalButton: {
     backgroundColor: '#007bff',
     padding: 10,
     borderRadius: 5,
-    marginHorizontal: 10,
+    margin: 5,
+    flex: 1,
+    alignItems: 'center',
   },
   modalButtonText: {
     color: 'white',
     fontSize: 16,
   },
   closeButton: {
+    marginTop: 10,
     backgroundColor: '#dc3545',
     padding: 10,
     borderRadius: 5,
