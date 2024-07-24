@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
   },
   topImage: {
     height: 200,
-    width: width - 20, // Adjust width according to padding
+    width: width - 20, 
     borderRadius: 10,
   },
   noImageText: {
