@@ -5,7 +5,7 @@ import storage from '@react-native-firebase/storage';
 import firestore from '@react-native-firebase/firestore';
 import Icon from 'react-native-vector-icons/MaterialIcons'; // Đảm bảo cài đặt react-native-vector-icons
 
-const BannerScreen = () => {
+const BannerScreen = ({route}) => {
   const [images, setImages] = useState([]);
 
   useEffect(() => {
@@ -30,29 +30,37 @@ const BannerScreen = () => {
       }
     });
   };
-
   const deleteImage = async (url) => {
-    if (url) {
-      try {
-        // Xóa ảnh khỏi Firebase Storage
-        const filename = url.substring(url.lastIndexOf('/') + 1);
-        const reference = storage().ref(`BannerImage/${filename}`);
-        await reference.delete();
+    try {
+      // Trích xuất đúng phần reference từ URL
+      const startIdx = url.indexOf('BannerImage%2F') + 'BannerImage%2F'.length;
+      const endIdx = url.indexOf('?');
+      const encodedFilename = url.substring(startIdx, endIdx);
+      const filename = decodeURIComponent(encodedFilename);
+      const referencePath = `BannerImage/${filename}`;
 
-        // Xóa URL ảnh khỏi Firestore
-        const doc = firestore().collection('BANNER').where('url', '==', url);
-        const snapshot = await doc.get();
-        snapshot.forEach(async (doc) => {
-          await doc.ref.delete();
-        });
+      // Xóa ảnh khỏi Firebase Storage
+      const reference = storage().ref(referencePath);
+      await reference.delete();
 
-        // Cập nhật trạng thái ảnh
-        setImages(prevImages => prevImages.filter(image => image !== url));
-      } catch (error) {
-        console.error("Error deleting image: ", error);
+      // Xóa URL ảnh khỏi Firestore
+      const snapshot = await firestore().collection('BANNER').where('url', '==', url).get();
+      snapshot.forEach(async (doc) => {
+        await doc.ref.delete();
+      });
+
+      // Cập nhật trạng thái ảnh
+      setImages(prevImages => prevImages.filter(image => image !== url));
+      console.log('Image deleted successfully');
+    } catch (error) {
+      if (error.code === 'storage/object-not-found') {
+        console.log('No object exists at the desired reference');
+      } else {
+        console.error('Error deleting image:', error);
       }
     }
   };
+
 
   const saveImage = async (uri) => {
     if (uri) {
