@@ -283,7 +283,7 @@ const styles = StyleSheet.create({
     color: '#343a40',
   },
   text: {
-    fontSize: 14,
+    fontSize: 16,
     color: '#495057',
   },
   deleteIcon: {

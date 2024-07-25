@@ -9,10 +9,8 @@ const RoomList = () => {
   const [rooms, setRooms] = useState([]);
 
   useEffect(() => {
-    const fetchRooms = async () => {
+    const unsubscribe = firestore().collection("ROOMS").onSnapshot(async (roomsSnapshot) => {
       try {
-        // Fetch all rooms
-        const roomsSnapshot = await firestore().collection("ROOMS").get();
         const roomsData = roomsSnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
@@ -45,9 +43,10 @@ const RoomList = () => {
       } catch (error) {
         console.error("Error fetching rooms and device counts:", error);
       }
-    };
+    });
 
-    fetchRooms();
+    // Clean up the subscription on unmount
+    return () => unsubscribe();
   }, []);
 
   const handleRoomPress = (room) => {

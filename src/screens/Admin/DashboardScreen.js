@@ -66,7 +66,6 @@ const DashboardScreen = ({ navigation }) => {
 
   const handleFeaturePress = (featureId) => {
     if (featureId === "4") {
-      // Điều hướng đến BannerScreen
       navigation.navigate("Banner");
     } else {
       setSelectedFeatureId(featureId);

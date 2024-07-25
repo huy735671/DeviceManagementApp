@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, Image, StyleSheet, Dimensions, FlatList, Animated } from "react-native";
+import { View, Text, Image, StyleSheet, Dimensions, FlatList, TouchableOpacity } from "react-native";
 import firestore from '@react-native-firebase/firestore';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 const Devices = () => {
   const [images, setImages] = useState([]);
@@ -10,22 +10,22 @@ const Devices = () => {
   const flatListRef = useRef(null);
 
   useEffect(() => {
-    // Hàm lắng nghe thay đổi từ Firestore
     const unsubscribe = firestore()
       .collection('BANNER')
       .onSnapshot((snapshot) => {
-        const fetchedImages = snapshot.docs.map(doc => doc.data().url);
+        const fetchedImages = snapshot.docs.map(doc => ({
+          id: doc.id,
+          url: doc.data().url,
+        }));
         setImages(fetchedImages);
       }, (error) => {
         console.error("Error fetching images: ", error);
       });
 
-    // Dọn dẹp khi component bị hủy
     return () => unsubscribe();
   }, []);
 
   useEffect(() => {
-    // Chuyển đổi hình ảnh mỗi 5 giây nếu có nhiều hình ảnh
     if (images.length > 1) {
       const interval = setInterval(() => {
         setCurrentIndex(prevIndex => {
@@ -33,7 +33,7 @@ const Devices = () => {
           flatListRef.current.scrollToIndex({ index: nextIndex, animated: true });
           return nextIndex;
         });
-      }, 5000); // 5000ms = 5 giây
+      }, 5000);
 
       return () => clearInterval(interval);
     }
@@ -63,9 +63,11 @@ const Devices = () => {
             onViewableItemsChanged={onViewableItemsChanged}
             viewabilityConfig={viewabilityConfig}
             renderItem={({ item }) => (
-              <Image source={{ uri: item }} style={styles.topImage} />
+              <View style={styles.imageContainer}>
+                <Image source={{ uri: item.url }} style={styles.topImage} />
+              </View>
             )}
-            keyExtractor={(item, index) => index.toString()}
+            keyExtractor={(item) => item.id}
           />
           <View style={styles.pagination}>
             {images.map((_, index) => (
@@ -100,13 +102,17 @@ const styles = StyleSheet.create({
   },
   bannerContainer: {
     width: width - 20,
-    height: 200,
+    height: height * 0.3,
     borderRadius: 10,
     overflow: 'hidden',
     marginBottom: 10,
   },
+  imageContainer: {
+    width: width - 20,
+    height: height * 0.3,
+  },
   topImage: {
-    height: 200,
+    height: height * 0.3,
     width: width - 20,
   },
   pagination: {

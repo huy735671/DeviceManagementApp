@@ -57,12 +57,7 @@ const ListEmployeeScreen = ({ route }) => {
       ) : (
         <Text style={styles.emptyText}>Phòng hiện không có nhân viên.</Text>
       )}
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.goBack()}
-      >
-        <Text style={styles.buttonText}>Quay lại</Text>
-      </TouchableOpacity>
+     
     </View>
   );
 };

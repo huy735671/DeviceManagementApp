@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -31,6 +31,20 @@ const getStatusLabel = (status) => {
   return statusOption ? statusOption.label : 'Không xác định'; // Nếu không tìm thấy, trả về 'Không xác định'
 };
 
+// Hàm để xác định độ ưu tiên của trạng thái
+const getStatusPriority = (status) => {
+  switch (status) {
+    case 'maintenance':
+      return 1;
+    case 'inactive':
+      return 2;
+    case 'active':
+      return 3;
+    default:
+      return 4; // Mặc định cho các trạng thái không xác định
+  }
+};
+
 const ListDevicesScreen = ({ route }) => {
   const { roomId, roomName } = route.params;
   const navigation = useNavigation();
@@ -43,7 +57,9 @@ const ListDevicesScreen = ({ route }) => {
       .where('roomId', '==', roomId)
       .onSnapshot(snapshot => {
         const devicesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setDevices(devicesData);
+        // Sắp xếp thiết bị theo độ ưu tiên của trạng thái
+        const sortedDevices = devicesData.sort((a, b) => getStatusPriority(a.operationalStatus) - getStatusPriority(b.operationalStatus));
+        setDevices(sortedDevices);
       }, error => {
         console.error('Error fetching devices:', error);
       });
@@ -57,13 +73,34 @@ const ListDevicesScreen = ({ route }) => {
     navigation.navigate('DevicesDetail', { device });
   };
 
+  // Xử lý xóa thiết bị
+  const handleDelete = (id) => {
+    Alert.alert(
+      'Xóa thiết bị',
+      'Bạn có chắc chắn muốn xóa thiết bị này?',
+      [
+        { text: 'Hủy', style: 'cancel' },
+        { 
+          text: 'Xóa', 
+          style: 'destructive', 
+          onPress: () => {
+            firestore().collection('DEVICES').doc(id).delete()
+              .then(() => {
+                console.log('Device successfully deleted!');
+              })
+              .catch(error => {
+                console.error('Error removing device: ', error);
+              });
+          } 
+        }
+      ]
+    );
+  };
+
   // Render một thiết bị
   const renderDeviceItem = ({ item }) => (
-    <TouchableOpacity
-      style={[styles.item, { backgroundColor: getStatusColor(item.operationalStatus) }]}
-      onPress={() => handlePress(item)}
-    >
-      <View style={styles.itemContent}>
+    <View style={[styles.item, { backgroundColor: getStatusColor(item.operationalStatus) }]}>
+      <TouchableOpacity style={styles.itemContent} onPress={() => handlePress(item)}>
         {item.image ? (
           <Image source={{ uri: item.image }} style={styles.deviceImage} />
         ) : (
@@ -74,8 +111,11 @@ const ListDevicesScreen = ({ route }) => {
           <Text style={styles.itemDetail}>Type: {item.deviceType}</Text>
           <Text style={styles.itemDetail}>Trạng thái: {getStatusLabel(item.operationalStatus)}</Text>
         </View>
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.deleteButton} onPress={() => handleDelete(item.id)}>
+        <Icon name="delete" size={24} color="#ff0000" />
+      </TouchableOpacity>
+    </View>
   );
 
   return (
@@ -91,12 +131,6 @@ const ListDevicesScreen = ({ route }) => {
       ) : (
         <Text style={styles.emptyText}>Phòng hiện không có thiết bị.</Text>
       )}
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.goBack()}
-      >
-        <Text style={styles.buttonText}>Quay lại</Text>
-      </TouchableOpacity>
     </View>
   );
 };
@@ -132,7 +166,7 @@ const styles = StyleSheet.create({
   itemContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    width: '100%',
+    flex: 1,
   },
   icon: {
     marginRight: 15,
@@ -154,6 +188,9 @@ const styles = StyleSheet.create({
   itemDetail: {
     fontSize: 14,
     color: '#666',
+  },
+  deleteButton: {
+    padding: 10,
   },
   button: {
     backgroundColor: '#007bff',
