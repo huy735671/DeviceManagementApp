@@ -24,6 +24,8 @@ const DashboardScreen = ({ navigation }) => {
   const [maintenance, setMaintenance] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState(null);
+  const [totalRooms, setTotalRooms] = useState(0);
+  const [totalDevices, setTotalDevices] = useState(0);
 
   useEffect(() => {
     const unsubscribeRooms = firestore()
@@ -36,6 +38,7 @@ const DashboardScreen = ({ navigation }) => {
           icon: doc.data().icon,
         }));
         setRooms(roomsData);
+        setTotalRooms(snapshot.size);
       });
 
     const unsubscribeMaintenance = firestore()
@@ -51,9 +54,16 @@ const DashboardScreen = ({ navigation }) => {
         setMaintenance(maintenanceData);
       });
 
+    const unsubscribeDevices = firestore()
+      .collection('DEVICES')
+      .onSnapshot(snapshot => {
+        setTotalDevices(snapshot.size);
+      });
+
     return () => {
       unsubscribeRooms();
       unsubscribeMaintenance();
+      unsubscribeDevices();
     };
   }, []);
 
@@ -136,6 +146,21 @@ const DashboardScreen = ({ navigation }) => {
     );
   };
 
+  const renderStatistics = () => {
+    return (
+      <View style={styles.statisticsContainer}>
+        <View style={styles.statisticsItem}>
+          <Icon name="room" size={40} color={"#000"} />
+          <Text style={styles.statisticsText}>Tổng số phòng: {totalRooms}</Text>
+        </View>
+        <View style={styles.statisticsItem}>
+          <Icon name="devices" size={40} color={"#000"} />
+          <Text style={styles.statisticsText}>Tổng số thiết bị: {totalDevices}</Text>
+        </View>
+      </View>
+    );
+  };
+
   const filteredData = selectedFeatureId === "1" ? rooms : maintenance;
 
   return (
@@ -163,12 +188,16 @@ const DashboardScreen = ({ navigation }) => {
         ))}
       </ScrollView>
 
-      <FlatList
-        data={filteredData}
-        renderItem={renderDetailItem}
-        keyExtractor={(item) => item.id}
-        numColumns={numColumns}
-      />
+      {selectedFeatureId === "3" ? (
+        renderStatistics()
+      ) : (
+        <FlatList
+          data={filteredData}
+          renderItem={renderDetailItem}
+          keyExtractor={(item) => item.id}
+          numColumns={numColumns}
+        />
+      )}
 
       <Modal 
         isVisible={modalVisible}
@@ -215,7 +244,7 @@ const DashboardScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
-
+    flex: 1,
     backgroundColor: "#FFF",
     paddingHorizontal: 10,
   },
@@ -236,33 +265,46 @@ const styles = StyleSheet.create({
   },
   btnFearture: {
     backgroundColor: "#f1f1f1",
-    padding: 15,
+    padding: 10,
     borderRadius: 10,
-    marginBottom: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 5,
   },
   txtFearture: {
-    fontSize: 16,
-    fontWeight: "bold",
+    fontSize: 12,
     textAlign: "center",
   },
   items: {
     flex: 1,
-    margin: 10,
-    padding: 10,
-    backgroundColor: "#f9f9f9",
-    borderRadius: 10,
     alignItems: "center",
-    elevation: 3,
+    padding: 10,
+    margin: 5,
+    borderRadius: 10,
+    backgroundColor: "#f1f1f1",
   },
   btn4FlstUnder: {
-    borderRadius: 10,
-    padding: 10,
-    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
+  },
+  statisticsContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 10,
+  },
+  statisticsItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  statisticsText: {
+    fontSize: 16,
+    marginLeft: 10,
   },
   modal: {
-    justifyContent: 'flex-end',
-    margin: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   modalContent: {
     backgroundColor: 'white',
@@ -281,30 +323,26 @@ const styles = StyleSheet.create({
   },
   modalButtons: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
+    marginTop: 10,
   },
   modalButton: {
     backgroundColor: '#007bff',
     padding: 10,
     borderRadius: 5,
     margin: 5,
-    flex: 1,
-    alignItems: 'center',
   },
   modalButtonText: {
     color: 'white',
-    fontSize: 16,
+    fontSize: 14,
   },
   closeButton: {
     marginTop: 10,
-    backgroundColor: '#dc3545',
     padding: 10,
+    backgroundColor: '#dc3545',
     borderRadius: 5,
   },
   closeButtonText: {
     color: 'white',
-    fontSize: 16,
   },
 });
 
