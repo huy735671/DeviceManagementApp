@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Image } fro
 import { launchCamera, launchImageLibrary } from "react-native-image-picker";
 import firestore from "@react-native-firebase/firestore";
 import auth from "@react-native-firebase/auth";
+import notifee from "@notifee/react-native";
 
 const ReportScreen = ({ route, navigation }) => {
   const { id = null, name = "", room = "" } = route.params || {};
@@ -28,13 +29,25 @@ const ReportScreen = ({ route, navigation }) => {
         deviceId: id,
         deviceName: name,
         description: description,
-        image: imageUri, 
+        image: imageUri,
         reporterName: user ? user.displayName : "Khách",
         reporterEmail: userEmail,
-        room: room, // Thêm thông tin phòng ban vào báo cáo
-        
+        room: room,
         timestamp: firestore.FieldValue.serverTimestamp(),
       });
+
+      // Show success notification
+      await notifee.displayNotification({
+        title: 'Báo cáo thiết bị hư hỏng',
+        body: 'Báo cáo đã được gửi thành công.',
+        android: {
+          channelId: 'default',
+          pressAction: {
+            id: 'default',
+          },
+        },
+      });
+
       Alert.alert("Thành công", "Báo cáo đã được gửi thành công.");
       navigation.goBack();
     } catch (error) {
