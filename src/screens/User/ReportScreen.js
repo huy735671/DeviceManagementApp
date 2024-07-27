@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Image } fro
 import { launchCamera, launchImageLibrary } from "react-native-image-picker";
 import firestore from "@react-native-firebase/firestore";
 import auth from "@react-native-firebase/auth";
-
+import LocalNotification from '../LocalNotification';
 const ReportScreen = ({ route, navigation }) => {
   const { id = null, name = "", room = "" } = route.params || {};
   const [description, setDescription] = useState("");
@@ -35,6 +35,7 @@ const ReportScreen = ({ route, navigation }) => {
         
         timestamp: firestore.FieldValue.serverTimestamp(),
       });
+      // LocalNotification(name, room);
       Alert.alert("Thành công", "Báo cáo đã được gửi thành công.");
       navigation.goBack();
     } catch (error) {
@@ -105,7 +106,7 @@ const ReportScreen = ({ route, navigation }) => {
           <Text style={styles.deviceName}>Thiết bị: {name}</Text>
           <Text style={styles.roomName}>Phòng ban: {room || "Unknow"}</Text>
         </View>
-        <TouchableOpacity style={styles.btnSubmit} onPress={handleSubmit}>
+        <TouchableOpacity style={styles.btnSubmit} onPress={LocalNotification}>
           <Text style={styles.btnSubmitText}>Gửi báo cáo</Text>
         </TouchableOpacity>
       </View>
