@@ -4,6 +4,7 @@ import { launchCamera, launchImageLibrary } from "react-native-image-picker";
 import firestore from "@react-native-firebase/firestore";
 import auth from "@react-native-firebase/auth";
 import LocalNotification from '../LocalNotification';
+
 const ReportScreen = ({ route, navigation }) => {
   const { id = null, name = "", room = "" } = route.params || {};
   const [description, setDescription] = useState("");
@@ -28,14 +29,14 @@ const ReportScreen = ({ route, navigation }) => {
         deviceId: id,
         deviceName: name,
         description: description,
-        image: imageUri, 
+        image: imageUri,
         reporterName: user ? user.displayName : "Khách",
         reporterEmail: userEmail,
-        room: room, // Thêm thông tin phòng ban vào báo cáo
-        
+        room: room,
         timestamp: firestore.FieldValue.serverTimestamp(),
       });
-      // LocalNotification(name, room);
+
+      LocalNotification(name, room); // Trigger local notification with device name and room
       Alert.alert("Thành công", "Báo cáo đã được gửi thành công.");
       navigation.goBack();
     } catch (error) {
@@ -104,9 +105,9 @@ const ReportScreen = ({ route, navigation }) => {
       <View style={styles.reportContainer}>
         <View style={styles.reportInfo}>
           <Text style={styles.deviceName}>Thiết bị: {name}</Text>
-          <Text style={styles.roomName}>Phòng ban: {room || "Unknow"}</Text>
+          <Text style={styles.roomName}>Phòng ban: {room || "Unknown"}</Text>
         </View>
-        <TouchableOpacity style={styles.btnSubmit} onPress={LocalNotification}>
+        <TouchableOpacity style={styles.btnSubmit} onPress={handleSubmit}>
           <Text style={styles.btnSubmitText}>Gửi báo cáo</Text>
         </TouchableOpacity>
       </View>

@@ -1,6 +1,6 @@
 import PushNotification from 'react-native-push-notification';
 
-const LocalNotification = (deviceName, room) => {
+const LocalNotification = (deviceType, roomName) => {
     const key = Date.now().toString();
     PushNotification.createChannel(
         {
@@ -16,7 +16,7 @@ const LocalNotification = (deviceName, room) => {
     PushNotification.localNotification({
         channelId: key,
         title: 'Thông báo lỗi',
-        message: `Thiết bị ${deviceName} ở phòng ${room} bị lỗi.`,
+        message: `Thiết bị ${deviceType} ở phòng ${roomName} bị lỗi.`,
     });
 };
 
