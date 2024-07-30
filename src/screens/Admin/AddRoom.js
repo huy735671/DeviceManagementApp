@@ -53,6 +53,12 @@ const AddRoom = ({ navigation }) => {
         icon: "apartment", // Placeholder icon
       });
 
+      // Create notification document
+      await firestore().collection('NOTIFICATION_ADMIN').add({
+        message: `${roomName} đã được thêm thành công.`,
+        timestamp: firestore.FieldValue.serverTimestamp(),
+      });
+
       // Clear input fields after submission
       setRoomId(null); // Will be automatically set on re-render
       setRoomName("");
@@ -172,6 +178,7 @@ const styles = StyleSheet.create({
     borderBottomColor: "#DDD",
   },
   modalText: {
+    color:"black",
     fontSize: 16,
     textAlign: "center",
   },

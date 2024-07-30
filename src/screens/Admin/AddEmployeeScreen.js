@@ -48,7 +48,7 @@ const AddEmployeeScreen = ({ navigation }) => {
         const employeesRef = firestore().collection('EMPLOYEES');
         const snapshot = await employeesRef.get();
         const count = snapshot.size;
-
+  
         // Add the employee with a numeric ID
         await employeesRef.doc(String(count + 1)).set({
           icon,
@@ -61,12 +61,19 @@ const AddEmployeeScreen = ({ navigation }) => {
           password,
           roomId: selectedRoom.id,
         });
-
+  
+        // Add a notification for the admin
+        await firestore().collection('NOTIFICATION_ADMIN').add({
+          title: 'New Employee Added',
+          message: `Nhân viên ${name} đã được thêm vào phòng ban ${selectedRoom.name}`,
+          timestamp: firestore.FieldValue.serverTimestamp(),
+        });
+  
         // Show success alert and navigate back
         Alert.alert('Thành công', 'Nhân viên đã được lưu thành công!', [
           { text: 'OK', onPress: () => navigation.goBack() }
         ]);
-
+  
       } catch (error) {
         console.error('Lỗi khi lưu nhân viên:', error);
         Alert.alert('Lỗi', 'Đã xảy ra lỗi khi lưu nhân viên. Vui lòng thử lại sau.');
@@ -75,6 +82,7 @@ const AddEmployeeScreen = ({ navigation }) => {
       Alert.alert('Lỗi', 'Vui lòng chọn phòng ban trước khi lưu.');
     }
   };
+  
 
   const renderRoomItem = ({ item }) => (
     <TouchableOpacity

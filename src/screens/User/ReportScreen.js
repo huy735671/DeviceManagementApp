@@ -10,6 +10,33 @@ const ReportScreen = ({ route, navigation }) => {
   const [description, setDescription] = useState("");
   const [imageUri, setImageUri] = useState(null);
 
+  const createNotificationUser = async (deviceName, room) => {
+    try {
+      await firestore().collection("NOTIFICATION_USER").add({
+        userName: auth().currentUser ? auth().currentUser.displayName : "Khách",
+        reportMessage: `Báo cáo về thiết bị ${deviceName} trong phòng ${room} đã được gửi thành công.`,
+        timestamp: firestore.FieldValue.serverTimestamp(),
+      });
+      console.log('Notification for user created successfully');
+    } catch (error) {
+      console.error("Error creating notification for user: ", error);
+    }
+  };
+
+  const createNotificationAdmin = async (deviceName, room) => {
+    try {
+      await firestore().collection("NOTIFICATION_ADMIN").add({
+        adminName: "Admin",
+        reportMessage: `Có một báo cáo mới về thiết bị ${deviceName} trong phòng ${room}.`,
+        timestamp: firestore.FieldValue.serverTimestamp(),
+        color: "#FF5733"  // Example color code (orange)
+      });
+      console.log('Notification for admin created successfully');
+    } catch (error) {
+      console.error("Error creating notification for admin: ", error);
+    }
+  };
+
   const handleSubmit = async () => {
     if (!description.trim()) {
       Alert.alert("Thông báo", "Vui lòng nhập mô tả vấn đề.");
@@ -37,6 +64,11 @@ const ReportScreen = ({ route, navigation }) => {
       });
 
       LocalNotification(name, room); // Trigger local notification with device name and room
+
+      // Create notifications in both collections
+      await createNotificationUser(name, room);
+      await createNotificationAdmin(name, room);
+
       Alert.alert("Thành công", "Báo cáo đã được gửi thành công.");
       navigation.goBack();
     } catch (error) {
@@ -120,7 +152,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FFF",
     padding: 10,
-    paddingBottom: 80, 
+    paddingBottom: 80,
   },
   title: {
     fontSize: 24,

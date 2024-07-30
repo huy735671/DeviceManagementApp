@@ -91,6 +91,15 @@ const AddDeviceScreen = ({ navigation }) => {
         });
 
       console.log('Thiết bị đã được lưu vào Firestore với phòng ban:', selectedRoom.name);
+
+      // Add notification for admin
+      await firestore().collection('NOTIFICATION_ADMIN').add({
+        title: 'Thiết bị mới được thêm',
+        message: `Thiết bị ${name} đã được thêm vào phòng ban ${selectedRoom.name}.`,
+        timestamp: new Date(),
+        adminNotification: true, // You can use this field to differentiate notifications for admins
+      });
+
       navigation.navigate('AdminTab', { id, name, image: deviceImage, type: deviceType });
     } catch (error) {
       console.error('Lỗi khi lưu thiết bị:', error);
