@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, Button, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import Icon from 'react-native-vector-icons/Ionicons';
 
@@ -27,13 +27,11 @@ const Notification = () => {
       const notifications = [];
       for (const documentSnapshot of querySnapshot.docs) {
         const notificationData = documentSnapshot.data();
-        const userDoc = await firestore().collection('USERS').doc(notificationData.userId).get();
         const reportDoc = await firestore().collection('REPORTS').doc(notificationData.reportId).get();
-
+  
         notifications.push({
           ...notificationData,
           key: documentSnapshot.id,
-          userName: userDoc.exists ? userDoc.data().name : 'Unknown User',
           reportDetails: reportDoc.exists ? reportDoc.data().details : 'No details available',
         });
       }
@@ -43,6 +41,11 @@ const Notification = () => {
     }
     setLoading(false);
   };
+  
+
+  useEffect(() => {
+    loadNotifications(); // Load notifications when the component mounts
+  }, []);
 
   const handleDelete = (id) => {
     deleteNotification(id).then(() => {
@@ -78,11 +81,6 @@ const Notification = () => {
           keyExtractor={item => item.key}
         />
       )}
-      <Button
-        title="Load Notifications"
-        onPress={loadNotifications}
-        color="#007bff"
-      />
     </View>
   );
 };

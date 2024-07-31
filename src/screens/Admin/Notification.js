@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, Button, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import Icon from 'react-native-vector-icons/Ionicons';
 
@@ -17,35 +17,36 @@ const Notification = () => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const loadNotifications = async () => {
-    setLoading(true);
-    try {
-      const querySnapshot = await firestore()
-        .collection('NOTIFICATION_ADMIN')
-        .orderBy('timestamp', 'desc')
-        .get();
+  useEffect(() => {
+    const subscriber = firestore()
+      .collection('NOTIFICATION_ADMIN')
+      .orderBy('timestamp', 'desc')
+      .onSnapshot(async querySnapshot => {
+        setLoading(true);
+        const notificationsList = [];
+        for (const documentSnapshot of querySnapshot.docs) {
+          const notificationData = documentSnapshot.data();
+          const userDoc = await firestore().collection('USERS').doc(notificationData.userId).get();
+          const reportDoc = await firestore().collection('REPORTS').doc(notificationData.reportId).get();
 
-      const notificationsList = [];
-      for (const documentSnapshot of querySnapshot.docs) {
-        const notificationData = documentSnapshot.data();
-        const userDoc = await firestore().collection('USERS').doc(notificationData.userId).get();
-        const reportDoc = await firestore().collection('REPORTS').doc(notificationData.reportId).get();
+          notificationsList.push({
+            ...notificationData,
+            key: documentSnapshot.id,
+            userName: userDoc.exists ? userDoc.data().name : 'HỆ THỐNG',
+            reportDetails: reportDoc.exists ? reportDoc.data().details : 'No details available',
+          });
+        }
+        setNotifications(notificationsList);
+        setLoading(false);
+      }, error => {
+        console.error("Error loading notifications: ", error);
+        Alert.alert("Error", "Failed to load notifications.");
+        setLoading(false);
+      });
 
-        notificationsList.push({
-          ...notificationData,
-          key: documentSnapshot.id,
-          userName: userDoc.exists ? userDoc.data().name : 'HỆ THỐNG',
-          reportDetails: reportDoc.exists ? reportDoc.data().details : 'No details available',
-        });
-      }
-      setNotifications(notificationsList);
-    } catch (error) {
-      console.error("Error loading notifications: ", error);
-      Alert.alert("Error", "Failed to load notifications.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    // Unsubscribe from events when no longer in use
+    return () => subscriber();
+  }, []);
 
   const handleDelete = (id) => {
     Alert.alert(
@@ -105,11 +106,6 @@ const Notification = () => {
           keyExtractor={item => item.key}
         />
       )}
-      <Button
-        title="Load Notifications"
-        onPress={loadNotifications}
-        color="#007bff"
-      />
     </View>
   );
 };

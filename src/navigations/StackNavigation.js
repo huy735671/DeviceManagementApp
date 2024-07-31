@@ -28,6 +28,7 @@ import Settings from '../screens/Settings';
 import ListEmployee from '../screens/Admin/ListEmployee';
 import ListDevices from '../screens/Admin/ListDevices';
 import BannerScreen from '../screens/Admin/BannerScreen';
+import StatisticsScreen from '../screens/Admin/StatisticsScreen';
 const Stack = createNativeStackNavigator();
 
 const StackNavigation = () => {
@@ -44,6 +45,14 @@ const StackNavigation = () => {
       <Stack.Screen name='Dashboard' component={DashboardScreen} options={{ headerShown: false }} />
       <Stack.Screen name='RoomList' component={RoomList} options={{ headerShown: false }} />
       <Stack.Screen name='Home' component={HomeScreen} options={{ headerShown: false }} />
+      <Stack.Screen name='Statistics' component={StatisticsScreen} 
+        options={{
+          title: "Thống kê",
+          headerShown: true,
+          headerStyle: {
+            backgroundColor: "#1FD2BD",
+          }, }} />
+
       <Stack.Screen name='Banner'
        component={BannerScreen}
        options={{

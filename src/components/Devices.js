@@ -51,7 +51,7 @@ const Devices = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.headerText}>Banner Management</Text>
+      {/* <Text style={styles.headerText}>Banner Management</Text> */}
       {images.length > 0 ? (
         <View style={styles.bannerContainer}>
           <FlatList

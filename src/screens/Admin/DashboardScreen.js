@@ -60,17 +60,20 @@ const DashboardScreen = ({ navigation }) => {
   const featuresData = [
     { id: "1", title: "Tất cả", icon: "menu" },
     { id: "2", title: "Bảo trì", icon: "settings" },
-    { id: "3", title: "Thống kê", icon: "insert-chart-outlined" },
-    { id: "4", title: "Banner", icon: "insert-chart-outlined" }, // Mục Banner
+    { id: "3", title: "Thống kê", icon: "insert-chart-outlined" }, // Thêm mục Thống kê
+    { id: "4", title: "Banner", icon: "insert-chart-outlined" },
   ];
-
+  
   const handleFeaturePress = (featureId) => {
-    if (featureId === "4") {
+    if (featureId === "3") {
+      navigation.navigate("Statistics"); // Điều hướng đến StatisticsScreen
+    } else if (featureId === "4") {
       navigation.navigate("Banner");
     } else {
       setSelectedFeatureId(featureId);
     }
   };
+  
 
   const handleDetailPress = async (item) => {
     if (item.featureId === "1") {
