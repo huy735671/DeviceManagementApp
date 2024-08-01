@@ -4,6 +4,8 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Button, TextInput } from 'react-native-paper';
 import DatePicker from 'react-native-date-picker';
 import firestore from '@react-native-firebase/firestore';
+import storage from '@react-native-firebase/storage';
+
 
 import Auth from '../../services/auth';
 
@@ -57,22 +59,17 @@ const AddEmployeeScreen = ({ navigation }) => {
       try {
         // Create user in Firebase Auth and Firestore
         await Auth.signUp(name, numPhone, email, password, role);
-
-        // Get the current count of documents in 'USERS' collection
-        const usersRef = firestore().collection('USERS');
-        const snapshot = await usersRef.get();
-        const count = snapshot.size;
-
-        // Upload image to Firebase Storage
+  
+        // Upload image to Firebase Storage and get the URL
         let imageUrl = '';
-        if (avatarUrl) {
+        if (employeeImage) {
           const storageRef = storage().ref(`employees/${email}.jpg`);
-          await storageRef.putFile(avatarUrl);
+          await storageRef.putFile(employeeImage);
           imageUrl = await storageRef.getDownloadURL();
         }
-
+  
         // Add the employee with a numeric ID
-        await usersRef.doc(email).set({
+        await firestore().collection('USERS').doc(email).set({
           icon,
           name,
           id,
@@ -82,21 +79,21 @@ const AddEmployeeScreen = ({ navigation }) => {
           datetime,
           password,
           roomId: selectedRoom.id,
-          image: imageUrl,
+          avatarUrl: imageUrl, // Save the image URL here
         });
-
+  
         // Add a notification for the admin
         await firestore().collection('NOTIFICATION_ADMIN').add({
           title: 'New Employee Added',
           message: `Nhân viên ${name} đã được thêm vào phòng ban ${selectedRoom.name}`,
           timestamp: firestore.FieldValue.serverTimestamp(),
         });
-
+  
         // Show success alert and navigate back
         Alert.alert('Thành công', 'Nhân viên đã được lưu thành công!', [
           { text: 'OK', onPress: () => navigation.goBack() }
         ]);
-
+  
       } catch (error) {
         console.error('Lỗi khi lưu nhân viên:', error);
         Alert.alert('Lỗi', 'Đã xảy ra lỗi khi lưu nhân viên. Vui lòng thử lại sau.');
@@ -105,6 +102,7 @@ const AddEmployeeScreen = ({ navigation }) => {
       Alert.alert('Lỗi', 'Vui lòng chọn phòng ban trước khi lưu.');
     }
   };
+  
 
 
   // choose image or take a photo from phone
