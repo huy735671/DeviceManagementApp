@@ -1,9 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, Modal, FlatList } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Modal, FlatList, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Button, TextInput } from 'react-native-paper';
 import DatePicker from 'react-native-date-picker';
 import firestore from '@react-native-firebase/firestore';
+
+import Auth from '../../services/auth';
+
+import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
+
+
 
 const AddEmployeeScreen = ({ navigation }) => {
   const [name, setName] = useState('');
@@ -12,7 +18,7 @@ const AddEmployeeScreen = ({ navigation }) => {
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [email, setEmail] = useState('');
   const [numPhone, setNumPhone] = useState('');
-  const [role, setRole] = useState('User'); // Default is User
+  const [role, setRole] = useState('user'); // Default is User
   const [password, setPassword] = useState('');
   const [datetime, setDatetime] = useState(new Date());
   const [open, setOpen] = useState(false);
@@ -20,6 +26,11 @@ const AddEmployeeScreen = ({ navigation }) => {
   const [rooms, setRooms] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [iconModalVisible, setIconModalVisible] = useState(false);
+  const [employeeImage, setEmployeeImage] = useState(null);
+  const [employeeType, setEmployeeType] = useState(null); // Set employeeType based on your requirement
+  const [avatarUrl, setAvatarUrl] = useState(null);
+
+
 
   const availableIcons = [
     'person', 'person-outline'
@@ -44,13 +55,24 @@ const AddEmployeeScreen = ({ navigation }) => {
   const handleSaveEmployee = async () => {
     if (selectedRoom) {
       try {
-        // Get the current count of documents in 'EMPLOYEES' collection
-        const employeesRef = firestore().collection('EMPLOYEES');
-        const snapshot = await employeesRef.get();
+        // Create user in Firebase Auth and Firestore
+        await Auth.signUp(name, numPhone, email, password, role);
+
+        // Get the current count of documents in 'USERS' collection
+        const usersRef = firestore().collection('USERS');
+        const snapshot = await usersRef.get();
         const count = snapshot.size;
-  
+
+        // Upload image to Firebase Storage
+        let imageUrl = '';
+        if (avatarUrl) {
+          const storageRef = storage().ref(`employees/${email}.jpg`);
+          await storageRef.putFile(avatarUrl);
+          imageUrl = await storageRef.getDownloadURL();
+        }
+
         // Add the employee with a numeric ID
-        await employeesRef.doc(String(count + 1)).set({
+        await usersRef.doc(email).set({
           icon,
           name,
           id,
@@ -60,20 +82,21 @@ const AddEmployeeScreen = ({ navigation }) => {
           datetime,
           password,
           roomId: selectedRoom.id,
+          image: imageUrl,
         });
-  
+
         // Add a notification for the admin
         await firestore().collection('NOTIFICATION_ADMIN').add({
           title: 'New Employee Added',
           message: `Nhân viên ${name} đã được thêm vào phòng ban ${selectedRoom.name}`,
           timestamp: firestore.FieldValue.serverTimestamp(),
         });
-  
+
         // Show success alert and navigate back
         Alert.alert('Thành công', 'Nhân viên đã được lưu thành công!', [
           { text: 'OK', onPress: () => navigation.goBack() }
         ]);
-  
+
       } catch (error) {
         console.error('Lỗi khi lưu nhân viên:', error);
         Alert.alert('Lỗi', 'Đã xảy ra lỗi khi lưu nhân viên. Vui lòng thử lại sau.');
@@ -82,14 +105,69 @@ const AddEmployeeScreen = ({ navigation }) => {
       Alert.alert('Lỗi', 'Vui lòng chọn phòng ban trước khi lưu.');
     }
   };
-  
+
+
+  // choose image or take a photo from phone
+  const pickEmployeeImage = () => {
+    const options = {
+      mediaType: 'photo',
+      quality: 1,
+    };
+
+    const selectImage = () => {
+      launchImageLibrary(options, (response) => {
+        if (response.didCancel) {
+          console.log('User cancelled image picker');
+        } else if (response.errorCode) {
+          console.log('ImagePicker Error: ', response.errorMessage);
+        } else {
+          const uri = response.assets[0].uri;
+          setEmployeeImage(uri);
+        }
+      });
+    };
+
+    const takePhoto = () => {
+      launchCamera(options, (response) => {
+        if (response.didCancel) {
+          console.log('User cancelled camera');
+        } else if (response.errorCode) {
+          console.log('Camera Error: ', response.errorMessage);
+        } else {
+          const uri = response.assets[0].uri;
+          setEmployeeImage(uri);
+        }
+      });
+    };
+
+    Alert.alert(
+      'Select Image',
+      'Choose an option',
+      [
+        {
+          text: 'Take Photo',
+          onPress: takePhoto,
+        },
+        {
+          text: 'Choose from Library',
+          onPress: selectImage,
+        },
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
 
   const renderRoomItem = ({ item }) => (
     <TouchableOpacity
       style={styles.roomItem}
       onPress={() => {
         setSelectedRoom(item);
-        setModalVisible(false); 
+        setModalVisible(false);
       }}
     >
       <Text style={styles.roomItemText}>{item.name}</Text>
@@ -110,8 +188,24 @@ const AddEmployeeScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.iconContainer}>
+      {/* <View style={styles.iconContainer}>
         <Icon name={icon} size={150} color={"#000"} onPress={() => setIconModalVisible(true)} />
+      </View> */}
+
+      <View style={styles.iconContainer}>
+        <TouchableOpacity onPress={pickEmployeeImage}>
+          {employeeImage ? (
+            <Image source={{ uri: employeeImage }} style={styles.employeeImage} />
+          ) : (
+            <View style={styles.iconWrapper}>
+              {!employeeType ? (
+                <Text style={styles.chooseImageText}>Chọn hình ảnh</Text>
+              ) : (
+                <Icon name={getDefaultIcon(employeeType)} size={100} color="#000" />
+              )}
+            </View>
+          )}
+        </TouchableOpacity>
       </View>
       <View style={styles.formContainer}>
         <View style={styles.inputContainer}>
@@ -190,7 +284,7 @@ const AddEmployeeScreen = ({ navigation }) => {
           <Text style={styles.label}>Vai trò: </Text>
           <TouchableOpacity
             style={styles.roleButton}
-            onPress={() => setRole(role === 'User' ? 'Admin' : 'User')}
+            onPress={() => setRole(role === 'user' ? 'admin' : 'user')}
           >
             <Text style={styles.roleText}>{role}</Text>
           </TouchableOpacity>
@@ -417,6 +511,19 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
     borderColor: '#E0E0E0',
+  },
+  employeeImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 10,
+  },
+  iconWrapper: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  chooseImageText: {
+    fontSize: 16,
+    color: '#000',
   },
 });
 

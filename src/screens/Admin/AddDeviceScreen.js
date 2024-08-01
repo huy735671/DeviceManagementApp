@@ -4,7 +4,8 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Button, TextInput } from 'react-native-paper';
 import DatePicker from 'react-native-date-picker';
 import firestore from '@react-native-firebase/firestore';
-import { launchImageLibrary } from 'react-native-image-picker';
+//import { launchImageLibrary } from 'react-native-image-picker';
+import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
 
 const AddDeviceScreen = ({ navigation }) => {
   const [name, setName] = useState('');
@@ -23,6 +24,7 @@ const AddDeviceScreen = ({ navigation }) => {
   const [deploymentDate, setDeploymentDate] = useState(new Date());
   const [deviceImage, setDeviceImage] = useState(null);
   const [loading, setLoading] = useState(false);
+
 
   const statusOptions = [
     { label: 'Hoạt động', value: 'active' },
@@ -109,22 +111,77 @@ const AddDeviceScreen = ({ navigation }) => {
     }
   };
 
+  // const pickImage = () => {
+  //   const options = {
+  //     mediaType: 'photo',
+  //     quality: 1,
+  //   };
+
+  //   launchImageLibrary(options, (response) => {
+  //     if (response.didCancel) {
+  //       console.log('User cancelled image picker');
+  //     } else if (response.errorCode) {
+  //       console.log('ImagePicker Error: ', response.errorMessage);
+  //     } else {
+  //       const uri = response.assets[0].uri;
+  //       setDeviceImage(uri);
+  //     }
+  //   });
+
+  // };
+
+
   const pickImage = () => {
     const options = {
       mediaType: 'photo',
       quality: 1,
     };
 
-    launchImageLibrary(options, (response) => {
-      if (response.didCancel) {
-        console.log('User cancelled image picker');
-      } else if (response.errorCode) {
-        console.log('ImagePicker Error: ', response.errorMessage);
-      } else {
-        const uri = response.assets[0].uri;
-        setDeviceImage(uri);
-      }
-    });
+    const selectImage = () => {
+      launchImageLibrary(options, (response) => {
+        if (response.didCancel) {
+          console.log('User cancelled image picker');
+        } else if (response.errorCode) {
+          console.log('ImagePicker Error: ', response.errorMessage);
+        } else {
+          const uri = response.assets[0].uri;
+          setDeviceImage(uri);
+        }
+      });
+    };
+
+    const takePhoto = () => {
+      launchCamera(options, (response) => {
+        if (response.didCancel) {
+          console.log('User cancelled camera');
+        } else if (response.errorCode) {
+          console.log('Camera Error: ', response.errorMessage);
+        } else {
+          const uri = response.assets[0].uri;
+          setDeviceImage(uri);
+        }
+      });
+    };
+
+    Alert.alert(
+      'Select Image',
+      'Choose an option',
+      [
+        {
+          text: 'Take Photo',
+          onPress: takePhoto,
+        },
+        {
+          text: 'Choose from Library',
+          onPress: selectImage,
+        },
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
   const renderRoomItem = ({ item }) => (
@@ -165,6 +222,23 @@ const AddDeviceScreen = ({ navigation }) => {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.content}>
+        {/* <View style={styles.iconContainer}>
+          <TouchableOpacity onPress={pickImage}>
+            {deviceImage ? (
+              <Image source={{ uri: deviceImage }} style={styles.deviceImage} />
+            ) : (
+              <View style={styles.iconWrapper}>
+                {!deviceType ? (
+                  <Text style={styles.chooseImageText}>Chọn hình ảnh</Text>
+                ) : (
+                  <Icon name={getDefaultIcon(deviceType)} size={100} color="#000" />
+                )}
+              </View>
+            )}
+          </TouchableOpacity>
+        </View> */}
+
+        
         <View style={styles.iconContainer}>
           <TouchableOpacity onPress={pickImage}>
             {deviceImage ? (
