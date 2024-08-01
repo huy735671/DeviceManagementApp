@@ -1,62 +1,96 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity, ActivityIndicator } from "react-native";
 import Icons from "react-native-vector-icons/MaterialIcons";
 import { useNavigation } from "@react-navigation/native";
 import firestore from "@react-native-firebase/firestore";
+import { useMyContextController } from "../context"; // Adjust path as necessary
 
 const RoomList = () => {
   const navigation = useNavigation();
   const [rooms, setRooms] = useState([]);
+  const [loading, setLoading] = useState(true); // Add loading state
+
+  // Access userLogin from context
+  const [controller] = useMyContextController();
+  const userLogin = controller.userLogin;
 
   useEffect(() => {
-    const unsubscribe = firestore().collection("ROOMS").onSnapshot(async (roomsSnapshot) => {
-      try {
-        const roomsData = roomsSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        console.log("Rooms Data:", roomsData);
+    console.log("User Login:", userLogin); // Debugging line
 
-        // Fetch device counts for each room
-        const roomsWithDeviceCounts = await Promise.all(roomsData.map(async (room) => {
-          const devicesSnapshot = await firestore()
-            .collection("DEVICES")
-            .where("roomId", "==", room.id)
-            .get();
-          
-          const deviceCount = devicesSnapshot.size;
-          return {
-            ...room,
-            deviceCount,
-          };
-        }));
+    if (!userLogin || !userLogin.roomId) return; // Exit if userLogin or roomId is not set
 
-        // Sort rooms by status with priority
-        const sortedRooms = roomsWithDeviceCounts.sort((a, b) => {
-          console.log(`Sorting: ${a.name} (${a.status}) vs ${b.name} (${b.status})`);
-          const statusOrder = ["maintenance", "inactive", "active"];
-          return statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status);
-        });
+    const unsubscribe = firestore()
+      .collection("ROOMS")
+      .onSnapshot(async (roomsSnapshot) => {
+        try {
+          const roomsData = roomsSnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          console.log("Fetched Rooms Data:", roomsData);
 
-        console.log("Sorted Rooms:", sortedRooms);
-        setRooms(sortedRooms);
-      } catch (error) {
-        console.error("Error fetching rooms and device counts:", error);
-      }
-    });
+          // Fetch device counts for each room
+          const roomsWithDeviceCounts = await Promise.all(
+            roomsData.map(async (room) => {
+              const devicesSnapshot = await firestore()
+                .collection("DEVICES")
+                .where("roomId", "==", room.id)
+                .get();
+
+              const deviceCount = devicesSnapshot.size;
+              console.log(`Room ${room.id} has ${deviceCount} devices`);
+              return {
+                ...room,
+                deviceCount,
+              };
+            })
+          );
+
+          console.log("Rooms with Device Counts:", roomsWithDeviceCounts);
+
+          // Sort rooms by status with priority
+          const sortedRooms = roomsWithDeviceCounts.sort((a, b) => {
+            const statusOrder = ["maintenance", "inactive", "active"];
+            return statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status);
+          });
+
+          console.log("Sorted Rooms:", sortedRooms);
+
+          // Filter rooms to show only the one that matches the user's roomId
+          const filteredRooms = sortedRooms.filter(
+            (room) => room.id === userLogin.roomId
+          );
+
+          console.log("Filtered Rooms:", filteredRooms);
+
+          setRooms(filteredRooms);
+        } catch (error) {
+          console.error("Error fetching rooms and device counts:", error);
+        } finally {
+          setLoading(false); // Set loading to false once data is fetched
+        }
+      });
 
     // Clean up the subscription on unmount
     return () => unsubscribe();
-  }, []);
+  }, [userLogin]);
 
   const handleRoomPress = (room) => {
     navigation.navigate("Room", { room });
   };
 
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
+
   return (
     <View>
       <Text style={{ fontWeight: "bold", fontSize: 25, margin: 10 }}>
-        Danh sách phòng ban
+        Phòng
       </Text>
       <View style={styles.container}>
         {rooms.map((room) => (
@@ -67,7 +101,9 @@ const RoomList = () => {
           >
             <Icons name="list-alt" size={50} color="black" />
             <Text style={{ fontWeight: "bold" }}>{room.name}</Text>
-            <Text style={{ fontWeight: 'bold' }}>Số thiết bị: {room.deviceCount}</Text>
+            <Text style={{ fontWeight: "bold" }}>
+              Số thiết bị: {room.deviceCount}
+            </Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -82,9 +118,15 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     flexWrap: "wrap",
+
+    padding: 20,
+    justifyContent: "space-around",
+    backgroundColor: "white",
+    paddingBottom: 100, // Adjust padding based on device size and content
+    paddingTop: 20, // Adjust padding based on device size and content
   },
   item: {
-    width: width / 2 - 20,
+    width: 350,
     height: 100,
     margin: 10,
     justifyContent: "center",
@@ -96,5 +138,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
