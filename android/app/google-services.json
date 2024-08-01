@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "45382348832",
+    "project_id": "projectmanager-c0311",
+    "storage_bucket": "projectmanager-c0311.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:45382348832:android:5ec69220082a40917fcc45",
+        "android_client_info": {
+          "package_name": "com.devicemanagementapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDML-Xn_N8ecw5JaEe2TlFnBpmZqgpSc3c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
