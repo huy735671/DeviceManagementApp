@@ -1,136 +1,219 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
-import React, { useState, useEffect } from "react";
-import Icon from "react-native-vector-icons/MaterialIcons";
-import { Button } from "react-native-paper";
-import { useNavigation } from "@react-navigation/native";
+import React, { useEffect, useState } from 'react';
+import {
+  StyleSheet,
+  SafeAreaView,
+  View,
+  Image,
+  Text,
+  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
+} from 'react-native';
+import AntDesign from 'react-native-vector-icons/AntDesign';
+import { useNavigation } from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { Icon } from 'react-native-paper';
 
-const AccountScreen = () => {
+export default function AccountScreen() {
   const navigation = useNavigation();
-  const [user, setUser] = useState(null);
-  const [avatarUrl, setAvatarUrl] = useState(null);
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = auth().onAuthStateChanged(async (user) => {
+    const fetchUserData = async () => {
+      const user = auth().currentUser;
       if (user) {
-        setUser(user);
-
-        try {
-          const userDoc = await firestore()
-            .collection("USERS")
-            .doc(user.email)
-            .get();
-          if (userDoc.exists) {
-            const userData = userDoc.data();
-            setAvatarUrl(userData.avatarUrl || null);
-          }
-        } catch (error) {
-          console.error("Error fetching user data: ", error);
+        const userDoc = await firestore().collection('USERS').doc(user.email).get();
+        if (userDoc.exists) {
+          setUserData(userDoc.data());
         }
-      } else {
-        setUser(null);
       }
-    });
+      setLoading(false);
+    };
 
-    return unsubscribe;
+    fetchUserData();
   }, []);
 
-  const handleSignOut = () => {
-    auth().signOut().then(() => {
-      navigation.navigate('SignIn');
-    });
+  const handlerLogout = () => {
+    auth()
+      .signOut()
+      .then(() => {
+        navigation.navigate('SignIn');
+      });
   };
 
-  return (
-    <View style={{ flex: 1, backgroundColor: "#FFF" }}>
-      <View style={styles.bodyContainer}>
-        <View style={styles.bodyViewContainer}>
-          {avatarUrl ? (
-            <Image
-              source={{ uri: avatarUrl }}
-              style={{ width: 100, height: 100, borderRadius: 50, marginVertical: 20 }}
-            />
-          ) : (
-            <Icon name={"account-circle"} size={100} color={"#000"} style={{ marginVertical: 20 }} />
-          )}
-          <View style={{ flexDirection: "column", justifyContent: "center", marginHorizontal: 25 }}>
-            <View style={{ flexDirection: "row" }}>
-              <Text style={{ ...styles.txt, fontWeight: "bold" }}>Họ và tên:{" "}</Text>
-              <Text style={styles.txt}>{user ? user.displayName : 'NaN'}</Text>
-            </View>
+  const handlerEditProfile = () => {
+    navigation.navigate('EditProfile');
+  };
 
-            <View style={{ flexDirection: "row" }}>
-              <Text style={{ ...styles.txt, fontWeight: "bold" }}>Email:{" "}</Text>
-              <Text style={styles.txt}>{user ? user.email : 'NaN'}</Text>
-            </View>
+  // const handlerUpdateAccount = () => {
+  //   if (userData && userData.level >= 2) {
+  //     Alert.alert('Thông báo', 'Bạn đã được phê duyệt và không được phép sử dụng chức năng này.');
+  //   } else {
+  //     navigation.navigate('UpdateAccount');
+  //   }
+  // };
 
-            <View style={{ flexDirection: "row" }}>
-              <Text style={{ ...styles.txt, fontWeight: "bold" }}>
-                Số điện thoại:{" "}
-              </Text>
-              <Text style={styles.txt}>{user ? user.phone : 'NaN'}</Text>
-            </View>
-
-            <Button style={{ backgroundColor: "#1FD2BD", ...styles.btn }} onPress={() => navigation.navigate('EditProfile')}>
-              <Text style={styles.txt}>Chỉnh sửa</Text>
-            </Button>
-
-            <Button style={{ backgroundColor: "red", ...styles.btn }} onPress={handleSignOut}>
-              <Text style={styles.txt}>Đăng xuất</Text>
-            </Button>
-          </View>
-        </View>
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
       </View>
+    );
+  }
 
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#f6f6f6' }}>
       
 
-
-      <View style={{ marginLeft: 10, marginTop:25}}>
-        <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'black' }}>Các thiết bị đang bảo trì:</Text>
-        <View style={styles.bodyContainer}>
-          <Icon name={"computer"} size={60} color={"#000"} style={{ marginHorizontal: 10 }} />
-          <View style={{ marginVertical: 5, alignItems: 'center' }}>
-            <View style={{ flexDirection: "row" }}>
-              <Text style={{ ...styles.txt, fontWeight: "bold" }}>Tên:{" "}</Text>
-              <Text style={styles.txt}>NaN</Text>
-            </View>
-            <View style={{ flexDirection: "row" }}>
-              <Text style={{ ...styles.txt, fontWeight: "bold" }}>Mã:{" "}</Text>
-              <Text style={styles.txt}>NaN</Text>
-            </View>
+      <View style={styles.container}>
+        <View style={styles.profile}>
+          <Image
+            source={{
+              uri: userData?.avatarUrl || 'https://via.placeholder.com/150', // Default placeholder if no avatarUrl is provided
+            }}
+            style={styles.profileAvatar}
+          />
+          <View style={styles.proFileNameContainer}>
+            <Text style={styles.profileName}>{userData?.username || 'NaN'}</Text>
+            <Text style={styles.profileEmail}>{userData?.email || 'NaN'}</Text>
           </View>
         </View>
+        <View style={styles.serviceContainer}>
+          
+
+          <TouchableOpacity onPress={handlerEditProfile}>
+            <View style={styles.footerContainer}>
+              <MaterialCommunityIcons name={'account-arrow-up'} size={24} color={'#808080'} style={styles.InputIcon} />
+              <Text style={styles.footerText}>Chỉnh sửa tài khoản</Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={handlerLogout}>
+            <View style={styles.footerContainer}>
+              <AntDesign name={'logout'} size={24} color={'#808080'} style={styles.InputIcon} />
+              <Text style={styles.footerText}>Đăng xuất</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        {/* <View style={{ marginLeft: 10, marginTop: 25 }}>
+          <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'black' }}>Các thiết bị đang bảo trì:</Text>
+          <View style={styles.deviceContainer}>
+            <Icon name={"computer"} size={60} color={"#000"} style={{ marginHorizontal: 10 }} />
+            <View style={{ marginVertical: 5, alignItems: 'center' }}>
+              <View style={{ flexDirection: "row" }}>
+                <Text style={{ ...styles.txt, fontWeight: "bold" }}>Tên:{" "}</Text>
+                <Text style={styles.txt}>NaN</Text>
+              </View>
+              <View style={{ flexDirection: "row" }}>
+                <Text style={{ ...styles.txt, fontWeight: "bold" }}>Mã:{" "}</Text>
+                <Text style={styles.txt}>NaN</Text>
+              </View>
+            </View>
+          </View>
+        </View> */}
       </View>
-
-
-    </View>
+    </SafeAreaView>
   );
 }
 
-export default AccountScreen;
-
 const styles = StyleSheet.create({
-  bodyContainer: {
+  container: {
+    paddingHorizontal: 0,
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
+  },
+  header: {
+    flexDirection: 'row-reverse',
+    paddingHorizontal: 10,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+    backgroundColor: '#007bff',
+    paddingTop: 25,
+  },
+  profile: {
+    padding: 13,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: '#e3e3e3',
+  },
+  profileAvatar: {
+    width: 60,
+    height: 60,
+    borderRadius: 9999,
+  },
+  proFileNameContainer: {
+    marginLeft: 16,
+  },
+  profileName: {
+    marginTop: 12,
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#090909',
+  },
+  profileEmail: {
+    marginTop: 6,
+    fontSize: 16,
+    fontWeight: '400',
+    color: '#848484',
+  },
+  // profileAction: {
+  //   marginTop: 12,
+  //   paddingVertical: 10,
+  //   paddingHorizontal: 16,
+  //   flexDirection: 'row',
+  //   alignItems: 'center',
+  //   justifyContent: 'center',
+  //   backgroundColor: '#007bff',
+  //   borderRadius: 12,
+  // },
+  // profileActionText: {
+  //   marginRight: 8,
+  //   fontSize: 15,
+  //   fontWeight: '600',
+  //   color: '#fff',
+  // },
+  serviceContainer: {},
+  footerContainer: {
+    paddingLeft: 10,
+    height: 50,
+    width: '100%',
+    flexDirection: 'row',
+    marginTop: 20,
+    alignItems: 'center',
+    borderBottomWidth: 1,
+  },
+  footerText: {
+    fontSize: 25,
+    fontWeight: 'bold',
+    color: 'black',
+    marginLeft: 20,
+  },
+  InputIcon: {
+    marginLeft: 12,
+    marginRight: 5,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  deviceContainer: {
     margin: 10,
     borderRadius: 10,
     borderWidth: 1,
     flexDirection: 'row',
-    
-  },
-  bodyViewContainer: {
-    padding: 10,
-    flexDirection: "row",
-    justifyContent: "center",
   },
   txt: {
     color: "#000",
     fontSize: 17,
   },
-  btn: {
-    borderRadius: 5,
-    width: 200,
-    marginBottom: 10,
-  },
 });
-
