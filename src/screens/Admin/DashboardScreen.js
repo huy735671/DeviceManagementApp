@@ -18,8 +18,8 @@ const { width } = Dimensions.get('window'); // Get screen width for responsive l
 const DashboardScreen = ({ navigation }) => {
   const [numColumns, setNumColumns] = useState(2);
   const [selectedFeatureId, setSelectedFeatureId] = useState("1");
-  const [devices, setDevices] = useState([]);
-  const [employees, setEmployees] = useState([]);
+  const [devices, setDevices] = useState(0); // Initialize with 0
+  const [employees, setEmployees] = useState(0); // Initialize with 0
   const [rooms, setRooms] = useState([]);
   const [maintenance, setMaintenance] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
@@ -74,25 +74,27 @@ const DashboardScreen = ({ navigation }) => {
     }
   };
 
-
   const handleDetailPress = async (item) => {
     if (item.featureId === "1") {
       setSelectedRoom(item);
       setModalVisible(true);
 
       // Fetch employees and devices counts for the selected room
-      const employeeSnapshot = await firestore()
-        .collection('EMPLOYEES')
-        .where('roomId', '==', item.id)
-        .get();
-      const deviceSnapshot = await firestore()
-        .collection('DEVICES')
-        .where('roomId', '==', item.id)
-        .get();
+      try {
+        const employeeSnapshot = await firestore()
+          .collection('USERS')
+          .where('roomId', '==', item.id)
+          .get();
+        const deviceSnapshot = await firestore()
+          .collection('DEVICES')
+          .where('roomId', '==', item.id)
+          .get();
 
-      setEmployees(employeeSnapshot.size);
-      setDevices(deviceSnapshot.size);
-
+        setEmployees(employeeSnapshot.size);
+        setDevices(deviceSnapshot.size);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
     } else if (item.featureId === "2") {
       try {
         const deviceSnapshot = await firestore()

@@ -5,13 +5,18 @@ import { Button } from "react-native-paper";
 import firestore from "@react-native-firebase/firestore";
 
 const EmployeeDetail = ({ route, navigation }) => {
-  const { name, employeeId, department, phoneNumber, employeesPassword, employeesEmail,
-    employeesRole, employeesDatetime, id } = route.params;
+  const { employee } = route.params;
 
-  // delete employee button handler
+  if (!employee) {
+    Alert.alert('Error', 'Employee data is missing.');
+    return null;
+  }
+
+  const { id, name, numPhone, roomId, email,  datetime } = employee;
+
   const handleDelete = async () => {
     try {
-      await firestore().collection('EMPLOYEES').doc(id).delete();
+      await firestore().collection('USERS').doc(id).delete();
       console.log('Employee has been deleted from Firestore');
 
       navigation.navigate('AdminTab'); // Navigate back to admin screen after deletion
@@ -23,48 +28,61 @@ const EmployeeDetail = ({ route, navigation }) => {
   };
 
   return (
-   <ScrollView>
-     <View style={styles.container}>
-      <View style={styles.borderInfo}>
-        <View style={styles.iconContainer}>
-          <Icon name="account-circle" size={200} color="#000" />
+    <ScrollView>
+      <View style={styles.container}>
+        <View style={styles.borderInfo}>
+          <View style={styles.iconContainer}>
+            <Icon name="account-circle" size={200} color="#000" />
+          </View>
+          <View style={styles.infoContainer}>
+            <View style={styles.row}>
+              <Text style={styles.label}>Name:</Text>
+              <Text style={styles.value}> {name}</Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={styles.label}>Employee ID:</Text>
+              <Text style={styles.value}> {id}</Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={styles.label}>Phone Number:</Text>
+              <Text style={styles.value}> {numPhone}</Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={styles.label}>Email:</Text>
+              <Text style={styles.value}> {email}</Text>
+            </View>
+
+            <View style={styles.row}>
+              <Text style={styles.label}>Room:</Text>
+              <Text style={styles.value}>Phòng {roomId}</Text>
+            </View>
+            
+            <View style={styles.row}>
+              <Text style={styles.label}>Date Time:</Text>
+              <Text style={styles.value}> {new Date(datetime.toDate()).toLocaleString()}</Text>
+            </View>
+          </View>
         </View>
-        <View style={styles.infoContainer}>
-          <View style={styles.row}>
-            <Text style={styles.label}>Name:</Text>
-            <Text style={styles.value}>{" "}{name}</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.label}>Employee ID:</Text>
-            <Text style={styles.value}>{" "}{employeeId}</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.label}>Phone Number:</Text>
-            <Text style={styles.value}>{" "}{phoneNumber}</Text>
-          </View>
-          {/* Add other fields as needed */}
+        <View style={styles.buttonContainer}>
+          <Button
+            style={{ ...styles.button, backgroundColor: "#1FD2BD" }}
+            mode="contained"
+            onPress={() => {
+              // Handle edit button press
+            }}
+          >
+            Edit
+          </Button>
+          <Button
+            style={{ ...styles.button, backgroundColor: "red" }}
+            mode="contained"
+            onPress={handleDelete} // Call handleDelete function on press
+          >
+            Delete
+          </Button>
         </View>
       </View>
-      <View style={styles.buttonContainer}>
-        <Button
-          style={{ ...styles.button, backgroundColor: "#1FD2BD" }}
-          mode="contained"
-          onPress={() => {
-            // Handle edit button press
-          }}
-        >
-          Edit
-        </Button>
-        <Button
-          style={{ ...styles.button, backgroundColor: "red" }}
-          mode="contained"
-          onPress={handleDelete} // Call handleDelete function on press
-        >
-          Delete
-        </Button>
-      </View>
-    </View>
-   </ScrollView>
+    </ScrollView>
   );
 };
 

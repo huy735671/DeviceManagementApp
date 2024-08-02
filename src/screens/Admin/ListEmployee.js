@@ -1,52 +1,71 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const ListEmployeeScreen = ({ route }) => {
-  const { roomId, roomName } = route.params;
+  const { roomId, roomName } = route.params || {};
   const navigation = useNavigation();
   const [employees, setEmployees] = useState([]);
 
   useEffect(() => {
     const fetchEmployees = async () => {
+      if (!roomId) {
+        Alert.alert('Error', 'Room ID is missing.');
+        return;
+      }
+
       try {
-        const employeesCollection = await firestore()
-          .collection('EMPLOYEES')
+        console.log('Fetching employees for room ID:', roomId);
+        const usersCollection = await firestore()
+          .collection('USERS')
           .where('roomId', '==', roomId)
           .get();
-        const employeesData = employeesCollection.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setEmployees(employeesData);
+
+        if (usersCollection.empty) {
+          Alert.alert('No Data', 'No employees found for this room.');
+          return;
+        }
+
+        const usersData = usersCollection.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        console.log('Fetched employees:', usersData);
+        setEmployees(usersData);
       } catch (error) {
-        console.error('Error fetching employees:', error);
+        console.error('Error fetching users:', error.message); // Detailed error message
+        Alert.alert('Error', 'An error occurred while fetching employees.');
       }
     };
 
     fetchEmployees();
   }, [roomId]);
 
-  const handlePress = (employeeId) => {
-    navigation.navigate('EmployeeDetail', { employeeId });
+  const handlePress = (employee) => {
+    console.log('Navigating to EmployeeDetail with:', employee);
+    navigation.navigate('EmployeeDetail', { employee });
   };
 
-  const renderEmployeeItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.item}
-      onPress={() => handlePress(item.id)}
-    >
-      <View style={styles.itemContent}>
-        <Icon name="person" size={30} color="#007bff" style={styles.icon} />
-        <View style={styles.itemDetails}>
-          <Text style={styles.itemName}>{item.name}</Text>
+  const renderEmployeeItem = ({ item }) => {
+    const username = item.username || 'No Name'; // Ensure 'username' field exists in USERS
+
+    return (
+      <TouchableOpacity
+        style={styles.item}
+        onPress={() => handlePress(item)}
+      >
+        <View style={styles.itemContent}>
+          <Icon name="person" size={30} color="#007bff" style={styles.icon} />
+          <View style={styles.itemDetails}>
+            <Text style={styles.itemName}>{username}</Text>
+          </View>
         </View>
-      </View>
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Danh sách nhân viên - {roomName}</Text>
+      <Text style={styles.title}>Danh sách nhân viên {roomName || 'N/A'}</Text>
       {employees.length > 0 ? (
         <FlatList
           data={employees}
@@ -57,12 +76,9 @@ const ListEmployeeScreen = ({ route }) => {
       ) : (
         <Text style={styles.emptyText}>Phòng hiện không có nhân viên.</Text>
       )}
-     
     </View>
   );
 };
-
-export default ListEmployeeScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -109,24 +125,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#333',
   },
-  button: {
-    backgroundColor: '#007bff',
-    paddingVertical: 15,
-    paddingHorizontal: 20,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginTop: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 4,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
-  },
   emptyText: {
     fontSize: 18,
     fontWeight: '600',
@@ -135,3 +133,5 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
 });
+
+export default ListEmployeeScreen;

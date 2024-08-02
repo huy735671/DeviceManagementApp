@@ -206,6 +206,7 @@ const StackNavigation = () => {
           },
         }}
       />
+      
       <Stack.Screen
         name="ReportDevice"
         component={ReportDevice}
@@ -222,7 +223,7 @@ const StackNavigation = () => {
         component={NotificationDetail}
         options={{
           headerShown: true,
-          headerTitle: "QUẢN LÝ THIẾT BỊ",
+          headerTitle: "Thông báo",
           headerStyle: {
             backgroundColor: "#1FD2BD",
           },
@@ -262,7 +263,7 @@ const StackNavigation = () => {
         component={NotificationUser}
         options={{
           headerShown: true,
-          headerTitle: "QUẢN LÝ THIẾT BỊ",
+          headerTitle: "Thông báo người dùng",
           headerStyle: {
             backgroundColor: "#1FD2BD",
           },
@@ -273,7 +274,7 @@ const StackNavigation = () => {
         component={NotificationAdmin}
         options={{
           headerShown: true,
-          headerTitle: "QUẢN LÝ THIẾT BỊ",
+          headerTitle: "Thông báo admin",
           headerStyle: {
             backgroundColor: "#1FD2BD",
           },
