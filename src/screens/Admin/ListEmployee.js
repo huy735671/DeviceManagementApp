@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const ListEmployeeScreen = ({ route }) => {
-  const { roomId, roomName } = route.params || {};
+  const { roomId } = route.params || {};
   const navigation = useNavigation();
   const [employees, setEmployees] = useState([]);
 
@@ -65,7 +65,7 @@ const ListEmployeeScreen = ({ route }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Danh sách nhân viên {roomName || 'N/A'}</Text>
+      <Text style={styles.title}>Nhân viên phòng {roomId || 'N/A'}</Text>
       {employees.length > 0 ? (
         <FlatList
           data={employees}
