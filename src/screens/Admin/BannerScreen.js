@@ -115,6 +115,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 5, // Thêm padding cho container chính
     backgroundColor: '#fff',
+    
   },
   image: {
     height: 200, // Giảm chiều cao của ảnh để phù hợp với danh sách

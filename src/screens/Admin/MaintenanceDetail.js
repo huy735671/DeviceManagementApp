@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, FlatList, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Image, FlatList, Dimensions, ScrollView } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 
 const { width } = Dimensions.get('window');
@@ -82,12 +82,14 @@ const MaintenanceDetail = ({ route }) => {
   };
 
   return (
-    <FlatList
+    <ScrollView>
+      <FlatList
       data={data}
       renderItem={renderItem}
       keyExtractor={(item, index) => item.type + index}
       contentContainerStyle={styles.container}
     />
+    </ScrollView>
   );
 };
 

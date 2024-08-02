@@ -8,12 +8,13 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
+  ScrollView,
 } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { useNavigation } from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import Icons from 'react-native-vector-icons/MaterialIcons';
 import { Icon } from 'react-native-paper';
 
 export default function AccountScreen() {
@@ -65,41 +66,43 @@ export default function AccountScreen() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#f6f6f6' }}>
-      
+    <ScrollView>
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF' }}>
 
-      <View style={styles.container}>
-        <View style={styles.profile}>
-          <Image
-            source={{
-              uri: userData?.avatarUrl || 'https://via.placeholder.com/150', // Default placeholder if no avatarUrl is provided
-            }}
-            style={styles.profileAvatar}
-          />
-          <View style={styles.proFileNameContainer}>
-            <Text style={styles.profileName}>{userData?.username || 'NaN'}</Text>
-            <Text style={styles.profileEmail}>{userData?.email || 'NaN'}</Text>
+
+        <View style={styles.container}>
+          <View style={styles.profile}>
+            <Image
+              source={{
+                uri: userData?.avatarUrl || 'https://via.placeholder.com/150', // Default placeholder if no avatarUrl is provided
+              }}
+              style={styles.profileAvatar}
+            />
+            <View style={styles.proFileNameContainer}>
+              <Text style={styles.profileName}>{userData?.username || 'NaN'}</Text>
+              <Text style={styles.profileEmail}>{userData?.email || 'NaN'}</Text>
+            </View>
           </View>
-        </View>
-        <View style={styles.serviceContainer}>
-          
+          <View style={styles.serviceContainer}>
 
-          <TouchableOpacity onPress={handlerEditProfile}>
-            <View style={styles.footerContainer}>
-              <MaterialCommunityIcons name={'account-arrow-up'} size={24} color={'#808080'} style={styles.InputIcon} />
-              <Text style={styles.footerText}>Chỉnh sửa tài khoản</Text>
-            </View>
-          </TouchableOpacity>
 
-          <TouchableOpacity onPress={handlerLogout}>
-            <View style={styles.footerContainer}>
-              <AntDesign name={'logout'} size={24} color={'#808080'} style={styles.InputIcon} />
-              <Text style={styles.footerText}>Đăng xuất</Text>
-            </View>
-          </TouchableOpacity>
-        </View>
+            <TouchableOpacity onPress={handlerEditProfile}>
+              <View style={styles.footerContainer}>
+                <Icons name={'edit'} size={24} color={'#808080'} style={styles.InputIcon} />
+                <Text style={styles.footerText}>Chỉnh sửa tài khoản</Text>
+              </View>
+            </TouchableOpacity>
+            
 
-        {/* <View style={{ marginLeft: 10, marginTop: 25 }}>
+            <TouchableOpacity onPress={handlerLogout}>
+              <View style={styles.footerContainer}>
+                <Icons name={'logout'} size={24} color={'#808080'} style={styles.InputIcon} />
+                <Text style={styles.footerText}>Đăng xuất</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+
+          {/* <View style={{ marginLeft: 10, marginTop: 25 }}>
           <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'black' }}>Các thiết bị đang bảo trì:</Text>
           <View style={styles.deviceContainer}>
             <Icon name={"computer"} size={60} color={"#000"} style={{ marginHorizontal: 10 }} />
@@ -115,8 +118,9 @@ export default function AccountScreen() {
             </View>
           </View>
         </View> */}
-      </View>
-    </SafeAreaView>
+        </View>
+      </SafeAreaView>
+    </ScrollView>
   );
 }
 

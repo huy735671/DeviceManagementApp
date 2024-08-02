@@ -29,6 +29,9 @@ import ListEmployee from '../screens/Admin/ListEmployee';
 import ListDevices from '../screens/Admin/ListDevices';
 import BannerScreen from '../screens/Admin/BannerScreen';
 import StatisticsScreen from '../screens/Admin/StatisticsScreen';
+import NotificationUser from '../screens/User/Notification';
+import NotificationAdmin from '../screens/Admin/Notification';
+
 const Stack = createNativeStackNavigator();
 
 const StackNavigation = () => {
@@ -45,34 +48,37 @@ const StackNavigation = () => {
       <Stack.Screen name='Dashboard' component={DashboardScreen} options={{ headerShown: false }} />
       <Stack.Screen name='RoomList' component={RoomList} options={{ headerShown: false }} />
       <Stack.Screen name='Home' component={HomeScreen} options={{ headerShown: false }} />
-      <Stack.Screen name='Statistics' component={StatisticsScreen} 
+      <Stack.Screen name='Statistics' component={StatisticsScreen}
         options={{
           title: "Thống kê",
           headerShown: true,
           headerStyle: {
             backgroundColor: "#1FD2BD",
-          }, }} />
+          },
+        }} />
 
       <Stack.Screen name='Banner'
-       component={BannerScreen}
-       options={{
-        title: "Ảnh bìa trang chủ",
-        headerShown: true,
-        headerStyle: {
-          backgroundColor: "#1FD2BD",
-        }, }} />
+        component={BannerScreen}
+        options={{
+          title: "Ảnh bìa trang chủ",
+          headerShown: true,
+          headerStyle: {
+            backgroundColor: "#1FD2BD",
+          },
+        }} />
 
       <Stack.Screen name='Room'
-       component={Room}
-       options={{
-        title: "Danh sách thiết bị",
-        headerShown: true,
-        headerStyle: {
-          backgroundColor: "#1FD2BD",
-        }, }} />
+        component={Room}
+        options={{
+          title: "Danh sách thiết bị",
+          headerShown: true,
+          headerStyle: {
+            backgroundColor: "#1FD2BD",
+          },
+        }} />
 
       <Stack.Screen name='AddRoom'
-       component={AddRoom}
+        component={AddRoom}
         options={{
           title: "Thêm phòng ban",
           headerShown: true,
@@ -146,7 +152,7 @@ const StackNavigation = () => {
           },
         }}
       />
-      
+
       <Stack.Screen
         name="MaintenanceDetail"
         component={MaintenanceDetail}
@@ -252,7 +258,27 @@ const StackNavigation = () => {
           },
         }}
       />
+      <Stack.Screen name='NotificationUser'
+        component={NotificationUser}
+        options={{
+          headerShown: true,
+          headerTitle: "QUẢN LÝ THIẾT BỊ",
+          headerStyle: {
+            backgroundColor: "#1FD2BD",
+          },
+        }}
+      />
 
+      <Stack.Screen name='NotificationAdmin'
+        component={NotificationAdmin}
+        options={{
+          headerShown: true,
+          headerTitle: "QUẢN LÝ THIẾT BỊ",
+          headerStyle: {
+            backgroundColor: "#1FD2BD",
+          },
+        }}
+      />
     </Stack.Navigator>
 
   )

@@ -27,6 +27,11 @@ const AdminTab = () => {
         navigation.navigate('SearchBar');
     }
 
+    const NotificationHandler = () => {
+        navigation.navigate('NotificationAdmin');
+
+    };
+
     return (
         <Tab.Navigator>
             <Tab.Screen
@@ -61,11 +66,21 @@ const AdminTab = () => {
                                     style={{ marginRight: 15 }}
                                 />
                             </TouchableOpacity>
+                             <TouchableOpacity
+                                onPress={NotificationHandler}
+                            >
+                                <MaterialIcons
+                                    name="notifications"
+                                    size={25}
+                                    color="white"
+                                    style={{ marginRight: 15 }}
+                                />
+                            </TouchableOpacity>
                         </View>
                     ),
                 })}
             />
-            <Tab.Screen name='Notification' component={Notification} options={{
+            {/* <Tab.Screen name='Notification' component={Notification} options={{
                 tabBarIcon: ({ color, size }) => (
                     <Ionicons name="notifications-outline" color={color} size={size} />
                 ),
@@ -75,7 +90,7 @@ const AdminTab = () => {
                     backgroundColor: "#1CD2BD",
                     
                 },
-            }}/>
+            }}/> */}
             <Tab.Screen
                 name="Account"
                 component={AccountScreen}

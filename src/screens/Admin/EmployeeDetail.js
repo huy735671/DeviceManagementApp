@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, Alert } from "react-native";
+import { View, Text, StyleSheet, Alert, ScrollView } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { Button } from "react-native-paper";
 import firestore from "@react-native-firebase/firestore";
@@ -23,7 +23,8 @@ const EmployeeDetail = ({ route, navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+   <ScrollView>
+     <View style={styles.container}>
       <View style={styles.borderInfo}>
         <View style={styles.iconContainer}>
           <Icon name="account-circle" size={200} color="#000" />
@@ -63,6 +64,7 @@ const EmployeeDetail = ({ route, navigation }) => {
         </Button>
       </View>
     </View>
+   </ScrollView>
   );
 };
 

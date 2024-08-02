@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Image } from "react-native";
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Image, ScrollView } from "react-native";
 import { launchCamera, launchImageLibrary } from "react-native-image-picker";
 import firestore from "@react-native-firebase/firestore";
 import auth from "@react-native-firebase/auth";
@@ -104,46 +104,48 @@ const ReportScreen = ({ route, navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Thiết bị này có vấn đề?</Text>
-      <Text style={styles.description}>
-        Vui lòng cung cấp mô tả chi tiết về vấn đề của thiết bị. Chúng tôi sẽ xử lý báo cáo của bạn sớm nhất có thể.
-      </Text>
-      <View style={styles.imageContainer}>
-        {imageUri ? (
-          <Image source={{ uri: imageUri }} style={styles.imagePreview} />
-        ) : (
-          <View style={styles.imagePlaceholderContainer}>
-            <Text style={styles.imagePlaceholder}>Chưa có hình ảnh</Text>
-          </View>
-        )}
-      </View>
-      <View style={styles.buttonsContainer}>
-        <TouchableOpacity style={styles.btnImage} onPress={handleCaptureImage}>
-          <Text style={styles.btnText}>Chụp hình</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.btnImage} onPress={handleImagePick}>
-          <Text style={styles.btnText}>Chọn từ album</Text>
-        </TouchableOpacity>
-      </View>
-      <TextInput
-        style={styles.input}
-        multiline
-        numberOfLines={10}
-        placeholder="Nhập mô tả vấn đề..."
-        value={description}
-        onChangeText={setDescription}
-      />
-      <View style={styles.reportContainer}>
-        <View style={styles.reportInfo}>
-          <Text style={styles.deviceName}>Thiết bị: {name}</Text>
-          <Text style={styles.roomName}>Phòng ban: {room || "Unknown"}</Text>
+    <ScrollView>
+      <View style={styles.container}>
+        <Text style={styles.title}>Thiết bị này có vấn đề?</Text>
+        <Text style={styles.description}>
+          Vui lòng cung cấp mô tả chi tiết về vấn đề của thiết bị. Chúng tôi sẽ xử lý báo cáo của bạn sớm nhất có thể.
+        </Text>
+        <View style={styles.imageContainer}>
+          {imageUri ? (
+            <Image source={{ uri: imageUri }} style={styles.imagePreview} />
+          ) : (
+            <View style={styles.imagePlaceholderContainer}>
+              <Text style={styles.imagePlaceholder}>Chưa có hình ảnh</Text>
+            </View>
+          )}
         </View>
-        <TouchableOpacity style={styles.btnSubmit} onPress={handleSubmit}>
-          <Text style={styles.btnSubmitText}>Gửi báo cáo</Text>
-        </TouchableOpacity>
+        <View style={styles.buttonsContainer}>
+          <TouchableOpacity style={styles.btnImage} onPress={handleCaptureImage}>
+            <Text style={styles.btnText}>Chụp hình</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.btnImage} onPress={handleImagePick}>
+            <Text style={styles.btnText}>Chọn từ album</Text>
+          </TouchableOpacity>
+        </View>
+        <TextInput
+          style={styles.input}
+          multiline
+          numberOfLines={10}
+          placeholder="Nhập mô tả vấn đề..."
+          value={description}
+          onChangeText={setDescription}
+        />
+        <View style={styles.reportContainer}>
+          <View style={styles.reportInfo}>
+            <Text style={styles.deviceName}>Thiết bị: {name}</Text>
+            <Text style={styles.roomName}>Phòng ban: {room || "Unknown"}</Text>
+          </View>
+          <TouchableOpacity style={styles.btnSubmit} onPress={handleSubmit}>
+            <Text style={styles.btnSubmitText}>Gửi báo cáo</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 

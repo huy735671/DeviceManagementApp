@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, Animated } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, Animated, ScrollView } from "react-native";
 import firestore from '@react-native-firebase/firestore';
 
 const StatisticsScreen = () => {
@@ -81,69 +81,81 @@ const StatisticsScreen = () => {
   );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Thống kê</Text>
-      
-      <TouchableOpacity style={styles.button} onPress={() => handlePress("admin")}>
-        <Text style={styles.buttonText}>Danh sách Admin ({adminCount})</Text>
-      </TouchableOpacity>
-      {expanded === "admin" && (
-        <Animated.View style={[styles.expandedList, { height: expandAnim.interpolate({
-          inputRange: [0, 1],
-          outputRange: [0, 200], // Adjust height as needed
-        })}]}>
-          {renderList(adminList)}
-        </Animated.View>
-      )}
+    <ScrollView>
+      <View style={styles.container}>
+        <Text style={styles.title}>Thống kê</Text>
 
-      <TouchableOpacity style={styles.button} onPress={() => handlePress("user")}>
-        <Text style={styles.buttonText}>Danh sách User ({userCount})</Text>
-      </TouchableOpacity>
-      {expanded === "user" && (
-        <Animated.View style={[styles.expandedList, { height: expandAnim.interpolate({
-          inputRange: [0, 1],
-          outputRange: [0, 200], // Adjust height as needed
-        })}]}>
-          {renderList(userList)}
-        </Animated.View>
-      )}
+        <TouchableOpacity style={styles.button} onPress={() => handlePress("admin")}>
+          <Text style={styles.buttonText}>Danh sách Admin ({adminCount})</Text>
+        </TouchableOpacity>
+        {expanded === "admin" && (
+          <Animated.View style={[styles.expandedList, {
+            height: expandAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, 200], // Adjust height as needed
+            })
+          }]}>
+            {renderList(adminList)}
+          </Animated.View>
+        )}
 
-      <TouchableOpacity style={styles.button} onPress={() => handlePress("device")}>
-        <Text style={styles.buttonText}>Danh sách Thiết bị ({deviceCount})</Text>
-      </TouchableOpacity>
-      {expanded === "device" && (
-        <Animated.View style={[styles.expandedList, { height: expandAnim.interpolate({
-          inputRange: [0, 1],
-          outputRange: [0, 200], // Adjust height as needed
-        })}]}>
-          {renderList(deviceList)}
-        </Animated.View>
-      )}
+        <TouchableOpacity style={styles.button} onPress={() => handlePress("user")}>
+          <Text style={styles.buttonText}>Danh sách User ({userCount})</Text>
+        </TouchableOpacity>
+        {expanded === "user" && (
+          <Animated.View style={[styles.expandedList, {
+            height: expandAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, 200], // Adjust height as needed
+            })
+          }]}>
+            {renderList(userList)}
+          </Animated.View>
+        )}
 
-      <TouchableOpacity style={styles.button} onPress={() => handlePress("maintenance")}>
-        <Text style={styles.buttonText}>Danh sách Thiết bị Bảo trì ({maintenanceCount})</Text>
-      </TouchableOpacity>
-      {expanded === "maintenance" && (
-        <Animated.View style={[styles.expandedList, { height: expandAnim.interpolate({
-          inputRange: [0, 1],
-          outputRange: [0, 200], // Adjust height as needed
-        })}]}>
-          {renderList(maintenanceList)}
-        </Animated.View>
-      )}
+        <TouchableOpacity style={styles.button} onPress={() => handlePress("device")}>
+          <Text style={styles.buttonText}>Danh sách Thiết bị ({deviceCount})</Text>
+        </TouchableOpacity>
+        {expanded === "device" && (
+          <Animated.View style={[styles.expandedList, {
+            height: expandAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, 200], // Adjust height as needed
+            })
+          }]}>
+            {renderList(deviceList)}
+          </Animated.View>
+        )}
 
-      <TouchableOpacity style={styles.button} onPress={() => handlePress("broken")}>
-        <Text style={styles.buttonText}>Danh sách Thiết bị Hư hỏng ({brokenCount})</Text>
-      </TouchableOpacity>
-      {expanded === "broken" && (
-        <Animated.View style={[styles.expandedList, { height: expandAnim.interpolate({
-          inputRange: [0, 1],
-          outputRange: [0, 200], // Adjust height as needed
-        })}]}>
-          {renderList(brokenList)}
-        </Animated.View>
-      )}
-    </View>
+        <TouchableOpacity style={styles.button} onPress={() => handlePress("maintenance")}>
+          <Text style={styles.buttonText}>Danh sách Thiết bị Bảo trì ({maintenanceCount})</Text>
+        </TouchableOpacity>
+        {expanded === "maintenance" && (
+          <Animated.View style={[styles.expandedList, {
+            height: expandAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, 200], // Adjust height as needed
+            })
+          }]}>
+            {renderList(maintenanceList)}
+          </Animated.View>
+        )}
+
+        <TouchableOpacity style={styles.button} onPress={() => handlePress("broken")}>
+          <Text style={styles.buttonText}>Danh sách Thiết bị Hư hỏng ({brokenCount})</Text>
+        </TouchableOpacity>
+        {expanded === "broken" && (
+          <Animated.View style={[styles.expandedList, {
+            height: expandAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, 200], // Adjust height as needed
+            })
+          }]}>
+            {renderList(brokenList)}
+          </Animated.View>
+        )}
+      </View>
+    </ScrollView>
   );
 };
 

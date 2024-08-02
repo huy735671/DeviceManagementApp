@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Animated, Image } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Animated, Image, ScrollView } from "react-native";
 import Icons from "react-native-vector-icons/MaterialIcons";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import firestore from "@react-native-firebase/firestore";
+import { Auth } from "../../services";
 
 const Room = () => {
   const navigation = useNavigation();
@@ -49,7 +50,7 @@ const Room = () => {
       }
     };
 
-    fetchDevices(); 
+    fetchDevices();
 
     // Fetch devices every 10 seconds
     const intervalId = setInterval(fetchDevices, 10000);
@@ -76,10 +77,10 @@ const Room = () => {
       deploymentDate: item.deploymentDate,
       image: item.image,
       roomName: item.roomName,
-      
+
     });
   };
-  
+
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -101,52 +102,57 @@ const Room = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{room.name}</Text>
-      <View style={styles.infoContainer}>
-        <View style={styles.infoBox}>
-          <Text style={styles.infoLabel}>Tổng số thiết bị:</Text>
-          <Text style={styles.infoValue}>{deviceCounts.total}</Text>
-        </View>
-        <View style={styles.infoBox}>
-          <Text style={styles.infoLabel}>Bình thường:</Text>
-          <Text style={styles.infoValue}>{deviceCounts.active}</Text>
-        </View>
-        <View style={styles.infoBox}>
-          <Text style={styles.infoLabel}>Đang bảo trì:</Text>
-          <Text style={styles.infoValue}>{deviceCounts.maintenance}</Text>
-        </View>
-        <View style={styles.infoBox}>
-          <Text style={styles.infoLabel}>Hư hỏng:</Text>
-          <Text style={styles.infoValue}>{deviceCounts.inactive}</Text>
-        </View>
-      </View>
-      <Animated.View animation="zoomIn" style={styles.content}>
-        {devices.length === 0 ? (
-          <View style={styles.noDevicesContainer}>
-            <Text style={styles.noDevicesText}>Không có thiết bị nào trong phòng này.</Text>
+    <ScrollView>
+      <View style={styles.container}>
+        <Text style={styles.title}>{room.name}</Text>
+        <View style={styles.infoContainer}>
+          <View style={styles.infoBox}>
+            <Text style={styles.infoLabel}>Tổng số thiết bị</Text>
+            <Text style={styles.infoValue}>{deviceCounts.total}</Text>
           </View>
-        ) : (
-          devices.map((device) => (
-            <TouchableOpacity
-              key={device.id}
-              onPress={() => handleDevicePress(device)}
-              style={[styles.item, { backgroundColor: getStatusColor(device.operationalStatus) }]}
-            >
-              {device.image ? (
-                <Image source={{ uri: device.image }} style={styles.deviceImage} />
-              ) : (
-                <Icons name="devices" size={50} color="black" />
-              )}
-              <View style={styles.deviceInfo}>
-                <Text style={styles.deviceName}>Thiết bị: {device.name}</Text>
-                <Text style={styles.deviceStatus}>Trạng thái: {statusLabels[device.operationalStatus]}</Text>
-              </View>
-            </TouchableOpacity>
-          ))
-        )}
-      </Animated.View>
-    </View>
+          <View style={styles.infoBox}>
+            <Text style={styles.infoLabel}>Bình thường</Text>
+            <Text style={styles.infoValue}>{deviceCounts.active}</Text>
+          </View>
+          <View style={styles.infoBox}>
+            <Text style={styles.infoLabel}>Đang bảo trì</Text>
+            <Text style={styles.infoValue}>{deviceCounts.maintenance}</Text>
+          </View>
+          <View style={styles.infoBox}>
+            <Text style={styles.infoLabel}>Hư hỏng</Text>
+            <Text style={styles.infoValue}>{deviceCounts.inactive}</Text>
+          </View>
+        </View>
+        <Animated.View animation="zoomIn" style={styles.content}>
+          {devices.length === 0 ? (
+            <View style={styles.noDevicesContainer}>
+              <Text style={styles.noDevicesText}>Không có thiết bị nào trong phòng này.</Text>
+            </View>
+          ) : (
+            devices.map((device) => (
+
+              <TouchableOpacity
+                key={device.id}
+                onPress={() => handleDevicePress(device)}
+                style={[styles.item, { backgroundColor: getStatusColor(device.operationalStatus) }]}
+              >
+                {device.image ? (
+                  <Image source={{ uri: device.image }} style={styles.deviceImage} />
+                ) : (
+                  <Icons name="devices" size={50} color="black" />
+                )}
+
+                <View style={styles.deviceInfo}>
+
+                  <Text style={styles.deviceName}>Thiết bị: {device.name}</Text>
+                  <Text style={styles.deviceStatus}>Trạng thái: {statusLabels[device.operationalStatus]}</Text>
+                </View>
+              </TouchableOpacity>
+            ))
+          )}
+        </Animated.View>
+      </View>
+    </ScrollView>
   );
 };
 
@@ -168,54 +174,56 @@ const styles = StyleSheet.create({
   },
   infoContainer: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
-    width: '100%',
-    paddingHorizontal: 20,
-    marginBottom: 20,
+    padding: 5,
+    backgroundColor: '#f8f8f8',
+    borderRadius: 2,
   },
   infoBox: {
-    flex: 1,
-    marginHorizontal: 5,
-    backgroundColor: "#fff",
-    padding: 15,
-    borderRadius: 15,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 5,
-    },
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
-    elevation: 6,
-    alignItems: 'center',
+    width: '48%',
+    padding: 10,
+    marginBottom: 10,
+    backgroundColor: '#ffffff',
+    borderRadius: 5,
     borderWidth: 1,
-    borderColor: '#dee2e6',
+    borderColor: '#ddd',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 2,
   },
   infoLabel: {
-    fontSize: 14,
-    color: "#6c757d",
+    fontSize: 15,
+    fontWeight: '600',
+    textAlign: 'center',
+    color: '#333',
+    marginBottom: 5,
   },
   infoValue: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#343a40",
+    fontSize: 20,
+    textAlign: 'center',
+    fontWeight: 'bold',
+    color: '#007AFF',
   },
   content: {
     flex: 1,
-    width: "100%",
+    width: "95%",
     alignItems: "center",
     paddingHorizontal: 10,
-    paddingVertical: 10,
+    paddingVertical: 20,
     borderTopWidth: 5,
     borderRightWidth: 1.5,
     borderLeftWidth: 1.5,
-    borderRadius: 30,
+    borderRadius: 10,
     borderColor: '#a9a9a9',
     backgroundColor: '#fff',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
+    height:'auto',
     elevation: 6,
   },
   item: {
@@ -223,10 +231,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "flex-start",
     width: "100%",
-    height: 100,
+    height: 65,
     borderWidth: 1,
     borderColor: "#dee2e6",
-    borderRadius: 10,
+    borderRadius: 5,
     marginBottom: 10,
     padding: 10,
     shadowColor: "#000",
@@ -235,8 +243,8 @@ const styles = StyleSheet.create({
       height: 3,
     },
     shadowOpacity: 0.25,
-    shadowRadius: 5,
-    elevation: 4,
+    shadowRadius: 2,
+    elevation: 2,
   },
   deviceImage: {
     width: 50,
@@ -248,7 +256,7 @@ const styles = StyleSheet.create({
   },
   deviceName: {
     fontWeight: 'bold',
-    fontSize: 18,
+    fontSize: 15,
     color: '#343a40',
   },
   deviceStatus: {

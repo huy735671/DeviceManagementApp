@@ -63,7 +63,7 @@ const DashboardScreen = ({ navigation }) => {
     { id: "3", title: "Thống kê", icon: "insert-chart-outlined" }, // Thêm mục Thống kê
     { id: "4", title: "Banner", icon: "insert-chart-outlined" },
   ];
-  
+
   const handleFeaturePress = (featureId) => {
     if (featureId === "3") {
       navigation.navigate("Statistics"); // Điều hướng đến StatisticsScreen
@@ -73,7 +73,7 @@ const DashboardScreen = ({ navigation }) => {
       setSelectedFeatureId(featureId);
     }
   };
-  
+
 
   const handleDetailPress = async (item) => {
     if (item.featureId === "1") {
@@ -92,7 +92,7 @@ const DashboardScreen = ({ navigation }) => {
 
       setEmployees(employeeSnapshot.size);
       setDevices(deviceSnapshot.size);
-      
+
     } else if (item.featureId === "2") {
       try {
         const deviceSnapshot = await firestore()
@@ -124,7 +124,7 @@ const DashboardScreen = ({ navigation }) => {
       }
     }
   };
-  
+
   const renderDetailItem = ({ item }) => {
     return (
       <Animatable.View animation='zoomIn' style={styles.items}>
@@ -142,77 +142,79 @@ const DashboardScreen = ({ navigation }) => {
   const filteredData = selectedFeatureId === "1" ? rooms : maintenance;
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.txt}>Các chức năng quản lý</Text>
-      <ScrollView
-        horizontal
-        contentContainerStyle={styles.horizontalScrollView}
-        showsHorizontalScrollIndicator={false}
-      >
-        {featuresData.map((item) => (
-          <Animatable.View
-            key={item.id}
-            animation='zoomIn'
-            style={styles.itemContainer}
-          >
+    <ScrollView>
+      <View style={styles.container}>
+        <Text style={styles.txt}>Các chức năng quản lý</Text>
+        <ScrollView
+          horizontal
+          contentContainerStyle={styles.horizontalScrollView}
+          showsHorizontalScrollIndicator={false}
+        >
+          {featuresData.map((item) => (
+            <Animatable.View
+              key={item.id}
+              animation='zoomIn'
+              style={styles.itemContainer}
+            >
+              <TouchableOpacity
+                style={styles.btnFearture}
+                onPress={() => handleFeaturePress(item.id)}
+              >
+                <Icon name={item.icon} size={40} color={"#000"} />
+              </TouchableOpacity>
+              <Text style={styles.txtFearture}>{item.title}</Text>
+            </Animatable.View>
+          ))}
+        </ScrollView>
+
+        <FlatList
+          data={filteredData}
+          renderItem={renderDetailItem}
+          keyExtractor={(item) => item.id}
+          numColumns={numColumns}
+        />
+
+        <Modal
+          isVisible={modalVisible}
+          onBackdropPress={() => setModalVisible(false)}
+          style={styles.modal}
+        >
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>{selectedRoom?.name}</Text>
+            <Text style={styles.modalText}>Số nhân viên: {employees}</Text>
+            <Text style={styles.modalText}>Số thiết bị: {devices}</Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={styles.modalButton}
+                onPress={() => {
+                  setModalVisible(false);
+                  navigation.navigate("ListEmployee", {
+                    roomId: selectedRoom?.id
+                  });
+                }}
+              >
+                <Text style={styles.modalButtonText}>Nhân viên</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.modalButton}
+                onPress={() => {
+                  setModalVisible(false);
+                  navigation.navigate("ListDevices", { roomId: selectedRoom?.id });
+                }}
+              >
+                <Text style={styles.modalButtonText}>Thiết bị</Text>
+              </TouchableOpacity>
+            </View>
             <TouchableOpacity
-              style={styles.btnFearture}
-              onPress={() => handleFeaturePress(item.id)}
+              style={styles.closeButton}
+              onPress={() => setModalVisible(false)}
             >
-              <Icon name={item.icon} size={40} color={"#000"} />
-            </TouchableOpacity>
-            <Text style={styles.txtFearture}>{item.title}</Text>
-          </Animatable.View>
-        ))}
-      </ScrollView>
-
-      <FlatList
-        data={filteredData}
-        renderItem={renderDetailItem}
-        keyExtractor={(item) => item.id}
-        numColumns={numColumns}
-      />
-
-      <Modal 
-        isVisible={modalVisible}
-        onBackdropPress={() => setModalVisible(false)}
-        style={styles.modal}
-      >
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>{selectedRoom?.name}</Text>
-          <Text style={styles.modalText}>Số nhân viên: {employees}</Text>
-          <Text style={styles.modalText}>Số thiết bị: {devices}</Text>
-          <View style={styles.modalButtons}>
-            <TouchableOpacity 
-              style={styles.modalButton} 
-              onPress={() => {
-                setModalVisible(false);
-                navigation.navigate("ListEmployee", {
-                   roomId: selectedRoom?.id
-                });
-              }}
-            >
-              <Text style={styles.modalButtonText}>Nhân viên</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.modalButton} 
-              onPress={() => {
-                setModalVisible(false);
-                navigation.navigate("ListDevices", { roomId: selectedRoom?.id });
-              }}
-            >
-              <Text style={styles.modalButtonText}>Thiết bị</Text>
+              <Text style={styles.closeButtonText}>Đóng</Text>
             </TouchableOpacity>
           </View>
-          <TouchableOpacity 
-            style={styles.closeButton} 
-            onPress={() => setModalVisible(false)}
-          >
-            <Text style={styles.closeButtonText}>Đóng</Text>
-          </TouchableOpacity>
-        </View>
-      </Modal>
-    </View>
+        </Modal>
+      </View>
+    </ScrollView>
   );
 };
 

@@ -25,6 +25,9 @@ const UserTab = ({ route, navigation }) => {
     const SearchHandler = () => {
         navigation.navigate('SearchBar');
     }
+    const NotificationHandler = () => {
+        navigation.navigate('NotificationUser');
+    }
 
     return (
         <Tab.Navigator>
@@ -50,12 +53,21 @@ const UserTab = ({ route, navigation }) => {
 
                                 />
                             </TouchableOpacity>
+                            <TouchableOpacity onPress={NotificationHandler}>
+                                <Icon
+                                    name="notifications"
+                                    size={25}
+                                    color="white"
+                                    style={{ marginRight: 15 }}
+
+                                />
+                            </TouchableOpacity>
 
                         </View>
                     ),
                 }}
             />
-            <Tab.Screen name='Notification' component={Notification}  options={{
+            {/* <Tab.Screen name='Notification' component={Notification}  options={{
                 tabBarIcon: ({ color, size }) => (
                     <MaterialIcons name="notifications" color={color} size={size} />
                 ),
@@ -65,7 +77,7 @@ const UserTab = ({ route, navigation }) => {
                     backgroundColor: "#1CD2BD",
                     
                 },
-            }}/>
+            }}/> */}
             <Tab.Screen
                 name="Account"
                 component={AccountScreen}
