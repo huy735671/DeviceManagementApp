@@ -118,7 +118,6 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     flexWrap: "wrap",
-
     padding: 20,
     justifyContent: "space-around",
     backgroundColor: "white",
@@ -138,10 +137,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
+    borderWidth:1,
+    borderColor:'#ddd',
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    
   },
 });

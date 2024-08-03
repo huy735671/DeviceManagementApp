@@ -252,6 +252,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 2,
     elevation: 2,
+    borderWidth:1,
+    borderColor:'#ddd',
   },
   searchInput: {
     flex: 1,

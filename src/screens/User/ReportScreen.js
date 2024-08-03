@@ -1,12 +1,21 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Image, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  Image,
+  ScrollView,
+} from "react-native";
 import { launchCamera, launchImageLibrary } from "react-native-image-picker";
 import firestore from "@react-native-firebase/firestore";
 import auth from "@react-native-firebase/auth";
 import { useNavigation } from "@react-navigation/native";
-import io from 'socket.io-client';
+import io from "socket.io-client";
 
-const socket = io('http://192.168.1.51:3000'); // Thay đổi thành IP của laptop đang chạy
+const socket = io("http://192.168.1.51:3000"); // Thay đổi thành IP của laptop đang chạy
 
 const ReportScreen = ({ route, navigation }) => {
   const { id = null, name = "", room = "" } = route.params || {};
@@ -16,18 +25,22 @@ const ReportScreen = ({ route, navigation }) => {
   // Hàm tạo thông báo cho người dùng
   const createNotificationUser = async (deviceName, room, reporterEmail) => {
     try {
-      await firestore().collection("NOTIFICATION_USER").add({
-        userName: auth().currentUser ? auth().currentUser.displayName : "Khách",
-        email: reporterEmail,
-        image: imageUri,
-        roomName: room,
-        deviceName: deviceName,
-        description: description,
-        reportMessage: `Báo cáo về thiết bị ${deviceName} trong phòng ${room} đã được gửi thành công.`,
-        timestamp: firestore.FieldValue.serverTimestamp(),
-        deviceId: id  // Thêm ID thiết bị vào thông báo cho người dùng
-      });
-      console.log('Notification for user created successfully');
+      await firestore()
+        .collection("NOTIFICATION_USER")
+        .add({
+          userName: auth().currentUser
+            ? auth().currentUser.displayName
+            : "Khách",
+          email: reporterEmail,
+          image: imageUri,
+          roomName: room,
+          deviceName: deviceName,
+          description: description,
+          reportMessage: `Báo cáo về thiết bị ${deviceName} trong phòng ${room} đã được gửi thành công.`,
+          timestamp: firestore.FieldValue.serverTimestamp(),
+          deviceId: id, // Thêm ID thiết bị vào thông báo cho người dùng
+        });
+      console.log("Notification for user created successfully");
     } catch (error) {
       console.error("Error creating notification for user: ", error);
     }
@@ -36,19 +49,23 @@ const ReportScreen = ({ route, navigation }) => {
   // Hàm tạo thông báo cho quản trị viên
   const createNotificationAdmin = async (deviceName, room, reporterEmail) => {
     try {
-      await firestore().collection("NOTIFICATION_ADMIN").add({
-        deviceId: id,
-        deviceName: deviceName,
-        image: imageUri,
-        userName: auth().currentUser ? auth().currentUser.displayName : "Khách",
-        email: reporterEmail,
-        reportMessage: `Có một báo cáo mới về thiết bị ${deviceName} trong phòng ${room}.`,
-        timestamp: firestore.FieldValue.serverTimestamp(),
-        description: description,
-        room: room,
-        // Bỏ color
-      });
-      console.log('Notification for admin created successfully');
+      await firestore()
+        .collection("NOTIFICATION_ADMIN")
+        .add({
+          deviceId: id,
+          deviceName: deviceName,
+          image: imageUri,
+          userName: auth().currentUser
+            ? auth().currentUser.displayName
+            : "Khách",
+          email: reporterEmail,
+          reportMessage: `Có một báo cáo mới về thiết bị ${deviceName} trong phòng ${room}.`,
+          timestamp: firestore.FieldValue.serverTimestamp(),
+          description: description,
+          room: room,
+          // Bỏ color
+        });
+      console.log("Notification for admin created successfully");
     } catch (error) {
       console.error("Error creating notification for admin: ", error);
     }
@@ -86,7 +103,7 @@ const ReportScreen = ({ route, navigation }) => {
 
       // Gửi thông báo qua socket
       const message = `Báo cáo về thiết bị ${name} trong phòng ${room} từ ${userName}`;
-      socket.emit('sendNotification', message);
+      socket.emit("sendNotification", message);
 
       // Tạo thông báo cho người dùng
       await createNotificationUser(name, room, userEmail);
@@ -105,7 +122,7 @@ const ReportScreen = ({ route, navigation }) => {
   // Xử lý chọn hình ảnh từ album
   const handleImagePick = () => {
     const options = {
-      mediaType: 'photo',
+      mediaType: "photo",
       quality: 1,
     };
 
@@ -119,7 +136,7 @@ const ReportScreen = ({ route, navigation }) => {
   // Xử lý chụp hình ảnh
   const handleCaptureImage = () => {
     const options = {
-      mediaType: 'photo',
+      mediaType: "photo",
       quality: 1,
     };
 
@@ -131,48 +148,53 @@ const ReportScreen = ({ route, navigation }) => {
   };
 
   return (
-    <ScrollView>
-      <View style={styles.container}>
-        <Text style={styles.title}>Thiết bị này có vấn đề?</Text>
-        <Text style={styles.description}>
-          Vui lòng cung cấp mô tả chi tiết về vấn đề của thiết bị. Chúng tôi sẽ xử lý báo cáo của bạn sớm nhất có thể.
-        </Text>
-        <View style={styles.imageContainer}>
-          {imageUri ? (
-            <Image source={{ uri: imageUri }} style={styles.imagePreview} />
-          ) : (
-            <View style={styles.imagePlaceholderContainer}>
-              <Text style={styles.imagePlaceholder}>Chưa có hình ảnh</Text>
-            </View>
-          )}
-        </View>
-        <View style={styles.buttonsContainer}>
-          <TouchableOpacity style={styles.btnImage} onPress={handleCaptureImage}>
-            <Text style={styles.btnText}>Chụp hình</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.btnImage} onPress={handleImagePick}>
-            <Text style={styles.btnText}>Chọn từ album</Text>
-          </TouchableOpacity>
-        </View>
-        <TextInput
-          style={styles.input}
-          multiline
-          numberOfLines={10}
-          placeholder="Nhập mô tả vấn đề..."
-          value={description}
-          onChangeText={setDescription}
-        />
-        <View style={styles.reportContainer}>
-          <View style={styles.reportInfo}>
-            <Text style={styles.deviceName}>Thiết bị: {name}</Text>
-            <Text style={styles.roomName}>Phòng ban: {room || "Unknown"}</Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Thiết bị này có vấn đề?</Text>
+      <Text style={styles.description}>
+        Vui lòng cung cấp mô tả chi tiết về vấn đề của thiết bị. Chúng tôi sẽ xử
+        lý báo cáo của bạn sớm nhất có thể.
+      </Text>
+      <View style={styles.imageContainer}>
+        {imageUri ? (
+          <Image source={{ uri: imageUri }} style={styles.imagePreview} />
+        ) : (
+          <View style={styles.imagePlaceholderContainer}>
+            <Text style={styles.imagePlaceholder}>Chưa có hình ảnh</Text>
           </View>
-          <TouchableOpacity style={styles.btnSubmit} onPress={handleSubmit}>
-            <Text style={styles.btnSubmitText}>Gửi báo cáo</Text>
-          </TouchableOpacity>
-        </View>
+        )}
       </View>
-    </ScrollView>
+      <View style={styles.buttonsContainer}>
+        <TouchableOpacity style={styles.btnImage} onPress={handleCaptureImage}>
+          <Text style={styles.btnText}>Chụp hình</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.btnImage} onPress={handleImagePick}>
+          <Text style={styles.btnText}>Chọn từ album</Text>
+        </TouchableOpacity>
+      </View>
+      <TextInput
+        style={styles.input}
+        multiline
+        numberOfLines={10}
+        placeholder="Nhập mô tả vấn đề..."
+        value={description}
+        onChangeText={setDescription}
+      />
+      <View style={styles.reportContainer}>
+        <View style={styles.reportInfo}>
+          <Text
+            style={styles.deviceName}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            Thiết bị: {name}
+          </Text>
+          <Text style={styles.roomName}>Phòng ban: {room || "Unknown"}</Text>
+        </View>
+        <TouchableOpacity style={styles.btnSubmit} onPress={handleSubmit}>
+          <Text style={styles.btnSubmitText}>Gửi báo cáo</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 };
 
@@ -247,23 +269,31 @@ const styles = StyleSheet.create({
   },
   reportContainer: {
     borderTopWidth: 1,
-    borderTopColor: '#ccc',
-    padding: 10,
+    borderTopColor: "#ccc",
+    padding: 5,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   reportInfo: {
+    flex: 1,
     marginBottom: 10,
+    marginTop: 10,
   },
   deviceName: {
     fontSize: 16,
     fontWeight: "bold",
+    color: "#000",
+    width: 200, 
+    overflow: "hidden",
   },
   roomName: {
-    fontSize: 14,
+    fontSize: 16,
     color: "#666",
   },
   btnSubmit: {
     backgroundColor: "#28a745",
-    paddingVertical: 15,
+    paddingVertical: 17,
     borderRadius: 5,
     alignItems: "center",
   },
@@ -271,6 +301,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "#FFF",
     fontWeight: "bold",
+    width: 150,
+    textAlign: "center",
   },
 });
 
