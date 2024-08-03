@@ -8,20 +8,60 @@ const NotificationDetail = ({ route }) => {
     const { notification } = route.params;
     const navigation = useNavigation();
     const [deviceData, setDeviceData] = useState(null);
+    const [roomData, setRoomData] = useState(null);
+    const [employeeData, setEmployeeData] = useState(null);
 
     useEffect(() => {
         const fetchDeviceData = async () => {
             try {
-                const snapshot = await firestore().collection('DEVICES').get();
+                console.log('Fetching device data for deviceId:', notification.deviceId);
+                const snapshot = await firestore().collection('DEVICES').where('id', '==', notification.deviceId).get();
+                if (snapshot.empty) {
+                    console.log('No devices found for deviceId:', notification.deviceId);
+                    setDeviceData(null);
+                    return;
+                }
                 const devices = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                setDeviceData(devices);
+                setDeviceData(devices.length > 0 ? devices[0] : null);
             } catch (error) {
                 console.error("Error fetching devices: ", error);
             }
         };
 
+        const fetchRoomData = async () => {
+            try {
+                const snapshot = await firestore().collection('ROOMS').where('name', '==', notification.room).get();
+                if (snapshot.empty) {
+                    console.log('No rooms found for room name:', notification.room);
+                    setRoomData(null);
+                    return;
+                }
+                const rooms = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                setRoomData(rooms.length > 0 ? rooms[0] : null);
+            } catch (error) {
+                console.error("Error fetching rooms: ", error);
+            }
+        };
+
+        const fetchEmployeeData = async () => {
+            try {
+                const snapshot = await firestore().collection('USERS').where('username', '==', notification.userName).get();
+                if (snapshot.empty) {
+                    console.log('No employees found for username:', notification.userName);
+                    setEmployeeData(null);
+                    return;
+                }
+                const employees = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                setEmployeeData(employees.length > 0 ? employees[0] : null);
+            } catch (error) {
+                console.error("Error fetching employees: ", error);
+            }
+        };
+
         fetchDeviceData();
-    }, []);
+        fetchRoomData();
+        fetchEmployeeData();
+    }, [notification.deviceId, notification.room, notification.userName]);
 
     const handleDelete = async () => {
         try {
@@ -36,25 +76,46 @@ const NotificationDetail = ({ route }) => {
 
     const handleDeviceDetailsPress = () => {
         if (deviceData) {
-            navigation.navigate('DeviceDetails', { devices: deviceData });
+            navigation.navigate('DevicesDetail', { device: deviceData });
         } else {
-            Alert.alert("Error", "No device data available.");
+            Alert.alert("Error", "Device not found.");
+        }
+    };
+
+    const handleRoomPress = () => {
+        if (roomData) {
+            navigation.navigate('ListDevices', { roomId: roomData.id });
+        } else {
+            Alert.alert("Error", "Room not found.");
+        }
+    };
+
+    const handleUserDetailsPress = () => {
+        if (employeeData) {
+            navigation.navigate('EmployeeDetail', { employee: employeeData });
+        } else {
+            Alert.alert("Error", "User not found.");
         }
     };
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
-            <Text style={styles.title}>Notification Details</Text>
+            <Text style={styles.title}>Chi tiết thông báo</Text>
             <View style={styles.card}>
+                <TouchableOpacity onPress={handleDelete} style={styles.deleteButton}>
+                    <Icon name='trash-outline' style={styles.deleteButtonIcon} />
+                </TouchableOpacity>
                 <Text style={styles.detail}>
-                    <Text style={styles.label}>Thông báo từ:</Text> {notification.userName}
+                    <Text style={styles.label}>Thông báo từ: Hệ thống</Text> 
                 </Text>
                 <Text style={styles.detail}>
-                    <Text style={styles.label}>Tên người gửi:</Text> {notification.userName}
+                    <Text style={styles.label}>Tên người gửi:</Text> {notification.userName || "Không xác định"}
                 </Text>
-                <Text style={styles.detail}>
-                    <Text style={styles.label}>Phòng:</Text> {notification.room}
-                </Text>
+                <TouchableOpacity onPress={handleRoomPress} style={styles.roomTouchable}>
+                    <Text style={styles.detail}>
+                        <Text style={styles.label}>Phòng:</Text> {notification.room}
+                    </Text>
+                </TouchableOpacity>
                 <Text style={styles.detail}>
                     <Text style={styles.label}>Thông báo:</Text> {notification.reportMessage}
                 </Text>
@@ -73,32 +134,19 @@ const NotificationDetail = ({ route }) => {
                         style={styles.image}
                     />
                 ) : (
-                    <Text style={styles.noImage}>No image available</Text>
+                    <Text style={styles.noImage}>Không có hình ảnh</Text>
                 )}
-            </View>
-            <View style={styles.buttonsContainer}>
-                <TouchableOpacity 
-                    onPress={handleDeviceDetailsPress} 
-                    style={styles.button}
-                >
-                    <Text style={styles.buttonText}>Thông tin thiết bị</Text>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                    onPress={() => navigation.navigate('UserDetail', { userId: notification.userId })} 
-                    style={styles.button}
-                >
-                    <Text style={styles.buttonText}>Phòng ban</Text>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                    onPress={() => navigation.navigate('UserDetail', { userId: notification.userId })} 
-                    style={styles.button}
-                >
-                    <Text style={styles.buttonText}>Thông tin người gửi</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={handleDelete} style={styles.deleteButton}>
-                    <Icon name='trash-outline' style={styles.deleteButtonIcon} />
-                    <Text style={styles.deleteButtonText}>Xóa</Text>
-                </TouchableOpacity>
+                <View style={styles.buttonsContainer}>
+                    <TouchableOpacity onPress={handleDeviceDetailsPress} style={styles.button}>
+                        <Text style={styles.buttonText}>Thông tin thiết bị</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={handleRoomPress} style={styles.button}>
+                        <Text style={styles.buttonText}>Phòng ban</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={handleUserDetailsPress} style={styles.button}>
+                        <Text style={styles.buttonText}>Thông tin người gửi</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
         </ScrollView>
     );
@@ -127,6 +175,7 @@ const styles = StyleSheet.create({
         shadowRadius: 5,
         elevation: 3,
         marginBottom: 20,
+        position: 'relative',
     },
     detail: {
         fontSize: 16,
@@ -155,24 +204,18 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     deleteButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        position: 'absolute',
+        top: 10,
+        right: 10,
         backgroundColor: '#ff4d4d',
-        paddingVertical: 14,
-        paddingHorizontal: 20,
-        borderRadius: 8,
+        padding: 10,
+        borderRadius: 50,
         alignItems: 'center',
         elevation: 2,
     },
     deleteButtonIcon: {
         color: '#fff',
         fontSize: 20,
-        marginRight: 10,
-    },
-    deleteButtonText: {
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: 'bold',
     },
     image: {
         width: '100%',
@@ -185,6 +228,9 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#004d40',
         textAlign: 'center',
+    },
+    roomTouchable: {
+        // Add any specific styles for the touchable area here if needed
     },
 });
 

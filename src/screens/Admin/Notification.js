@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useNavigation } from '@react-navigation/native'; // Import useNavigation
+import { useNavigation } from '@react-navigation/native';
 
 const deleteNotification = async (id) => {
   try {
@@ -17,7 +17,7 @@ const deleteNotification = async (id) => {
 const Notification = () => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
-  const navigation = useNavigation(); // Get the navigation object
+  const navigation = useNavigation();
 
   useEffect(() => {
     const subscriber = firestore()
@@ -28,13 +28,15 @@ const Notification = () => {
         const notificationsList = [];
         for (const documentSnapshot of querySnapshot.docs) {
           const notificationData = documentSnapshot.data();
-          const userDoc = await firestore().collection('USERS').doc(notificationData.userId).get();
+          const userName = notificationData.userName || 'Hệ thống';
+
+          // Fetch report details
           const reportDoc = await firestore().collection('REPORTS').doc(notificationData.reportId).get();
 
           notificationsList.push({
             ...notificationData,
             key: documentSnapshot.id,
-            userName: userDoc.exists ? userDoc.data().name : 'HỆ THỐNG',
+            userName, 
             reportDetails: reportDoc.exists ? reportDoc.data().details : 'No details available',
           });
         }
@@ -46,7 +48,6 @@ const Notification = () => {
         setLoading(false);
       });
 
-    // Unsubscribe from events when no longer in use
     return () => subscriber();
   }, []);
 
@@ -75,7 +76,11 @@ const Notification = () => {
   };
 
   const handlePress = (item) => {
-    // Navigate to NotificationDetail screen with the notification item data
+    if (!item.deviceId) {
+      Alert.alert("Error", "Device ID is missing.");
+      return;
+    }
+    console.log("Navigating with item:", item);
     navigation.navigate('NotificationDetailsAdmin', { notification: item });
   };
 

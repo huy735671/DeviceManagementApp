@@ -1,30 +1,31 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Image, ScrollView } from "react-native";
 import { launchCamera, launchImageLibrary } from "react-native-image-picker";
 import firestore from "@react-native-firebase/firestore";
 import auth from "@react-native-firebase/auth";
 import { useNavigation } from "@react-navigation/native";
-import PushNotification from 'react-native-push-notification';
-import useNotificationSetup from '../../../sendNotification';
 import io from 'socket.io-client';
+
 const socket = io('http://192.168.1.51:3000'); // Thay đổi thành IP của laptop đang chạy
 
 const ReportScreen = ({ route, navigation }) => {
   const { id = null, name = "", room = "" } = route.params || {};
   const [description, setDescription] = useState("");
   const [imageUri, setImageUri] = useState(null);
-  const CHANNEL_ID = '4';
 
-  const createNotificationUser = async (deviceName, room) => {
+  // Hàm tạo thông báo cho người dùng
+  const createNotificationUser = async (deviceName, room, reporterEmail) => {
     try {
       await firestore().collection("NOTIFICATION_USER").add({
         userName: auth().currentUser ? auth().currentUser.displayName : "Khách",
+        email: reporterEmail,
         image: imageUri,
         roomName: room,
         deviceName: deviceName,
         description: description,
         reportMessage: `Báo cáo về thiết bị ${deviceName} trong phòng ${room} đã được gửi thành công.`,
         timestamp: firestore.FieldValue.serverTimestamp(),
+        deviceId: id  // Thêm ID thiết bị vào thông báo cho người dùng
       });
       console.log('Notification for user created successfully');
     } catch (error) {
@@ -32,20 +33,20 @@ const ReportScreen = ({ route, navigation }) => {
     }
   };
 
-  const createNotificationAdmin = async (deviceName, room) => {
+  // Hàm tạo thông báo cho quản trị viên
+  const createNotificationAdmin = async (deviceName, room, reporterEmail) => {
     try {
       await firestore().collection("NOTIFICATION_ADMIN").add({
-      
         deviceId: id,
         deviceName: deviceName,
         image: imageUri,
         userName: auth().currentUser ? auth().currentUser.displayName : "Khách",
-        //adminName: "Admin",
+        email: reporterEmail,
         reportMessage: `Có một báo cáo mới về thiết bị ${deviceName} trong phòng ${room}.`,
         timestamp: firestore.FieldValue.serverTimestamp(),
         description: description,
         room: room,
-        color: "#FF5733"  // Example color code (orange)
+        // Bỏ color
       });
       console.log('Notification for admin created successfully');
     } catch (error) {
@@ -53,8 +54,7 @@ const ReportScreen = ({ route, navigation }) => {
     }
   };
 
-  useNotificationSetup();
-
+  // Xử lý gửi báo cáo
   const handleSubmit = async () => {
     if (!description.trim()) {
       Alert.alert("Thông báo", "Vui lòng nhập mô tả vấn đề.");
@@ -68,27 +68,31 @@ const ReportScreen = ({ route, navigation }) => {
 
     const user = auth().currentUser;
     const userEmail = user ? user.email : "Chưa đăng nhập";
+    const userName = user ? user.displayName : "Khách";
 
     try {
+      // Lưu báo cáo
       await firestore().collection("REPORTS").add({
         id: id,
         deviceId: id,
         deviceName: name,
         description: description,
         image: imageUri,
-        reporterName: user ? user.displayName : "Khách",
+        reporterName: userName,
         reporterEmail: userEmail,
         room: room,
         timestamp: firestore.FieldValue.serverTimestamp(),
       });
 
       // Gửi thông báo qua socket
-      const message = `Báo cáo về thiết bị ${name} trong phòng ${room} từ ${user ? user.displayName : "Khách"}`;
+      const message = `Báo cáo về thiết bị ${name} trong phòng ${room} từ ${userName}`;
       socket.emit('sendNotification', message);
 
-      // Tạo thông báo trong cả hai collection
-      await createNotificationUser(name, room);
-      await createNotificationAdmin(name, room);
+      // Tạo thông báo cho người dùng
+      await createNotificationUser(name, room, userEmail);
+
+      // Tạo thông báo cho quản trị viên
+      await createNotificationAdmin(name, room, userEmail);
 
       Alert.alert("Thành công", "Báo cáo đã được gửi thành công.");
       navigation.goBack();
@@ -98,6 +102,7 @@ const ReportScreen = ({ route, navigation }) => {
     }
   };
 
+  // Xử lý chọn hình ảnh từ album
   const handleImagePick = () => {
     const options = {
       mediaType: 'photo',
@@ -111,6 +116,7 @@ const ReportScreen = ({ route, navigation }) => {
     });
   };
 
+  // Xử lý chụp hình ảnh
   const handleCaptureImage = () => {
     const options = {
       mediaType: 'photo',
@@ -240,42 +246,32 @@ const styles = StyleSheet.create({
     color: "white",
   },
   reportContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: '#FFF',
     borderTopWidth: 1,
-    borderTopColor: '#ddd',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    borderTopColor: '#ccc',
+    padding: 10,
   },
   reportInfo: {
-    flex: 1,
+    marginBottom: 10,
   },
   deviceName: {
     fontSize: 16,
     fontWeight: "bold",
   },
   roomName: {
-    fontSize: 16,
+    fontSize: 14,
+    color: "#666",
   },
   btnSubmit: {
-    backgroundColor: "#28A745",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    backgroundColor: "#28a745",
+    paddingVertical: 15,
     borderRadius: 5,
     alignItems: "center",
-    justifyContent: "center",
   },
   btnSubmitText: {
-    fontSize: 16,
+    fontSize: 18,
+    color: "#FFF",
     fontWeight: "bold",
-    color: "white",
   },
 });
 
-export default ReportScreen
+export default ReportScreen;

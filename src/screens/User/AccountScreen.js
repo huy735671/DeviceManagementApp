@@ -148,6 +148,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderBottomWidth: 1,
     borderColor: '#e3e3e3',
+    
   },
   profileAvatar: {
     width: 60,
@@ -156,6 +157,7 @@ const styles = StyleSheet.create({
   },
   proFileNameContainer: {
     marginLeft: 16,
+    bottom:5,
   },
   profileName: {
     marginTop: 12,

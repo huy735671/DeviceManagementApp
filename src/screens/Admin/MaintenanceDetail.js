@@ -4,6 +4,19 @@ import firestore from '@react-native-firebase/firestore';
 
 const { width } = Dimensions.get('window');
 
+const translateStatus = (status) => {
+  switch (status) {
+    case "maintenance":
+      return "Đang bảo trì";
+    case "inactive":
+      return "Hư hỏng";
+    case "active":
+      return "Bình thường";
+    default:
+      return "Không xác định";
+  }
+};
+
 const MaintenanceDetail = ({ route }) => {
   const { id } = route.params;
   const [device, setDevice] = useState(null);
@@ -39,13 +52,13 @@ const MaintenanceDetail = ({ route }) => {
     {
       type: 'info',
       content: [
-        { label: 'Brand', value: device.brand },
-        { label: 'Device Type', value: device.deviceType },
-        { label: 'Deployment Date', value: device.deploymentDate.toDate().toLocaleDateString() },
-        { label: 'Warranty End Date', value: device.warrantyEndDate.toDate().toLocaleDateString() },
-        { label: 'Supplier', value: device.supplier },
-        { label: 'Operational Status', value: device.operationalStatus },
-        { label: 'Room Name', value: device.roomName },
+        { label: 'Thương hiệu:', value: device.brand },
+        { label: 'Loại thiết bị:', value: device.deviceType },
+        { label: 'Ngày triển khai:', value: device.deploymentDate.toDate().toLocaleDateString() },
+        { label: 'Ngày hết hạn bảo hành:', value: device.warrantyEndDate.toDate().toLocaleDateString() },
+        { label: 'Nhà cung cấp:', value: device.supplier },
+        { label: 'Tình trạng:', value: translateStatus(device.operationalStatus) },
+        { label: 'Room Name:', value: device.roomName },
       ],
     },
   ];
@@ -84,11 +97,11 @@ const MaintenanceDetail = ({ route }) => {
   return (
     <ScrollView>
       <FlatList
-      data={data}
-      renderItem={renderItem}
-      keyExtractor={(item, index) => item.type + index}
-      contentContainerStyle={styles.container}
-    />
+        data={data}
+        renderItem={renderItem}
+        keyExtractor={(item, index) => item.type + index}
+        contentContainerStyle={styles.container}
+      />
     </ScrollView>
   );
 };

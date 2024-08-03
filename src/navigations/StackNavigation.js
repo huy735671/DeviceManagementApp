@@ -288,7 +288,7 @@ const StackNavigation = () => {
         component={NotificationDetailsAdmin}
         options={{
           headerShown: true,
-          headerTitle: "CHI TIẾT THÔNG BÁO",
+          headerTitle: "",
           headerStyle: {
             backgroundColor: "#1FD2BD",
           },

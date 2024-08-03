@@ -22,9 +22,7 @@ const UserTab = ({ route, navigation }) => {
     const AddDeviceHandler = () => {
         navigation.navigate('AddDevice');
     }
-    const SearchHandler = () => {
-        navigation.navigate('SearchForUser');
-    }
+    
     const NotificationHandler = () => {
         navigation.navigate('NotificationUser');
     }
@@ -44,15 +42,7 @@ const UserTab = ({ route, navigation }) => {
                     headerTitle: "QUẢN LÝ THIẾT BỊ",
                     headerRight: () => (
                         <View style={{ flexDirection: "row" }}>
-                            <TouchableOpacity onPress={SearchHandler}>
-                                <Icon
-                                    name="search"
-                                    size={25}
-                                    color="white"
-                                    style={{ marginRight: 15 }}
-
-                                />
-                            </TouchableOpacity>
+                           
                             <TouchableOpacity onPress={NotificationHandler}>
                                 <Icon
                                     name="notifications"
@@ -91,13 +81,13 @@ const UserTab = ({ route, navigation }) => {
                     headerTitle: "QUẢN LÝ THIẾT BỊ",
                     headerRight: () => (
                         <View style={{ flexDirection: "row" }}>
-                            <TouchableOpacity>
+                             <TouchableOpacity onPress={NotificationHandler}>
                                 <Icon
-                                    name="search"
+                                    name="notifications"
                                     size={25}
                                     color="white"
                                     style={{ marginRight: 15 }}
-                                    onPress={SearchHandler}
+
                                 />
                             </TouchableOpacity>
 

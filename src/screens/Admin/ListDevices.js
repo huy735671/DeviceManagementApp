@@ -104,7 +104,7 @@ const ListDevicesScreen = ({ route }) => {
         {item.image ? (
           <Image source={{ uri: item.image }} style={styles.deviceImage} />
         ) : (
-          <Icon name="devices" size={30} color="#007bff" style={styles.icon} />
+          <Icon name="devices" size={40} color="#007bff" style={styles.icon} />
         )}
         <View style={styles.itemDetails}>
           <Text style={styles.itemName}>{item.name}</Text>
@@ -113,14 +113,14 @@ const ListDevicesScreen = ({ route }) => {
         </View>
       </TouchableOpacity>
       <TouchableOpacity style={styles.deleteButton} onPress={() => handleDelete(item.id)}>
-        <Icon name="delete" size={24} color="#ff0000" />
+        <Icon name="delete" size={28} color="#ff0000" />
       </TouchableOpacity>
     </View>
   );
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Danh sách thiết bị phòng {roomId}</Text>
+      <Text style={styles.title}>Danh sách thiết bị phòng {roomName}</Text>
       {devices.length > 0 ? (
         <FlatList
           data={devices}
@@ -142,8 +142,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 26,
+    fontWeight: '700',
     marginBottom: 20,
     textAlign: 'center',
     color: '#333',
@@ -152,16 +152,18 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   item: {
-    padding: 15,
+    padding: 20,
     borderRadius: 12,
     marginVertical: 10,
     flexDirection: 'row',
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 4,
+    borderWidth: 1,
+    borderColor: '#ddd', // Đường viền xám nhạt
   },
   itemContent: {
     flexDirection: 'row',
@@ -169,46 +171,28 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   icon: {
-    marginRight: 15,
+    marginRight: 20,
   },
   deviceImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 15,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    marginRight: 20,
   },
   itemDetails: {
     flex: 1,
   },
   itemName: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 20,
+    fontWeight: '700',
     color: '#333',
   },
   itemDetail: {
-    fontSize: 14,
+    fontSize: 16,
     color: '#666',
   },
   deleteButton: {
-    padding: 10,
-  },
-  button: {
-    backgroundColor: '#007bff',
-    paddingVertical: 15,
-    paddingHorizontal: 20,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginTop: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 4,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
+    padding: 15,
   },
   emptyText: {
     fontSize: 18,
