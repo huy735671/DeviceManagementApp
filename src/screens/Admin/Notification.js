@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { useNavigation } from '@react-navigation/native'; // Import useNavigation
 
 const deleteNotification = async (id) => {
   try {
@@ -16,6 +17,7 @@ const deleteNotification = async (id) => {
 const Notification = () => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
+  const navigation = useNavigation(); // Get the navigation object
 
   useEffect(() => {
     const subscriber = firestore()
@@ -72,8 +74,13 @@ const Notification = () => {
     );
   };
 
+  const handlePress = (item) => {
+    // Navigate to NotificationDetail screen with the notification item data
+    navigation.navigate('NotificationDetailsAdmin', { notification: item });
+  };
+
   const renderItem = ({ item }) => (
-    <View style={styles.notificationItem}>
+    <TouchableOpacity onPress={() => handlePress(item)} style={styles.notificationItem}>
       <View style={styles.notificationHeader}>
         <Text style={styles.notificationName}>{item.userName}</Text>
         <Text style={styles.notificationTimestamp}>
@@ -91,7 +98,7 @@ const Notification = () => {
       <TouchableOpacity onPress={() => handleDelete(item.key)} style={styles.deleteButton}>
         <Icon name='trash-outline' style={styles.deleteButtonText} />
       </TouchableOpacity>
-    </View>
+    </TouchableOpacity>
   );
 
   return (

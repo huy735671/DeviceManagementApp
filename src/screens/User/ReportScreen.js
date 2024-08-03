@@ -19,6 +19,10 @@ const ReportScreen = ({ route, navigation }) => {
     try {
       await firestore().collection("NOTIFICATION_USER").add({
         userName: auth().currentUser ? auth().currentUser.displayName : "Khách",
+        image: imageUri,
+        roomName: room,
+        deviceName: deviceName,
+        description: description,
         reportMessage: `Báo cáo về thiết bị ${deviceName} trong phòng ${room} đã được gửi thành công.`,
         timestamp: firestore.FieldValue.serverTimestamp(),
       });
@@ -31,9 +35,16 @@ const ReportScreen = ({ route, navigation }) => {
   const createNotificationAdmin = async (deviceName, room) => {
     try {
       await firestore().collection("NOTIFICATION_ADMIN").add({
-        adminName: "Admin",
+      
+        deviceId: id,
+        deviceName: deviceName,
+        image: imageUri,
+        userName: auth().currentUser ? auth().currentUser.displayName : "Khách",
+        //adminName: "Admin",
         reportMessage: `Có một báo cáo mới về thiết bị ${deviceName} trong phòng ${room}.`,
         timestamp: firestore.FieldValue.serverTimestamp(),
+        description: description,
+        room: room,
         color: "#FF5733"  // Example color code (orange)
       });
       console.log('Notification for admin created successfully');
@@ -60,6 +71,7 @@ const ReportScreen = ({ route, navigation }) => {
 
     try {
       await firestore().collection("REPORTS").add({
+        id: id,
         deviceId: id,
         deviceName: name,
         description: description,

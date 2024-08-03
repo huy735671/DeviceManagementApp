@@ -31,6 +31,10 @@ import StatisticsScreen from '../screens/Admin/StatisticsScreen';
 import NotificationUser from '../screens/User/Notification';
 import NotificationAdmin from '../screens/Admin/Notification';
 import SearchForUser from '../components/SearchForUser';
+import NotificationDetailsAdmin from '../screens/Admin/NotificationDetail';
+import ReportDetails from '../screens/Admin/ReportDetails';
+import NotificationDetailsUser from '../screens/User/NotificationDetail';
+
 
 const Stack = createNativeStackNavigator();
 
@@ -275,6 +279,36 @@ const StackNavigation = () => {
         options={{
           headerShown: true,
           headerTitle: "Thông báo admin",
+          headerStyle: {
+            backgroundColor: "#1FD2BD",
+          },
+        }}
+      />
+            <Stack.Screen name='NotificationDetailsAdmin'
+        component={NotificationDetailsAdmin}
+        options={{
+          headerShown: true,
+          headerTitle: "CHI TIẾT THÔNG BÁO",
+          headerStyle: {
+            backgroundColor: "#1FD2BD",
+          },
+        }}
+      />
+       <Stack.Screen name='NotificationDetailsUser'
+        component={NotificationDetailsUser}
+        options={{
+          headerShown: true,
+          headerTitle: "CHI TIẾT THÔNG BÁO",
+          headerStyle: {
+            backgroundColor: "#1FD2BD",
+          },
+        }}
+      />
+      <Stack.Screen name='ReportDetails'
+        component={ReportDetails}
+        options={{
+          headerShown: true,
+          headerTitle: "CHI TIẾT BẢO TRÌ",
           headerStyle: {
             backgroundColor: "#1FD2BD",
           },
