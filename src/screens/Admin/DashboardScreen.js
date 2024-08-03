@@ -12,10 +12,11 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import * as Animatable from 'react-native-animatable';
 import firestore from '@react-native-firebase/firestore';
 import Modal from 'react-native-modal';
-
+import useNotificationSetup from '../../../sendNotification';
 const { width } = Dimensions.get('window'); // Get screen width for responsive layout
 
 const DashboardScreen = ({ navigation }) => {
+  useNotificationSetup();
   const [numColumns, setNumColumns] = useState(2);
   const [selectedFeatureId, setSelectedFeatureId] = useState("1");
   const [devices, setDevices] = useState([]);
@@ -142,7 +143,7 @@ const DashboardScreen = ({ navigation }) => {
   const filteredData = selectedFeatureId === "1" ? rooms : maintenance;
 
   return (
-    <ScrollView>
+    // <ScrollView>
       <View style={styles.container}>
         <Text style={styles.txt}>Các chức năng quản lý</Text>
         <ScrollView
@@ -214,7 +215,7 @@ const DashboardScreen = ({ navigation }) => {
           </View>
         </Modal>
       </View>
-    </ScrollView>
+    // </ScrollView>
   );
 };
 

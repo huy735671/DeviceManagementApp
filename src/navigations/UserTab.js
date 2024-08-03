@@ -23,7 +23,7 @@ const UserTab = ({ route, navigation }) => {
         navigation.navigate('AddDevice');
     }
     const SearchHandler = () => {
-        navigation.navigate('SearchBar');
+        navigation.navigate('SearchForUser');
     }
     const NotificationHandler = () => {
         navigation.navigate('NotificationUser');

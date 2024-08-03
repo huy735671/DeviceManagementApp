@@ -17,6 +17,7 @@ const StatisticsScreen = () => {
 
   const [expandAnim] = useState(new Animated.Value(0)); // For animation
 
+
   useEffect(() => {
     const fetchData = async () => {
       try {

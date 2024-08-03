@@ -6,7 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Header } from 'react-native-elements';
 import firestore from '@react-native-firebase/firestore';
 
-const SearchBar = ({ userRole }) => {
+const SearchBar = ({ userRole,userRoomId }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const navigation = useNavigation();
@@ -19,44 +19,47 @@ const SearchBar = ({ userRole }) => {
   const handleSearch = async () => {
     
     try {
-      const userQuery = firestore()
-        .collection('USERS')
-        .where('name', '>=', searchQuery)
-        .where('name', '<=', searchQuery + '\uf8ff')
-        .get();
-      const usernameQuery = firestore()
-        .collection('USERS')
-        .where('username', '>=', searchQuery)
-        .where('username', '<=', searchQuery + '\uf8ff')
-        .get();
-      const roomQuery = firestore()
-        .collection('ROOMS')
-        .where('name', '>=', searchQuery)
-        .where('name', '<=', searchQuery + '\uf8ff')
-        .get();
+    //   const userQuery = firestore()
+    //     .collection('USERS')
+    //     .where('name', '>=', searchQuery)
+    //     .where('name', '<=', searchQuery + '\uf8ff')
+    //     .get();
+    //   const usernameQuery = firestore()
+    //     .collection('USERS')
+    //     .where('username', '>=', searchQuery)
+    //     .where('username', '<=', searchQuery + '\uf8ff')
+    //     .get();
+    //   const roomQuery = firestore()
+    //     .collection('ROOMS')
+    //     .where('name', '>=', searchQuery)
+    //     .where('name', '<=', searchQuery + '\uf8ff')
+    //     .get();
       const deviceQuery = firestore()
         .collection('DEVICES')
         .where('name', '>=', searchQuery)
         .where('name', '<=', searchQuery + '\uf8ff')
+      
         .get();
 
       const [
-        usersSnapshot, usernameSnapshot,
-         roomsSnapshot, devicesSnapshot] = await Promise.all([
-        userQuery,
-        usernameQuery,
-        roomQuery,
+        // usersSnapshot, usernameSnapshot,
+        //  roomsSnapshot,
+         devicesSnapshot] = await Promise.all([
+        // userQuery,
+        // usernameQuery,
+        // roomQuery,
         deviceQuery
       ]);
 
-      const users = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), type: 'user' }));
-      const usernames = usernameSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), type: 'username' }));
-      const rooms = roomsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), type: 'room' }));
+    //   const users = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), type: 'user' }));
+    //   const usernames = usernameSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), type: 'username' }));
+    //   const rooms = roomsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), type: 'room' }));
       const devices = devicesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), type: 'device' }));
 
       setSearchResults([
-        ...users, ...usernames,
-         ...rooms, ...devices]);
+        // ...users, ...usernames,
+        //  ...rooms,
+          ...devices]);
     } catch (error) {
       console.error("Error searching Firestore: ", error);
     }
@@ -85,9 +88,9 @@ const SearchBar = ({ userRole }) => {
         <Icons name={item.icon || 'business-outline'} size={40} color="black" style={styles.icon} />
         <View style={styles.itemTextContainer}>
           <Text style={styles.itemTitle}>{item.name 
-          ||item.username
+        //   ||item.username
            }</Text>
-          <Text style={styles.itemTitle}>{item.roomName || " "}</Text>
+          {/* <Text style={styles.itemTitle}>{item.roomName || " "}</Text> */}
        
         </View>
       </TouchableOpacity>

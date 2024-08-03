@@ -1,6 +1,5 @@
 import React from 'react'
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-
 import SignInScreen from '../screens/SignInScreen';
 import SignUpScreen from '../screens/SignUpScreen';
 import ForgotPassword from '../screens/ForgotPassword';
@@ -31,6 +30,7 @@ import BannerScreen from '../screens/Admin/BannerScreen';
 import StatisticsScreen from '../screens/Admin/StatisticsScreen';
 import NotificationUser from '../screens/User/Notification';
 import NotificationAdmin from '../screens/Admin/Notification';
+import SearchForUser from '../components/SearchForUser';
 
 const Stack = createNativeStackNavigator();
 
@@ -198,6 +198,17 @@ const StackNavigation = () => {
       <Stack.Screen
         name="SearchBar"
         component={SearchBar}
+        options={{
+          title: "Tìm kiếm",
+          headerShown: true,
+          headerStyle: {
+            backgroundColor: "#1FD2BD",
+          },
+        }}
+      />
+        <Stack.Screen
+        name="SearchForUser"
+        component={SearchForUser}
         options={{
           title: "Tìm kiếm",
           headerShown: true,
