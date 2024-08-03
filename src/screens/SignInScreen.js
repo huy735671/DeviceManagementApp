@@ -10,8 +10,13 @@ import { useMyContextController, login } from "../context";
 
 
 const SignInScreen = ({ navigation }) => {
+<<<<<<< HEAD
   const [email, setEmail] = useState('annguyen@gmail.com');
   const [password, setPassword] = useState('123321');
+=======
+  const [email, setEmail] = useState('huyadmin@gmail.com');
+  const [password, setPassword] = useState('123456');
+>>>>>>> a88345b23e60060808c887f7cae32915d3518628
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isReady, setIsReady] = useState(false);

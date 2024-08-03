@@ -1,63 +1,84 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Animated, Image, ScrollView } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Animated, Image, ScrollView, TextInput } from "react-native";
 import Icons from "react-native-vector-icons/MaterialIcons";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import firestore from "@react-native-firebase/firestore";
-import { Auth } from "../../services";
 
 const Room = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { room } = route.params;
   const [devices, setDevices] = useState([]);
+  const [allDevices, setAllDevices] = useState([]);
   const [deviceCounts, setDeviceCounts] = useState({ total: 0, active: 0, maintenance: 0, inactive: 0 });
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const fetchDevices = async () => {
+    try {
+      const devicesSnapshot = await firestore()
+        .collection("DEVICES")
+        .where("roomId", "==", room.id)
+        .get();
+
+      const devicesData = devicesSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      // Sắp xếp theo trạng thái: Bảo trì -> Hư hỏng -> Bình thường
+      devicesData.sort((a, b) => {
+        const statusOrder = { maintenance: 1, inactive: 2, active: 3 };
+        return statusOrder[a.operationalStatus] - statusOrder[b.operationalStatus];
+      });
+
+      setAllDevices(devicesData); // Lưu danh sách thiết bị gốc
+      // Nếu ô tìm kiếm trống thì hiển thị tất cả thiết bị, nếu không thì hiển thị kết quả tìm kiếm
+      if (searchQuery.trim() === "") {
+        setDevices(devicesData);
+      } else {
+        const filteredDevices = devicesData.filter(device =>
+          device.name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        setDevices(filteredDevices);
+      }
+
+      const counts = devicesData.reduce(
+        (acc, device) => {
+          acc.total += 1;
+          if (device.operationalStatus === "active") acc.active += 1;
+          if (device.operationalStatus === "maintenance") acc.maintenance += 1;
+          if (device.operationalStatus === "inactive") acc.inactive += 1;
+          return acc;
+        },
+        { total: 0, active: 0, maintenance: 0, inactive: 0 }
+      );
+
+      setDeviceCounts(counts);
+    } catch (error) {
+      console.error("Error fetching devices:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchDevices = async () => {
-      try {
-        const devicesSnapshot = await firestore()
-          .collection("DEVICES")
-          .where("roomId", "==", room.id)
-          .get();
-
-        const devicesData = devicesSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-
-        // Sắp xếp theo trạng thái: Bảo trì -> Hư hỏng -> Bình thường
-        devicesData.sort((a, b) => {
-          const statusOrder = { maintenance: 1, inactive: 2, active: 3 };
-          return statusOrder[a.operationalStatus] - statusOrder[b.operationalStatus];
-        });
-
-        setDevices(devicesData);
-
-        const counts = devicesData.reduce(
-          (acc, device) => {
-            acc.total += 1;
-            if (device.operationalStatus === "active") acc.active += 1;
-            if (device.operationalStatus === "maintenance") acc.maintenance += 1;
-            if (device.operationalStatus === "inactive") acc.inactive += 1;
-            return acc;
-          },
-          { total: 0, active: 0, maintenance: 0, inactive: 0 }
-        );
-
-        setDeviceCounts(counts);
-      } catch (error) {
-        console.error("Error fetching devices:", error);
-      }
-    };
-
     fetchDevices();
-
-    // Fetch devices every 10 seconds
-    const intervalId = setInterval(fetchDevices, 10000);
-
-    // Clean up interval on component unmount
-    return () => clearInterval(intervalId);
   }, [room]);
+
+  const handleSearch = (text) => {
+    setSearchQuery(text);
+    if (text.trim() === "") {
+      setDevices(allDevices); // Khi ô tìm kiếm trống, hiển thị tất cả thiết bị
+    } else {
+      const filteredDevices = allDevices.filter(device =>
+        device.name.toLowerCase().includes(text.toLowerCase())
+      );
+      setDevices(filteredDevices);
+    }
+  };
+
+  const clearSearch = () => {
+    setSearchQuery(""); // Xóa văn bản tìm kiếm
+    setDevices(allDevices); // Khi xóa tìm kiếm, hiển thị tất cả thiết bị
+  };
 
   const handleDevicePress = (item) => {
     navigation.navigate("InfoDevices", {
@@ -77,19 +98,17 @@ const Room = () => {
       deploymentDate: item.deploymentDate,
       image: item.image,
       roomName: item.roomName,
-
     });
   };
-
 
   const getStatusColor = (status) => {
     switch (status) {
       case "active":
         return "#d4edda"; // màu xanh nhạt cho trạng thái active
       case "maintenance":
-        return "#fff3cd"; // màu đỏ nhạt cho trạng thái maintenance
+        return "#fff3cd"; // màu vàng nhạt cho trạng thái maintenance
       case "inactive":
-        return "#f8d7da"; // màu vàng nhạt cho trạng thái inactive
+        return "#f8d7da"; // màu đỏ nhạt cho trạng thái inactive
       default:
         return "#e2e3e5"; // màu xám nhạt cho trạng thái khác
     }
@@ -123,6 +142,22 @@ const Room = () => {
             <Text style={styles.infoValue}>{deviceCounts.inactive}</Text>
           </View>
         </View>
+
+        {/* Thêm ô tìm kiếm */}
+        <View style={styles.searchContainer}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Tìm kiếm thiết bị"
+            value={searchQuery}
+            onChangeText={handleSearch}
+          />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity onPress={clearSearch} style={styles.clearButton}>
+              <Icons name="close" size={20} color="#999" />
+            </TouchableOpacity>
+          )}
+        </View>
+
         <Animated.View animation="zoomIn" style={styles.content}>
           {devices.length === 0 ? (
             <View style={styles.noDevicesContainer}>
@@ -130,7 +165,6 @@ const Room = () => {
             </View>
           ) : (
             devices.map((device) => (
-
               <TouchableOpacity
                 key={device.id}
                 onPress={() => handleDevicePress(device)}
@@ -141,9 +175,7 @@ const Room = () => {
                 ) : (
                   <Icons name="devices" size={50} color="black" />
                 )}
-
                 <View style={styles.deviceInfo}>
-
                   <Text style={styles.deviceName}>Thiết bị: {device.name}</Text>
                   <Text style={styles.deviceStatus}>Trạng thái: {statusLabels[device.operationalStatus]}</Text>
                 </View>
@@ -202,10 +234,32 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   infoValue: {
-    fontSize: 20,
-    textAlign: 'center',
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#007AFF',
+    textAlign: 'center',
+    color: '#000',
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    marginHorizontal: 10,
+    marginBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  searchInput: {
+    flex: 1,
+    paddingVertical: 8,
+    fontSize: 16,
+  },
+  clearButton: {
+    padding: 5,
   },
   content: {
     flex: 1,
@@ -223,53 +277,42 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
-    height:'auto',
+    height: 'auto',
     elevation: 6,
   },
   item: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "flex-start",
-    width: "100%",
-    height: 65,
-    borderWidth: 1,
-    borderColor: "#dee2e6",
-    borderRadius: 5,
-    marginBottom: 10,
     padding: 10,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 2,
-    elevation: 2,
+    marginVertical: 5,
+    borderRadius: 5,
+    width: "100%",
   },
   deviceImage: {
     width: 50,
     height: 50,
     borderRadius: 10,
+    marginRight: 15,
   },
   deviceInfo: {
-    marginLeft: 10,
+    flex: 1,
   },
   deviceName: {
-    fontWeight: 'bold',
-    fontSize: 15,
-    color: '#343a40',
+    fontSize: 16,
+    fontWeight: "bold",
   },
   deviceStatus: {
-    color: 'black',
-    fontWeight: 'bold',
+    fontSize: 14,
+    color: "#666",
   },
   noDevicesContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 100,
   },
   noDevicesText: {
     fontSize: 18,
-    color: '#6c757d',
+    color: "#666",
+    textAlign: "center",
   },
 });

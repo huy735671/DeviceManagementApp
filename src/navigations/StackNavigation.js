@@ -206,6 +206,7 @@ const StackNavigation = () => {
           },
         }}
       />
+<<<<<<< HEAD
         <Stack.Screen
         name="SearchForUser"
         component={SearchForUser}
@@ -217,6 +218,9 @@ const StackNavigation = () => {
           },
         }}
       />
+=======
+      
+>>>>>>> a88345b23e60060808c887f7cae32915d3518628
       <Stack.Screen
         name="ReportDevice"
         component={ReportDevice}
@@ -233,7 +237,7 @@ const StackNavigation = () => {
         component={NotificationDetail}
         options={{
           headerShown: true,
-          headerTitle: "QUẢN LÝ THIẾT BỊ",
+          headerTitle: "Thông báo",
           headerStyle: {
             backgroundColor: "#1FD2BD",
           },
@@ -273,7 +277,7 @@ const StackNavigation = () => {
         component={NotificationUser}
         options={{
           headerShown: true,
-          headerTitle: "QUẢN LÝ THIẾT BỊ",
+          headerTitle: "Thông báo người dùng",
           headerStyle: {
             backgroundColor: "#1FD2BD",
           },
@@ -284,7 +288,7 @@ const StackNavigation = () => {
         component={NotificationAdmin}
         options={{
           headerShown: true,
-          headerTitle: "QUẢN LÝ THIẾT BỊ",
+          headerTitle: "Thông báo admin",
           headerStyle: {
             backgroundColor: "#1FD2BD",
           },

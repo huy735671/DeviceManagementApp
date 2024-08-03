@@ -14,7 +14,7 @@ import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
 
 
 const AddEmployeeScreen = ({ navigation }) => {
-  const [name, setName] = useState('');
+  const [username, setusername] = useState('');
   const [icon, setIcon] = useState('person'); // Default is 'person'
   const [id, setId] = useState('');
   const [selectedRoom, setSelectedRoom] = useState(null);
@@ -58,7 +58,7 @@ const AddEmployeeScreen = ({ navigation }) => {
     if (selectedRoom) {
       try {
         // Create user in Firebase Auth and Firestore
-        await Auth.signUp(name, numPhone, email, password, role);
+        await Auth.signUp(username, numPhone, email, password, role);
   
         // Upload image to Firebase Storage and get the URL
         let imageUrl = '';
@@ -71,7 +71,7 @@ const AddEmployeeScreen = ({ navigation }) => {
         // Add the employee with a numeric ID
         await firestore().collection('USERS').doc(email).set({
           icon,
-          name,
+          username,
           id,
           email,
           numPhone,
@@ -85,7 +85,7 @@ const AddEmployeeScreen = ({ navigation }) => {
         // Add a notification for the admin
         await firestore().collection('NOTIFICATION_ADMIN').add({
           title: 'New Employee Added',
-          message: `Nhân viên ${name} đã được thêm vào phòng ban ${selectedRoom.name}`,
+          message: `Nhân viên ${username} đã được thêm vào phòng ban ${selectedRoom.name}`,
           timestamp: firestore.FieldValue.serverTimestamp(),
         });
   
@@ -210,8 +210,8 @@ const AddEmployeeScreen = ({ navigation }) => {
           <Text style={styles.label}>Tên nhân viên: </Text>
           <TextInput
             placeholder={"Tên nhân viên"}
-            value={name}
-            onChangeText={setName}
+            value={username}
+            onChangeText={setusername}
             style={styles.input}
           />
         </View>

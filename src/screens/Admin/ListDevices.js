@@ -120,7 +120,7 @@ const ListDevicesScreen = ({ route }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Danh sách thiết bị - {roomName}</Text>
+      <Text style={styles.title}>Danh sách thiết bị phòng {roomId}</Text>
       {devices.length > 0 ? (
         <FlatList
           data={devices}

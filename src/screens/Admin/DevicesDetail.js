@@ -176,11 +176,10 @@ const DeviceDetail = ({ route, navigation }) => {
               <Text style={styles.detailTitle}>Nhà cung cấp:</Text>
               <Text style={styles.detailText}>{supplier}</Text>
             </View>
-            
             <View style={styles.separator} />
             <View style={styles.detailItem}>
               <Text style={styles.detailTitle}>Ngày mua:</Text>
-              <Text style={styles.detailText}>{formatDate(purchaseDate)}</Text>
+              <Text style={styles.detailText}>{formatDate(purchaseDate?.toDate())}</Text>
             </View>
             <View style={styles.separator} />
             <View style={styles.detailItem}>
@@ -266,6 +265,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 10,
     marginBottom: 10,
+    
   },
   deviceImage: {
     width: 100,
@@ -298,9 +298,14 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 5,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
+
   },
   details: {
     flex: 1,
+    
   },
   detailItem: {
     flexDirection: 'row',
