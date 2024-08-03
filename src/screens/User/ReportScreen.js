@@ -8,7 +8,7 @@ import { useNavigation } from "@react-navigation/native";
 import PushNotification from 'react-native-push-notification';
 import useNotificationSetup from '../../../sendNotification';
 import io from 'socket.io-client';
-const socket = io('http://192.168.1.11:3000');
+const socket = io('http://192.168.1.11:3000');// Thay doi thanh IP cua laptop đang chạy
 const ReportScreen = ({ route, navigation }) => {
   const { id = null, name = "", room = "" } = route.params || {};
   const [description, setDescription] = useState("");
