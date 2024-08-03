@@ -111,6 +111,11 @@ const NotificationDetail = ({ route }) => {
                 <Text style={styles.detail}>
                     <Text style={styles.label}>Tên người gửi:</Text> {notification.userName || "Không xác định"}
                 </Text>
+
+                <Text style={styles.detail}>
+                    <Text style={styles.label}>Email người gửi:</Text> {notification.email || "Không xác định"}
+                </Text>
+
                 <TouchableOpacity onPress={handleRoomPress} style={styles.roomTouchable}>
                     <Text style={styles.detail}>
                         <Text style={styles.label}>Phòng:</Text> {notification.room}
