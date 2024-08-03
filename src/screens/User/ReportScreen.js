@@ -1,14 +1,14 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Image, ScrollView } from "react-native";
 import { launchCamera, launchImageLibrary } from "react-native-image-picker";
 import firestore from "@react-native-firebase/firestore";
 import auth from "@react-native-firebase/auth";
 import { useNavigation } from "@react-navigation/native";
-// import LocalNotification from '../LocalNotification';
 import PushNotification from 'react-native-push-notification';
 import useNotificationSetup from '../../../sendNotification';
 import io from 'socket.io-client';
-const socket = io('http://192.168.1.11:3000');// Thay doi thanh IP cua laptop đang chạy
+const socket = io('http://192.168.1.51:3000'); // Thay đổi thành IP của laptop đang chạy
+
 const ReportScreen = ({ route, navigation }) => {
   const { id = null, name = "", room = "" } = route.params || {};
   const [description, setDescription] = useState("");
@@ -41,47 +41,8 @@ const ReportScreen = ({ route, navigation }) => {
       console.error("Error creating notification for admin: ", error);
     }
   };
-  // useEffect(() => {
-  //   // Lắng nghe sự kiện 'receiveNotification' từ server
-  //   socket.on('receiveNotification', (message) => {
-  //     PushNotification.localNotification({
-  //       channelId: CHANNEL_ID, // Sử dụng channelId cố định
-  //       title: "Thông báo mới",
-  //       message: message,
-  //       importance: 4,
-  //       vibrate: 300,
-  //     });
-  //   });
 
-  //   // Tạo kênh thông báo
-  //   PushNotification.createChannel(
-  //     {
-  //       channelId: CHANNEL_ID, // ID duy nhất cho kênh này
-  //       channelName: "Thông báo", // Tên kênh thông báo
-  //       channelDescription: "Thông báo từ server", // Mô tả kênh
-  //       importance: 4, // Độ quan trọng của kênh (mức 4 là cao nhất)
-  //       vibrate: true, // Có sử dụng rung hay không
-  //     },
-  //     (created) => console.log(`createChannel returned '${created}'`) // Phản hồi sau khi tạo kênh
-  //   );
-
-  //   return () => {
-  //     socket.off('receiveNotification');
-  //   };
-  // }, []);
-
-  // const sendNotification = () => {
-  //   const message = `Báo cáo về thiết bị ${name} trong phòng ${room}.`;
-  //   socket.emit('sendNotification', message);
-    
-    
-  // };
   useNotificationSetup();
-
-  const sendNotification1 = () => {
-    const message = 'Thông báo từ user!';//sua doan nay
-    socket.emit('sendNotification', message);
-  };
 
   const handleSubmit = async () => {
     if (!description.trim()) {
@@ -109,9 +70,11 @@ const ReportScreen = ({ route, navigation }) => {
         timestamp: firestore.FieldValue.serverTimestamp(),
       });
 
-      LocalNotification(name, room); // Trigger local notification with device name and room
+      // Gửi thông báo qua socket
+      const message = `Báo cáo về thiết bị ${name} trong phòng ${room} từ ${user ? user.displayName : "Khách"}`;
+      socket.emit('sendNotification', message);
 
-      // Create notifications in both collections
+      // Tạo thông báo trong cả hai collection
       await createNotificationUser(name, room);
       await createNotificationAdmin(name, room);
 
@@ -186,7 +149,7 @@ const ReportScreen = ({ route, navigation }) => {
             <Text style={styles.deviceName}>Thiết bị: {name}</Text>
             <Text style={styles.roomName}>Phòng ban: {room || "Unknown"}</Text>
           </View>
-          <TouchableOpacity style={styles.btnSubmit} onPress={sendNotification1}>
+          <TouchableOpacity style={styles.btnSubmit} onPress={handleSubmit}>
             <Text style={styles.btnSubmitText}>Gửi báo cáo</Text>
           </TouchableOpacity>
         </View>
@@ -303,4 +266,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ReportScreen;
+export default ReportScreen

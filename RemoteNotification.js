@@ -4,7 +4,7 @@ import React, { useEffect } from 'react';
 import io from 'socket.io-client';
 import PushNotification from 'react-native-push-notification';
 
-const socket = io('http://192.168.1.11:3000');
+const socket = io('http://192.168.1.51:3000');
 
 const RemoteNotification = () => {
     useEffect(() => {

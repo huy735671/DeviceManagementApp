@@ -206,21 +206,7 @@ const StackNavigation = () => {
           },
         }}
       />
-<<<<<<< HEAD
-        <Stack.Screen
-        name="SearchForUser"
-        component={SearchForUser}
-        options={{
-          title: "Tìm kiếm",
-          headerShown: true,
-          headerStyle: {
-            backgroundColor: "#1FD2BD",
-          },
-        }}
-      />
-=======
       
->>>>>>> a88345b23e60060808c887f7cae32915d3518628
       <Stack.Screen
         name="ReportDevice"
         component={ReportDevice}

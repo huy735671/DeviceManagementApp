@@ -46,7 +46,7 @@ import io from 'socket.io-client';
 import PushNotification from 'react-native-push-notification';
 import { useEffect } from 'react';
 
-const socket = io('http://192.168.1.11:3000');
+const socket = io('http://192.168.1.51:3000');
 const CHANNEL_ID = '4'; // ID cố định cho kênh thông báo
 
 const useNotificationSetup = () => {
