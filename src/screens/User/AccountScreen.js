@@ -92,6 +92,20 @@ export default function AccountScreen() {
                 <Text style={styles.footerText}>Chỉnh sửa tài khoản</Text>
               </View>
             </TouchableOpacity>
+
+            <TouchableOpacity >
+              <View style={styles.footerContainer}>
+                <Icons name={'settings'} size={24} color={'#808080'} style={styles.InputIcon} />
+                <Text style={styles.footerText}>Cài đặt</Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity >
+              <View style={styles.footerContainer}>
+                <Icons name={'question-mark'} size={24} color={'#808080'} style={styles.InputIcon} />
+                <Text style={styles.footerText}>Hỗ trợ và trợ giúp</Text>
+              </View>
+            </TouchableOpacity>
             
 
             <TouchableOpacity onPress={handlerLogout}>

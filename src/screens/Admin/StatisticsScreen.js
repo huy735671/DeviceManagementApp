@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, Animated, ScrollView } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, Animated, SafeAreaView } from "react-native";
 import firestore from '@react-native-firebase/firestore';
 
 const StatisticsScreen = () => {
@@ -13,10 +13,9 @@ const StatisticsScreen = () => {
   const [deviceList, setDeviceList] = useState([]);
   const [maintenanceList, setMaintenanceList] = useState([]);
   const [brokenList, setBrokenList] = useState([]);
+  const [reportList, setReportList] = useState([]); // New state for reports
   const [expanded, setExpanded] = useState(null); // State to handle expanded items
-
   const [expandAnim] = useState(new Animated.Value(0)); // For animation
-
 
   useEffect(() => {
     const fetchData = async () => {
@@ -46,10 +45,15 @@ const StatisticsScreen = () => {
         setMaintenanceCount(maintenanceData.length);
 
         // Fetch broken list and count
-        const brokenSnapshot = await firestore().collection('DEVICES').where('operationalStatus', '==', 'broken').get();
+        const brokenSnapshot = await firestore().collection('DEVICES').where('operationalStatus', '==', 'inactive').get();
         const brokenData = brokenSnapshot.docs.map(doc => doc.data());
         setBrokenList(brokenData);
         setBrokenCount(brokenData.length);
+
+        // Fetch reports list
+        const reportSnapshot = await firestore().collection('REPORTS').get();
+        const reportData = reportSnapshot.docs.map(doc => doc.data());
+        setReportList(reportData);
       } catch (error) {
         console.error("Error fetching data: ", error);
       }
@@ -69,12 +73,14 @@ const StatisticsScreen = () => {
     }).start();
   };
 
-  const renderList = (list) => (
+  const renderList = (list, type) => (
     <FlatList
       data={list}
       renderItem={({ item }) => (
-        <View style={styles.listItem}>
-          <Text style={styles.listItemText}>{item.name || item.username || item.email}</Text>
+        <View style={type === "report" ? styles.reportItem : styles.listItem}>
+          <Text style={styles.listItemText}>
+            {type === "report" ? `Tên thiết bị: ${item.deviceName}, Thời gian gửi: ${item.timestamp.toDate().toLocaleString()}` : item.name || item.username || item.email}
+          </Text>
         </View>
       )}
       keyExtractor={(item, index) => index.toString()}
@@ -82,8 +88,8 @@ const StatisticsScreen = () => {
   );
 
   return (
-    <ScrollView>
-      <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.content}>
         <Text style={styles.title}>Thống kê</Text>
 
         <TouchableOpacity style={styles.button} onPress={() => handlePress("admin")}>
@@ -96,7 +102,7 @@ const StatisticsScreen = () => {
               outputRange: [0, 200], // Adjust height as needed
             })
           }]}>
-            {renderList(adminList)}
+            {renderList(adminList, "admin")}
           </Animated.View>
         )}
 
@@ -110,7 +116,7 @@ const StatisticsScreen = () => {
               outputRange: [0, 200], // Adjust height as needed
             })
           }]}>
-            {renderList(userList)}
+            {renderList(userList, "user")}
           </Animated.View>
         )}
 
@@ -124,7 +130,7 @@ const StatisticsScreen = () => {
               outputRange: [0, 200], // Adjust height as needed
             })
           }]}>
-            {renderList(deviceList)}
+            {renderList(deviceList, "device")}
           </Animated.View>
         )}
 
@@ -138,25 +144,39 @@ const StatisticsScreen = () => {
               outputRange: [0, 200], // Adjust height as needed
             })
           }]}>
-            {renderList(maintenanceList)}
+            {renderList(maintenanceList, "maintenance")}
           </Animated.View>
         )}
 
-        <TouchableOpacity style={styles.button} onPress={() => handlePress("broken")}>
+        <TouchableOpacity style={styles.button} onPress={() => handlePress("inactive")}>
           <Text style={styles.buttonText}>Danh sách Thiết bị Hư hỏng ({brokenCount})</Text>
         </TouchableOpacity>
-        {expanded === "broken" && (
+        {expanded === "inactive" && (
           <Animated.View style={[styles.expandedList, {
             height: expandAnim.interpolate({
               inputRange: [0, 1],
               outputRange: [0, 200], // Adjust height as needed
             })
           }]}>
-            {renderList(brokenList)}
+            {renderList(brokenList, "inactive")}
+          </Animated.View>
+        )}
+
+        <TouchableOpacity style={styles.button} onPress={() => handlePress("report")}>
+          <Text style={styles.buttonText}>Danh sách Báo cáo ({reportList.length})</Text>
+        </TouchableOpacity>
+        {expanded === "report" && (
+          <Animated.View style={[styles.expandedList, {
+            height: expandAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, 200], // Adjust height as needed
+            })
+          }]}>
+            {renderList(reportList, "report")}
           </Animated.View>
         )}
       </View>
-    </ScrollView>
+    </SafeAreaView>
   );
 };
 
@@ -164,6 +184,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F5F5F5",
+  },
+  content: {
+    flex: 1,
     padding: 20,
   },
   title: {
@@ -217,6 +240,11 @@ const styles = StyleSheet.create({
   listItemText: {
     fontSize: 16,
     color: '#333',
+  },
+  reportItem: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
   },
 });
 

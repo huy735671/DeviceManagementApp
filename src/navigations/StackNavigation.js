@@ -34,6 +34,8 @@ import SearchForUser from '../components/SearchForUser';
 import NotificationDetailsAdmin from '../screens/Admin/NotificationDetail';
 import ReportDetails from '../screens/Admin/ReportDetails';
 import NotificationDetailsUser from '../screens/User/NotificationDetail';
+import PendinglistScreen from '../screens/Admin/PendinglistScreen';
+import PendingDetailsScreen from '../screens/Admin/PendingDetailsScreen';
 
 
 const Stack = createNativeStackNavigator();
@@ -52,6 +54,28 @@ const StackNavigation = () => {
       <Stack.Screen name='Dashboard' component={DashboardScreen} options={{ headerShown: false }} />
       <Stack.Screen name='RoomList' component={RoomList} options={{ headerShown: false }} />
       <Stack.Screen name='Home' component={HomeScreen} options={{ headerShown: false }} />
+
+      <Stack.Screen name='Pendinglist'
+       component={PendinglistScreen}
+       options={{
+        title: "Danh sách tài khoản đăng ký",
+        headerShown: true,
+        headerStyle: {
+          backgroundColor: "#1FD2BD",
+        },
+      }} />
+
+      <Stack.Screen name='PendingDetail'
+       component={PendingDetailsScreen}
+        options={{
+          title: "Chi tiết tài khoản đăng ký",
+          headerShown: true,
+          headerStyle: {
+            backgroundColor: "#1FD2BD",
+          },
+        }} />
+
+
       <Stack.Screen name='Statistics' component={StatisticsScreen}
         options={{
           title: "Thống kê",

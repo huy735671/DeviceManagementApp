@@ -23,6 +23,7 @@ const EditProfileScreen = ({ navigation }) => {
   const [imageName, setImageName] = useState('');
   const [imageSource, setImageSource] = useState(null);
   const [isEdited, setIsEdited] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
 
   useEffect(() => {
     const unsubscribe = auth().onAuthStateChanged(async (user) => {
@@ -38,7 +39,6 @@ const EditProfileScreen = ({ navigation }) => {
           if (userDoc.exists) {
             const userData = userDoc.data();
             setNumPhone(userData.phone || "");
-            // setAvatar(userData.avatarUrl);
             setImageUri(userData.avatarUrl || null); 
           }
         } catch (error) {
@@ -60,16 +60,13 @@ const EditProfileScreen = ({ navigation }) => {
         return;
       }
   
-      // Chuẩn bị đối tượng cập nhật thông tin người dùng
       const userDataUpdate = {};
   
-      // Nếu người dùng đã chọn ảnh mới, tải ảnh lên Firebase Storage và lưu URL
       if (imageSource) {
         const downloadURL = await uploadImageToFirebase(imageSource.uri, imageName);
         userDataUpdate.avatarUrl = downloadURL;
       }
   
-      // Chỉ cập nhật tên và số điện thoại nếu chúng đã được thay đổi
       if (name) {
         userDataUpdate.username = name;
       }
@@ -83,7 +80,7 @@ const EditProfileScreen = ({ navigation }) => {
         "Thành công",
         "Thông tin người dùng đã được cập nhật thành công.",
         [
-          { text: "OK", onPress: () => navigation.goBack() }, // Quay lại trang trước đó sau khi nhấn OK
+          { text: "OK", onPress: () => navigation.goBack() }, 
         ]
       );
     } catch (error) {
@@ -118,7 +115,7 @@ const EditProfileScreen = ({ navigation }) => {
         console.log('Image Info:', response.assets[0]);
         setImageSource({ uri: filePath });
         setImageName(imageName);
-        setIsEdited(true); // Đánh dấu rằng đã chỉnh sửa để enable nút Lưu
+        setIsEdited(true);
       } else if (response.error) {
         console.log('ImagePicker Error: ', response.error);
         Alert.alert('Lỗi', 'Đã xảy ra lỗi khi chọn ảnh từ thư viện.');
@@ -127,205 +124,215 @@ const EditProfileScreen = ({ navigation }) => {
       }
     });
   };
-  
+
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: "#FFF" }}>
-      <Button
-        style={{ backgroundColor: isEdited ? "#1FD2BD" : "#CCC", ...styles.btn }}
-        onPress={handleSave}
-        disabled={!isEdited}
-      >
-        <Text style={styles.txt}>Lưu thông tin</Text>
-      </Button>
-      <View style={{ alignItems: "center", padding: 30 }}>
-        {imageSource || imageUri ? (
-          <Image
-            source={imageSource || { uri: imageUri }}
-            style={{ width: 150, height: 150, borderRadius: 75, marginBottom: 10 }}
-          />
-        ) : (
-          <Icon name={"account-circle"} size={150} color={"#000"} />
-        )}
-        <TouchableOpacity onPress={selectedImage} style={styles.editAvatar}>
-          <Text style={styles.editAvatarText}>Chỉnh sửa ảnh đại diện</Text>
+    <View style={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1, backgroundColor: "#FFF", }}>
+        <View style={{ alignItems: "center", padding: 30,borderRadius:10, borderWidth:1, marginHorizontal:10, marginVertical:10, borderColor:'#ddd' }}>
+          {imageSource || imageUri ? (
+            <Image
+              source={imageSource || { uri: imageUri }}
+              style={{ width: 200, height: 150, borderRadius: 75, marginBottom: 10 }}
+            />
+          ) : (
+            <Icon name={"account-circle"} size={150} color={"#000"} />
+          )}
+          <TouchableOpacity onPress={selectedImage} style={styles.editAvatar}>
+            <Text style={styles.editAvatarText}>Chỉnh sửa ảnh đại diện</Text>
+          </TouchableOpacity>
+        </View>
+        <Animatable.View animation="bounceIn" style={{ ...styles.boder4Info, padding: 15 }}>
+          <Text style={{ ...styles.txt, textDecorationLine: "underline", fontWeight: "bold" }}>
+            Thông tin người dùng:
+          </Text>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Họ và tên:</Text>
+            <TextInput
+              placeholder={user ? user.displayName : "Không có tên"}
+              value={name}
+              onChangeText={handleInputChange(setName)}
+              style={styles.txtInput}
+              underlineColor="white"
+              textColor="#000"
+              placeholderTextColor={"#000"}
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Email: </Text>
+            <TextInput
+              disabled
+              placeholder={user ? user.email : "Không có email"}
+              value={email}
+              onChangeText={handleInputChange(setEmail)}
+              style={styles.txtInput}
+              underlineColor="white"
+              textColor="#000"
+              placeholderTextColor={"#000"}
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Số điện thoại: </Text>
+            <TextInput
+              placeholder={numPhone}
+              value={numPhone}
+              onChangeText={handleInputChange(setNumPhone)}
+              style={styles.txtInput}
+              underlineColor="white"
+              textColor="#000"
+              placeholderTextColor={"#000"}
+            />
+          </View>
+        </Animatable.View>
+
+        <TouchableOpacity onPress={() => setShowChangePassword(!showChangePassword)}>
+          <Text style={{ ...styles.txt, textDecorationLine: "underline", fontWeight: "bold", marginTop: 15, marginLeft:10, }}>
+            Đổi mật khẩu
+          </Text>
         </TouchableOpacity>
-      </View>
-      <Animatable.View animation="bounceIn" style={{ ...styles.boder4Info, padding: 15 }}>
-        <Text style={{ ...styles.txt, textDecorationLine: "underline", fontWeight: "bold" }}>
-          Thông tin người dùng:
-        </Text>
-        <View style={styles.txtAndInput}>
-          <Text style={{ ...styles.txt, padding: 10 }}>Họ và tên:</Text>
-          <TextInput
-            placeholder={user ? user.displayName : "Không có tên"}
-            value={name}
-            onChangeText={handleInputChange(setName)}
-            style={styles.txtInput}
-            underlineColor="white"
-            textColor="#000"
-            placeholderTextColor={"#000"}
-          />
-        </View>
 
-        <View style={styles.txtAndInput}>
-          <Text style={{ ...styles.txt, padding: 10 }}>Email: </Text>
-          <TextInput
-            disabled
-            placeholder={user ? user.email : "Không có email"}
-            value={email}
-            onChangeText={handleInputChange(setEmail)}
-            style={{ ...styles.txtInput, width: "76%" }}
-            underlineColor="white"
-            textColor="#000"
-            placeholderTextColor={"#000"}
-          />
-        </View>
+        {showChangePassword && (
+          <Animatable.View animation="bounceIn" style={{ ...styles.boder4Info, padding: 15 }}>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Mật khẩu cũ: </Text>
+              <TextInput
+                secureTextEntry={!showPassCurrent}
+                placeholder={"Mật khẩu cũ"}
+                value={passCurrent}
+                onChangeText={handleInputChange(setPassCurrent)}
+                style={styles.txtInput}
+                underlineColor="white"
+                textColor="#000"
+                placeholderTextColor={"#000"}
+              />
+              <TouchableOpacity
+                onPress={() => setShowPassCurrent(!showPassCurrent)}
+                style={styles.iconStyle}
+              >
+                <Icon
+                  name={showPassCurrent ? "visibility" : "visibility-off"}
+                  size={24}
+                  color={"#000"}
+                />
+              </TouchableOpacity>
+            </View>
 
-        <View style={styles.txtAndInput}>
-          <Text style={{ ...styles.txt, padding: 10 }}>Số điện thoại: </Text>
-          <TextInput
-            placeholder={numPhone}
-            value={numPhone}
-            onChangeText={handleInputChange(setNumPhone)}
-            style={{ ...styles.txtInput, width: "56%" }}
-            underlineColor="white"
-            textColor="#000"
-            placeholderTextColor={"#000"}
-          />
-        </View>
-      </Animatable.View>
-      <Animatable.View animation="bounceIn" style={{ ...styles.boder4Info, padding: 15 }}>
-        <Text style={{ ...styles.txt, textDecorationLine: "underline", fontWeight: "bold" }}>
-          Đổi mật khẩu:
-        </Text>
-        <View style={styles.txtAndInput}>
-          <Text style={{ ...styles.txt, padding: 10 }}>Mật khẩu cũ: </Text>
-          <TextInput
-            secureTextEntry={!showPassCurrent}
-            placeholder={"Mật khẩu cũ"}
-            value={passCurrent}
-            onChangeText={handleInputChange(setPassCurrent)}
-            style={{ ...styles.txtInput, width: "60%" }}
-            underlineColor="white"
-            textColor="#000"
-            placeholderTextColor={"#000"}
-          />
-          <TouchableOpacity
-            onPress={() => setShowPassCurrent(!showPassCurrent)}
-            style={styles.iconStyle}
-          >
-            <Icon
-              name={showPassCurrent ? "visibility" : "visibility-off"}
-              size={24}
-              color={"#000"}
-            />
-          </TouchableOpacity>
-        </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Mật khẩu mới: </Text>
+              <TextInput
+                secureTextEntry={!showPassNew}
+                placeholder={"Mật khẩu mới"}
+                value={passNew}
+                onChangeText={handleInputChange(setPassNew)}
+                style={styles.txtInput}
+                underlineColor="white"
+                textColor="#000"
+                placeholderTextColor={"#000"}
+              />
+              <TouchableOpacity
+                onPress={() => setShowPassNew(!showPassNew)}
+                style={styles.iconStyle}
+              >
+                <Icon
+                  name={showPassNew ? "visibility" : "visibility-off"}
+                  size={24}
+                  color={"#000"}
+                />
+              </TouchableOpacity>
+            </View>
 
-        <View style={styles.txtAndInput}>
-          <Text style={{ ...styles.txt, padding: 10 }}>Mật khẩu mới: </Text>
-          <TextInput
-            secureTextEntry={!showPassNew}
-            placeholder={"Mật khẩu mới"}
-            value={passNew}
-            onChangeText={handleInputChange(setPassNew)}
-            style={{ ...styles.txtInput, width: "60%" }}
-            underlineColor="white"
-            textColor="#000"
-            placeholderTextColor={"#000"}
-          />
-          <TouchableOpacity
-            onPress={() => setShowPassNew(!showPassNew)}
-            style={styles.iconStyle}
-          >
-            <Icon
-              name={showPassNew ? "visibility" : "visibility-off"}
-              size={24}
-              color={"#000"}
-            />
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.txtAndInput}>
-          <Text style={{ ...styles.txt, padding: 10 }}>Nhập lại mật khẩu: </Text>
-          <TextInput
-            secureTextEntry={!showPassConfirm}
-            placeholder={"Nhập lại mật khẩu"}
-            value={confirmPass}
-            onChangeText={handleInputChange(setConfirmPass)}
-            style={{ ...styles.txtInput, width: "56%" }}
-            underlineColor="white"
-            textColor="#000"
-            placeholderTextColor={"#000"}
-          />
-          <TouchableOpacity
-            onPress={() => setShowPassConfirm(!showPassConfirm)}
-            style={styles.iconStyle}
-          >
-            <Icon
-              name={showPassConfirm ? "visibility" : "visibility-off"}
-              size={24}
-              color={"#000"}
-            />
-          </TouchableOpacity>
-        </View>
-      </Animatable.View>
-    </ScrollView>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Nhập lại mật khẩu mới: </Text>
+              <TextInput
+                secureTextEntry={!showPassConfirm}
+                placeholder={"Nhập lại mật khẩu mới"}
+                value={confirmPass}
+                onChangeText={handleInputChange(setConfirmPass)}
+                style={styles.txtInput}
+                underlineColor="white"
+                textColor="#000"
+                placeholderTextColor={"#000"}
+              />
+              <TouchableOpacity
+                onPress={() => setShowPassConfirm(!showPassConfirm)}
+                style={styles.iconStyle}
+              >
+                <Icon
+                  name={showPassConfirm ? "visibility" : "visibility-off"}
+                  size={24}
+                  color={"#000"}
+                />
+              </TouchableOpacity>
+            </View>
+          </Animatable.View>
+        )}
+      </ScrollView>
+      {isEdited && (
+        <TouchableOpacity onPress={handleSave} style={styles.saveButton}>
+          <Text style={styles.saveButtonText}>Lưu thông tin</Text>
+        </TouchableOpacity>
+      )}
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  btn: {
-    margin: 10,
-    // marginTop: 50,
-    width: 160,
-    height: 40,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 20,
+  boder4Info: {
+    borderWidth: 1,
+    borderColor: "#000",
+    borderRadius: 10,
+    marginTop: 10,
+    backgroundColor: "#FFF",
+    marginHorizontal:10,
+    borderColor:'#ddd',
+    
   },
-  txt: {
-    color: "black",
+  label: {
+    fontSize: 18,
+    color: "#000",
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  txtInput: {
+    borderWidth: 1,
+    borderColor: "#000",
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    width: "100%",
+  },
+  inputContainer: {
+    marginBottom: 20,
+  },
+  iconStyle: {
+    position: "absolute",
+    right: 10,
+    top: 50,
   },
   editAvatar: {
-    backgroundColor: "#1FD2BD",
+    marginTop: 10,
+    backgroundColor: "#000",
     padding: 10,
     borderRadius: 5,
   },
   editAvatarText: {
     color: "#FFF",
+  },
+  saveButton: {
+    position: "absolute",
+    bottom: 0,
+    width: "100%",
+    backgroundColor: "#007BFF",
+    padding: 15,
+    alignItems: "center",
+  },
+  saveButtonText: {
+    color: "#FFF",
+    fontSize: 18,
     fontWeight: "bold",
-  },
-  boder4Info: {
-    margin: 10,
-    borderWidth: 2,
-    borderRadius: 4,
-    borderColor: "#1FD2BD",
-  },
-  txtAndInput: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    margin: 5,
-  },
-  txtInput: {
-    backgroundColor: "#FFF",
-    width: "75%",
-    height: 40,
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: "#CCC",
-    padding: 5,
-    margin: 5,
-    fontSize: 15,
-  },
-  iconStyle: {
-    width: 30,
-    height: 30,
-    justifyContent: "center",
-    alignItems: "center",
   },
 });
 
 export default EditProfileScreen;
-

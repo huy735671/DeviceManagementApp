@@ -1,10 +1,10 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
-import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View, Alert } from 'react-native';
 import Icons from 'react-native-vector-icons/Ionicons';
 import * as Animatable from 'react-native-animatable';
 import firestore from '@react-native-firebase/firestore';
-import {Auth}   from '../services';
+
 const SignUpScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
@@ -13,27 +13,54 @@ const SignUpScreen = ({ navigation }) => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [error, setError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [generalError, setGeneralError] = useState('');
 
   const handleSignUp = async () => {
-    try {
-      await Auth.signUp(username, phone, email, password, 'user');
-      console.log('User signed up successfully!');
-      
-      // Display success message
-      alert('Đăng ký thành công!');
+    setEmailError('');
+    setGeneralError('');
   
-      // Navigate back to the login screen
-      navigation.goBack();
+    if (password !== confirmPassword) {
+      setGeneralError('Mật khẩu và xác nhận mật khẩu không khớp.');
+      return;
+    }
+    if (!validateEmail(email)) {
+      setEmailError('Email không hợp lệ.');
+      return;
+    }
+  
+    try {
+      // Save user info to SIGNUP collection with email as document ID
+      await firestore().collection('SIGNUP').doc(email).set({
+        username,
+        phone,
+        email,
+        password,
+        status: 'pending' // User is pending approval
+      });
+  
+      // Send notification to the user
+      Alert.alert(
+        "Đăng ký thành công!",
+        "Tài khoản của bạn đang chờ xét duyệt. Chúng tôi sẽ thông báo khi tài khoản được chấp nhận.",
+        [{ text: "OK", onPress: () => navigation.goBack() }]
+      );
+  
     } catch (error) {
       console.error('Error signing up:', error.message);
-      // Handle the error, e.g., show an error message to the user.
-      alert('Đăng ký thất bại: ' + error.message);
+      Alert.alert('Đăng ký thất bại', 'Có lỗi xảy ra trong quá trình đăng ký: ' + error.message);
     }
   };
+  
+
+  const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
+
   const handlerSignIn = () => {
     navigation.navigate('SignIn');
-  }
+  };
 
   return (
     <View style={styles.headerContainer}>
@@ -47,8 +74,7 @@ const SignUpScreen = ({ navigation }) => {
         <Text style={styles.bodyText}>Đăng ký tài khoản</Text>
       </View>
 
-
-      <Animatable.View animation="fadeIn"  duration={1500} style={styles.inputContainer}>
+      <Animatable.View animation="fadeIn" duration={1500} style={styles.inputContainer}>
         <Icons name="person-outline" size={24} color="gray" style={styles.inputIcon} />
         <TextInput
           style={styles.textInput}
@@ -58,17 +84,19 @@ const SignUpScreen = ({ navigation }) => {
         />
       </Animatable.View>
 
-      <Animatable.View animation="fadeIn"  duration={1500} style={styles.inputContainer}>
+      <Animatable.View animation="fadeIn" duration={1500} style={styles.inputContainer}>
         <Icons name="mail-outline" size={24} color="gray" style={styles.inputIcon} />
         <TextInput
           style={styles.textInput}
           placeholder='Nhập email của bạn'
           value={email}
           onChangeText={setEmail}
+          keyboardType='email-address'
         />
+        {emailError ? <Text style={styles.error}>{emailError}</Text> : null}
       </Animatable.View>
 
-      <Animatable.View animation="fadeIn"  duration={1500} style={styles.inputContainer}>
+      <Animatable.View animation="fadeIn" duration={1500} style={styles.inputContainer}>
         <Icons name="lock-closed-outline" size={24} color="gray" style={styles.inputIcon} />
         <TextInput
           style={styles.textInput}
@@ -82,7 +110,7 @@ const SignUpScreen = ({ navigation }) => {
         </TouchableOpacity>
       </Animatable.View>
 
-      {/* <Animatable.View animation="fadeIn"  duration={1500} style={styles.inputContainer}>
+      <Animatable.View animation="fadeIn" duration={1500} style={styles.inputContainer}>
         <Icons name="lock-closed-outline" size={24} color="gray" style={styles.inputIcon} />
         <TextInput
           style={styles.textInput}
@@ -94,10 +122,11 @@ const SignUpScreen = ({ navigation }) => {
         <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
           <Icons name={showConfirmPassword ? "eye-outline" : "eye-off-outline"} size={24} color="gray" />
         </TouchableOpacity>
-      </Animatable.View> */}
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+      </Animatable.View>
 
-      <Animatable.View animation="fadeIn"   duration={1500} style={styles.inputContainer}>
+      {generalError ? <Text style={styles.error}>{generalError}</Text> : null}
+
+      <Animatable.View animation="fadeIn" duration={1500} style={styles.inputContainer}>
         <Icons name="call-outline" size={24} color="gray" style={styles.inputIcon} />
         <TextInput
           style={styles.textInput}
@@ -109,20 +138,17 @@ const SignUpScreen = ({ navigation }) => {
       </Animatable.View>
 
       <View style={{ marginTop: 40 }} />
-      <Animatable.View animation="pulse"  duration={1500} style={{ top: '5%' }}>
+      <Animatable.View animation="pulse" duration={1500} style={{ top: '5%' }}>
         <TouchableOpacity onPress={handleSignUp} style={styles.signinButtonContainer}>
           <Text style={styles.signinText}>Đăng ký</Text>
         </TouchableOpacity>
       </Animatable.View>
 
-      <Animatable.View animation="zoomIn"  duration={1500} style={{ top: '5%' }}>
+      <Animatable.View animation="zoomIn" duration={1500} style={{ top: '5%' }}>
         <TouchableOpacity onPress={handlerSignIn} style={styles.signupContainer}>
-          <Text style={styles.signupText}> Bạn đã có tài khoản?<Text style={{ color: 'blue' }}>Đăng nhập</Text> </Text>
+          <Text style={styles.signupText}>Bạn đã có tài khoản?<Text style={{ color: 'blue' }}> Đăng nhập</Text></Text>
         </TouchableOpacity>
-
       </Animatable.View>
-
-
     </View>
   );
 };
@@ -153,9 +179,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: 'black',
     textAlign: 'center',
-
   },
-
   inputContainer: {
     backgroundColor: '#FFFFFF',
     flexDirection: 'row',
@@ -166,7 +190,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
     paddingHorizontal: 10,
-
   },
   InputIcon: {
     marginHorizontal: 10,
@@ -178,7 +201,6 @@ const styles = StyleSheet.create({
   },
   signinButtonContainer: {
     alignItems: 'center',
-
     backgroundColor: '#1fde99',
     marginHorizontal: 40,
     elevation: 10,
@@ -190,13 +212,16 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     padding: 10,
   },
-
   signupText: {
     color: "black",
     textAlign: "center",
     fontSize: 16,
     marginTop: 10,
   },
-
-
+  error: {
+    color: 'red',
+    textAlign: 'left',
+    marginTop: 5,
+    marginHorizontal: 10,
+  },
 });

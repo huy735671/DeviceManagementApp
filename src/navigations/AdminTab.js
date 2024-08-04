@@ -125,7 +125,7 @@ const AdminTab = () => {
                                     style={{ marginRight: 15 }}
                                 />
                             </TouchableOpacity>
-                            <TouchableOpacity
+                            {/* <TouchableOpacity
                                 onPress={() => navigation.navigate("Settings")}
                             >
                                 <Icon
@@ -134,7 +134,7 @@ const AdminTab = () => {
                                     color="white"
                                     style={{ marginRight: 15 }}
                                 />
-                            </TouchableOpacity>
+                            </TouchableOpacity> */}
                         </View>
                     ),
                 })}
