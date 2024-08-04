@@ -13,8 +13,13 @@ const EditDeviceScreen = ({ route, navigation }) => {
 
   useEffect(() => {
     if (device) {
-      setDeviceInfo(device);
-      if (device.icon) {
+      setDeviceInfo({
+        ...device,
+        deploymentDate: device.deploymentDate ? device.deploymentDate.toDate().toISOString().split('T')[0] : '',
+        datetime: device.datetime ? device.datetime.toDate().toISOString().split('T')[0] : '',
+        warrantyEndDate: device.warrantyEndDate ? device.warrantyEndDate.toDate().toISOString().split('T')[0] : '',
+      });
+      if (device.icon) { 
         fetchImageUri(device.icon);
       } else {
         setImageUri('');
@@ -47,8 +52,11 @@ const EditDeviceScreen = ({ route, navigation }) => {
     try {
       await firestore().collection('DEVICES').doc(deviceInfo.id).update({
         ...deviceInfo,
-        icon: imageUri, // Ensure this is set to the new image URL or path
-        operationalStatus: status
+        deploymentDate: new Date(deviceInfo.deploymentDate),
+        datetime: new Date(deviceInfo.datetime),
+        warrantyEndDate: new Date(deviceInfo.warrantyEndDate),
+        icon: imageUri, 
+        operationalStatus: status,
       });
       Alert.alert("Thành công", "Thông tin thiết bị đã được cập nhật.");
       navigation.goBack();
@@ -150,24 +158,24 @@ const EditDeviceScreen = ({ route, navigation }) => {
           <Text style={styles.label}>Ngày triển khai:</Text>
           <TextInput
             style={styles.input}
-            value={deviceInfo.deploymentDate?.toDate().toISOString().split('T')[0] || ''}
-            onChangeText={(text) => handleChange('deploymentDate', new Date(text))}
+            value={deviceInfo.deploymentDate}
+            onChangeText={(text) => handleChange('deploymentDate', text)}
             placeholder="YYYY-MM-DD"
           />
 
           <Text style={styles.label}>Ngày mua:</Text>
           <TextInput
             style={styles.input}
-            value={deviceInfo.purchaseDate?.toDate().toISOString().split('T')[0] || ''}
-            onChangeText={(text) => handleChange('purchaseDate', new Date(text))}
+            value={deviceInfo.datetime}
+            onChangeText={(text) => handleChange('datetime', text)}
             placeholder="YYYY-MM-DD"
           />
 
           <Text style={styles.label}>Ngày hết hạn bảo hành:</Text>
           <TextInput
             style={styles.input}
-            value={deviceInfo.warrantyEndDate?.toDate().toISOString().split('T')[0] || ''}
-            onChangeText={(text) => handleChange('warrantyEndDate', new Date(text))}
+            value={deviceInfo.warrantyEndDate}
+            onChangeText={(text) => handleChange('warrantyEndDate', text)}
             placeholder="YYYY-MM-DD"
           />
         </View>
@@ -258,7 +266,7 @@ const styles = StyleSheet.create({
   },
   saveButtonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
   },
 });

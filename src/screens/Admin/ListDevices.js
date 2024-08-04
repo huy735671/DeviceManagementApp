@@ -69,7 +69,7 @@ const ListDevicesScreen = ({ route }) => {
   }, [roomId]);
 
   // Xử lý khi nhấn vào thiết bị
-  const handlePress = (device) => {
+  const handlePress = (device) => { 
     navigation.navigate('DevicesDetail', { device });
   };
 

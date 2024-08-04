@@ -13,7 +13,7 @@ const DeviceDetail = ({ route, navigation }) => {
   useEffect(() => {
     if (!deviceId) {
       console.error("No deviceId to listen to");
-      return;
+      return; 
     }
 
     const unsubscribe = firestore()
@@ -45,7 +45,7 @@ const DeviceDetail = ({ route, navigation }) => {
 
   const {
     image, icon = 'devices', name, operationalStatus, deviceType, brand,
-    supplier,  deploymentDate, purchaseDate, warrantyEndDate,
+    supplier,  deploymentDate, warrantyEndDate,datetime,
     
   } = device;
 
@@ -179,7 +179,7 @@ const DeviceDetail = ({ route, navigation }) => {
             <View style={styles.separator} />
             <View style={styles.detailItem}>
               <Text style={styles.detailTitle}>Ngày mua:</Text>
-              <Text style={styles.detailText}>{formatDate(purchaseDate?.toDate())}</Text>
+              <Text style={styles.detailText}>{formatDate(datetime?.toDate())}</Text>
             </View>
             <View style={styles.separator} />
             <View style={styles.detailItem}>
