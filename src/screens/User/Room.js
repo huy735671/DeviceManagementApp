@@ -12,6 +12,7 @@ const Room = () => {
   const [allDevices, setAllDevices] = useState([]);
   const [deviceCounts, setDeviceCounts] = useState({ total: 0, active: 0, maintenance: 0, inactive: 0 });
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("all");
 
   const fetchDevices = async () => {
     try {
@@ -25,22 +26,13 @@ const Room = () => {
         ...doc.data(),
       }));
 
-      // Sắp xếp theo trạng thái: Bảo trì -> Hư hỏng -> Bình thường
       devicesData.sort((a, b) => {
         const statusOrder = { maintenance: 1, inactive: 2, active: 3 };
         return statusOrder[a.operationalStatus] - statusOrder[b.operationalStatus];
       });
 
-      setAllDevices(devicesData); // Lưu danh sách thiết bị gốc
-      // Nếu ô tìm kiếm trống thì hiển thị tất cả thiết bị, nếu không thì hiển thị kết quả tìm kiếm
-      if (searchQuery.trim() === "") {
-        setDevices(devicesData);
-      } else {
-        const filteredDevices = devicesData.filter(device =>
-          device.name.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-        setDevices(filteredDevices);
-      }
+      setAllDevices(devicesData);
+      filterDevices(devicesData);
 
       const counts = devicesData.reduce(
         (acc, device) => {
@@ -63,21 +55,30 @@ const Room = () => {
     fetchDevices();
   }, [room]);
 
+  const filterDevices = (devicesData) => {
+    let filteredDevices = devicesData;
+
+    if (searchQuery.trim() !== "") {
+      filteredDevices = filteredDevices.filter(device =>
+        device.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    if (selectedStatus !== "all") {
+      filteredDevices = filteredDevices.filter(device => device.operationalStatus === selectedStatus);
+    }
+
+    setDevices(filteredDevices);
+  };
+
   const handleSearch = (text) => {
     setSearchQuery(text);
-    if (text.trim() === "") {
-      setDevices(allDevices); // Khi ô tìm kiếm trống, hiển thị tất cả thiết bị
-    } else {
-      const filteredDevices = allDevices.filter(device =>
-        device.name.toLowerCase().includes(text.toLowerCase())
-      );
-      setDevices(filteredDevices);
-    }
+    filterDevices(allDevices);
   };
 
   const clearSearch = () => {
-    setSearchQuery(""); // Xóa văn bản tìm kiếm
-    setDevices(allDevices); // Khi xóa tìm kiếm, hiển thị tất cả thiết bị
+    setSearchQuery("");
+    filterDevices(allDevices);
   };
 
   const handleDevicePress = (item) => {
@@ -99,6 +100,11 @@ const Room = () => {
       image: item.image,
       roomName: item.roomName,
     });
+  };
+
+  const handleStatusPress = (status) => {
+    setSelectedStatus(status);
+    filterDevices(allDevices);
   };
 
   const getStatusColor = (status) => {
@@ -125,25 +131,44 @@ const Room = () => {
       <View style={styles.container}>
         <Text style={styles.title}>{room.name}</Text>
         <View style={styles.infoContainer}>
-          <View style={styles.infoBox}>
+
+
+        <TouchableOpacity
+            style={[styles.infoBox, { backgroundColor: "#e2e3e5" }]}
+            onPress={() => handleStatusPress("all")}
+          >
             <Text style={styles.infoLabel}>Tổng số thiết bị</Text>
             <Text style={styles.infoValue}>{deviceCounts.total}</Text>
-          </View>
-          <View style={styles.infoBox}>
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            style={[styles.infoBox, { backgroundColor: getStatusColor("active") }]}
+            onPress={() => handleStatusPress("active")}
+          >
             <Text style={styles.infoLabel}>Bình thường</Text>
             <Text style={styles.infoValue}>{deviceCounts.active}</Text>
-          </View>
-          <View style={styles.infoBox}>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.infoBox, { backgroundColor: getStatusColor("maintenance") }]}
+            onPress={() => handleStatusPress("maintenance")}
+          >
             <Text style={styles.infoLabel}>Đang bảo trì</Text>
             <Text style={styles.infoValue}>{deviceCounts.maintenance}</Text>
-          </View>
-          <View style={styles.infoBox}>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.infoBox, { backgroundColor: getStatusColor("inactive") }]}
+            onPress={() => handleStatusPress("inactive")}
+          >
             <Text style={styles.infoLabel}>Hư hỏng</Text>
             <Text style={styles.infoValue}>{deviceCounts.inactive}</Text>
-          </View>
+          </TouchableOpacity>
+
+          
+          
         </View>
 
-        {/* Thêm ô tìm kiếm */}
         <View style={styles.searchContainer}>
           <TextInput
             style={styles.searchInput}
@@ -242,79 +267,64 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
-    borderRadius: 10,
     paddingHorizontal: 15,
-    marginHorizontal: 10,
-    marginBottom: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 2,
-    borderWidth:1,
-    borderColor:'#ddd',
+    marginVertical: 10,
   },
   searchInput: {
     flex: 1,
-    paddingVertical: 8,
-    fontSize: 16,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    padding: 10,
+    backgroundColor: '#fff',
   },
   clearButton: {
-    padding: 5,
+    marginLeft: 10,
+    padding: 10,
   },
   content: {
     flex: 1,
-    width: "95%",
-    alignItems: "center",
-    paddingHorizontal: 10,
-    paddingVertical: 20,
-    borderTopWidth: 5,
-    borderRightWidth: 1.5,
-    borderLeftWidth: 1.5,
-    borderRadius: 10,
-    borderColor: '#a9a9a9',
-    backgroundColor: '#fff',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    height: 'auto',
-    elevation: 6,
+    width: '100%',
+    padding: 10,
+  },
+  noDevicesContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    flex: 1,
+  },
+  noDevicesText: {
+    fontSize: 18,
+    color: '#6c757d',
   },
   item: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 10,
-    marginVertical: 5,
+    flexDirection: 'row',
+    padding: 15,
+    marginBottom: 10,
     borderRadius: 5,
-    width: "100%",
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 2,
   },
   deviceImage: {
     width: 50,
     height: 50,
-    borderRadius: 10,
-    marginRight: 15,
+    borderRadius: 25,
+    marginRight: 10,
   },
   deviceInfo: {
     flex: 1,
   },
   deviceName: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: 'bold',
+    color: '#000',
   },
   deviceStatus: {
     fontSize: 14,
-    color: "#666",
-  },
-  noDevicesContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 100,
-  },
-  noDevicesText: {
-    fontSize: 18,
-    color: "#666",
-    textAlign: "center",
+    color: '#6c757d',
   },
 });
